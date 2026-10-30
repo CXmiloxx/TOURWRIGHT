@@ -73,7 +73,7 @@ export const runWithInput = (command, args, input, { timeout = 120_000, env = un
     child.on('error', reject)
     child.on('exit', code => {
       clearTimeout(timer)
-      code === 0 ? resolve() : reject(new Error(`${command} exited with ${code}: ${stderr.trim().slice(-500)}`))
+      code === 0 ? resolve(undefined) : reject(new Error(`${command} exited with ${code}: ${stderr.trim().slice(-500)}`))
     })
     child.stdin.end(input)
   })

@@ -79,7 +79,7 @@ const command = {
       let stderr = ''
       child.stderr.on('data', c => (stderr += c))
       child.on('error', reject)
-      child.on('exit', code => (code === 0 ? resolve() : reject(new Error(`TTS command exited ${code}: ${stderr.slice(-300)}`))))
+      child.on('exit', code => (code === 0 ? resolve(undefined) : reject(new Error(`TTS command exited ${code}: ${stderr.slice(-300)}`))))
       child.stdin.end(text)
     })
   },

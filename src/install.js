@@ -135,7 +135,7 @@ const runVisible = (command, args, env = process.env) =>
   new Promise((resolve, reject) => {
     const child = spawn(command, args, { stdio: 'inherit', env })
     child.on('error', reject)
-    child.on('exit', code => (code === 0 ? resolve() : reject(new Error(`${basename(command)} exited with ${code}`))))
+    child.on('exit', code => (code === 0 ? resolve(undefined) : reject(new Error(`${basename(command)} exited with ${code}`))))
   })
 
 const systemPython = () => (isWindows ? ['py', 'python'] : ['python3', 'python']).map(which).find(Boolean)
