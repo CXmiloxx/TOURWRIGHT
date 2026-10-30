@@ -1,0 +1,58 @@
+name: Share a voice
+description: A voice or alias that sounds good, to add to the built-in aliases or the docs.
+labels: [voice]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Voices are `engine:id[?options]`, e.g. `edge:es-CO-SalomeNeural?rate=-4%` or
+        `piper:en_US-lessac-medium`. See the Voices section of docs/SCRIPTS.md.
+  - type: dropdown
+    id: engine
+    attributes:
+      label: Engine
+      options:
+        - piper
+        - edge
+        - openai (OpenAI-compatible)
+        - command
+    validations:
+      required: true
+  - type: input
+    id: spec
+    attributes:
+      label: Voice spec
+      placeholder: "edge:es-CO-GonzaloNeural?rate=-10%"
+    validations:
+      required: true
+  - type: input
+    id: alias
+    attributes:
+      label: Suggested alias
+      placeholder: gonzalo
+  - type: input
+    id: language
+    attributes:
+      label: Language and accent
+      placeholder: Spanish (Colombia)
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Sample text
+      description: A line or two you tested it with. Attach a short audio or video clip if you can.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it works well
+      description: Good for tutorials, product demos, long narration…; options you tuned (rate, model).
+  - type: textarea
+    id: license
+    attributes:
+      label: License notes
+      description: The voice model's license, where to download it (Piper), or the service's terms.
+    validations:
+      required: true

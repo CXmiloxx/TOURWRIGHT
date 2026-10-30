@@ -1,0 +1,75 @@
+name: Bug report
+description: Something renders wrong, fails or crashes.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. A script we can run is the fastest way to a fix.
+        Remove secrets, tokens and private URLs before pasting. For security problems, do not open an issue:
+        see [SECURITY.md](https://github.com/CXmiloxx/tourwright/blob/main/SECURITY.md).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, and what you got instead (error message, wrong frame, bad audio…).
+    validations:
+      required: true
+  - type: textarea
+    id: script
+    attributes:
+      label: Script
+      description: The smallest script that shows the problem, with secrets removed.
+      render: yaml
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or API call
+      description: e.g. `tourwright render tour.yaml --voice salome --out out/`, the HTTP request, or the MCP tool call.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output
+      description: What Tourwright printed (stderr), or the job's error from the API.
+      render: text
+  - type: textarea
+    id: doctor
+    attributes:
+      label: "`tourwright doctor` output"
+      description: Run `tourwright doctor` (or `node bin/tourwright.js doctor`) on the machine that rendered.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Tourwright version
+      description: "`tourwright --version`, or the image tag / commit."
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS and Node.js
+      placeholder: Ubuntu 24.04, Node 22
+  - type: dropdown
+    id: docker
+    attributes:
+      label: Running in Docker?
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Failure screenshot
+      description: |
+        When a browser step fails, Tourwright saves `failure-<name>.png` next to the output. Attach it if it
+        helps (blur anything private).

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/CXmiloxx/tourwright/discussions
+    about: Ask how to do something, show what you made, discuss ideas.
+  - name: Security vulnerability
+    url: https://github.com/CXmiloxx/tourwright/blob/main/SECURITY.md
+    about: Report it privately through a security advisory, not a public issue.
