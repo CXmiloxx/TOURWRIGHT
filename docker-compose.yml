@@ -1,0 +1,93 @@
+# Tourwright, scalable: an API, N workers, Redis for the queue and (optionally) S3 (SeaweedFS or any S3) for the files.
+#
+#   cp .env.example .env            # set TOURWRIGHT_API_TOKENS at least
+#   docker compose up -d --build
+#   docker compose up -d --scale worker=4          # more videos at the same time
+#   docker compose --profile s3 up -d              # files in S3 (SeaweedFS) instead of the shared volume
+#
+# One server is enough to start. For many servers: point every worker at the same Redis and S3 bucket.
+name: tourwright
+
+x-tourwright: &tourwright
+  build: .
+  image: ${TOURWRIGHT_IMAGE:-tourwright:latest}
+  restart: unless-stopped
+  env_file: [.env]
+  environment:
+    TOURWRIGHT_REDIS_URL: ${TOURWRIGHT_REDIS_URL:-redis://redis:6379}
+  volumes:
+    - data:/var/lib/tourwright
+  depends_on:
+    redis:
+      condition: service_healthy
+
+services:
+  api:
+    <<: *tourwright
+    command: ["serve"]
+    ports:
+      - "${TOURWRIGHT_PUBLISH:-127.0.0.1:4700}:4700"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4700/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits: { cpus: "1", memory: 512M }
+
+  worker:
+    <<: *tourwright
+    command: ["worker"]
+    # Chromium + ffmpeg: give each worker room. TOURWRIGHT_CONCURRENCY videos per worker (default 1).
+    shm_size: 1gb
+    stop_grace_period: 10m
+    deploy:
+      replicas: ${TOURWRIGHT_WORKERS:-2}
+      resources:
+        limits: { cpus: "${TOURWRIGHT_WORKER_CPUS:-2}", memory: "${TOURWRIGHT_WORKER_MEMORY:-2g}" }
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Optional S3-compatible storage (SeaweedFS, Apache-2.0) for files shared by workers on many servers.
+  # Start with --profile s3 and set TOURWRIGHT_S3_BUCKET in .env. Tourwright creates the bucket on start.
+  # In production you may use any S3 instead (AWS, Cloudflare R2, Backblaze B2, Wasabi…).
+  s3:
+    profiles: [s3]
+    image: chrislusf/seaweedfs:3.97
+    restart: unless-stopped
+    command: ["server", "-dir=/data", "-s3", "-s3.port=8333", "-s3.config=/etc/seaweedfs/s3.json"]
+    configs:
+      - source: s3-identities
+        target: /etc/seaweedfs/s3.json
+    ports:
+      - "127.0.0.1:8333:8333"
+    volumes:
+      - s3:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8333/status || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+configs:
+  s3-identities:
+    content: |
+      {"identities": [{"name": "tourwright",
+        "credentials": [{"accessKey": "${TOURWRIGHT_S3_ACCESS_KEY:-tourwright}", "secretKey": "${TOURWRIGHT_S3_SECRET_KEY:-change-me-please}"}],
+        "actions": ["Admin", "Read", "Write", "List", "Tagging"]}]}
+
+volumes:
+  data:
+  redis:
+  s3:

@@ -1,0 +1,83 @@
+# Tourwright on Kubernetes: stateless API + autoscaled workers. Needs a Redis and an S3-compatible bucket
+# (workers on different nodes cannot share a local folder). Edit the Secret, then:
+#   kubectl apply -f deploy/kubernetes/tourwright.yaml
+apiVersion: v1
+kind: Namespace
+metadata: { name: tourwright }
+---
+apiVersion: v1
+kind: Secret
+metadata: { name: tourwright, namespace: tourwright }
+stringData:
+  TOURWRIGHT_API_TOKENS: "change-me"
+  TOURWRIGHT_LINK_SECRET: "change-me-too"
+  TOURWRIGHT_REDIS_URL: "redis://redis.tourwright.svc:6379"
+  TOURWRIGHT_S3_BUCKET: "tourwright"
+  TOURWRIGHT_S3_ENDPOINT: "https://s3.us-east-1.amazonaws.com"
+  TOURWRIGHT_S3_REGION: "us-east-1"
+  TOURWRIGHT_S3_ACCESS_KEY: ""
+  TOURWRIGHT_S3_SECRET_KEY: ""
+  TOURWRIGHT_S3_PATH_STYLE: "false"
+  TOURWRIGHT_PUBLIC_URL: "https://tourwright.example.com"
+  TOURWRIGHT_BLOCK_PRIVATE: "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: api, namespace: tourwright }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: tourwright-api } }
+  template:
+    metadata: { labels: { app: tourwright-api } }
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/cxmiloxx/tourwright:latest
+          args: ["serve"]
+          envFrom: [{ secretRef: { name: tourwright } }]
+          ports: [{ containerPort: 4700 }]
+          readinessProbe: { httpGet: { path: /health, port: 4700 }, periodSeconds: 10 }
+          resources: { requests: { cpu: 100m, memory: 128Mi }, limits: { cpu: "1", memory: 512Mi } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: api, namespace: tourwright }
+spec:
+  selector: { app: tourwright-api }
+  ports: [{ port: 80, targetPort: 4700 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: worker, namespace: tourwright }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: tourwright-worker } }
+  template:
+    metadata: { labels: { app: tourwright-worker } }
+    spec:
+      # Let a worker finish the video it is rendering before it stops
+      terminationGracePeriodSeconds: 1800
+      containers:
+        - name: worker
+          image: ghcr.io/cxmiloxx/tourwright:latest
+          args: ["worker"]
+          envFrom: [{ secretRef: { name: tourwright } }]
+          env: [{ name: TOURWRIGHT_CONCURRENCY, value: "1" }, { name: TOURWRIGHT_FFMPEG_THREADS, value: "2" }]
+          resources: { requests: { cpu: "1", memory: 1Gi }, limits: { cpu: "2", memory: 2Gi } }
+          volumeMounts: [{ name: shm, mountPath: /dev/shm }]
+      volumes:
+        - name: shm
+          emptyDir: { medium: Memory, sizeLimit: 1Gi }
+---
+# Scale workers with CPU. For queue-length autoscaling use KEDA's Redis scaler on the BullMQ list
+# `bull:tourwright:wait`.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: worker, namespace: tourwright }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: worker }
+  minReplicas: 1
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 60 } }
