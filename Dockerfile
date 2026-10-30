@@ -1,6 +1,6 @@
 # Tourwright: one image for every role. The command picks it: serve (API), worker, mcp, render <script>…
 # Multi-arch (linux/amd64, linux/arm64): docker buildx build --platform linux/amd64,linux/arm64 .
-FROM node:22-bookworm-slim
+FROM node:25-bookworm-slim
 
 ARG PIPER_VERSION=2023.11.14-2
 # Piper voices baked into the image (more: `tourwright install-voice <name>` at runtime, into the data volume)
