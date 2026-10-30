@@ -6,6 +6,10 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # The types follow the oldest supported Node (engines: >=20), not the newest
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
@@ -18,3 +22,7 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # Node LTS lines only: move the image to the next LTS by hand
+      - dependency-name: node
+        update-types: [version-update:semver-major]
