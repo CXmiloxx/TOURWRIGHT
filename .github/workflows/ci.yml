@@ -1,0 +1,74 @@
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: node scripts/check-schema.js
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ matrix.node }}", cache: npm }
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: npm ci
+      - run: npm test
+  # A real install and real videos on each system: `tourwright install` + slides + a browser walkthrough
+  render:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, capture: screen }
+          - { os: macos-latest, capture: screencast }
+          - { os: windows-latest, capture: screencast }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+      # No static ffmpeg build for macOS: Homebrew's, as the installer tells users
+      - if: runner.os == 'macOS'
+        run: brew install ffmpeg
+      - run: npm ci
+      - run: node bin/tourwright.js install --voices es_MX-claude-high,en_US-lessac-medium --no-edge
+      - if: runner.os == 'Linux'
+        run: sudo npx playwright install-deps chromium
+      - run: node bin/tourwright.js render examples/slides.yaml --out out/
+      - run: node bin/tourwright.js render examples/example-com.yaml --voice lessac --capture ${{ matrix.capture }} --out out/
+      - uses: actions/upload-artifact@v4
+        with: { name: "videos-${{ matrix.os }}", path: out/ }
+  image:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions: { contents: read, packages: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
+      # Image names must be lowercase, whatever the case of the repository's name
+      - run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+      - uses: docker/build-push-action@v6
+        with:
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ env.IMAGE }}:latest
