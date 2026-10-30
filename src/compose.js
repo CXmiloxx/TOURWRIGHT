@@ -24,7 +24,7 @@ export const ffmpeg = (args, config = loadConfig()) =>
     let stderr = ''
     child.stderr.on('data', c => (stderr = (stderr + c).slice(-4000)))
     child.on('error', reject)
-    child.on('exit', code => (code === 0 ? resolve() : reject(new Error(`ffmpeg failed (${code}): ${stderr.trim()}`))))
+    child.on('exit', code => (code === 0 ? resolve(undefined) : reject(new Error(`ffmpeg failed (${code}): ${stderr.trim()}`))))
   })
 
 const LANGUAGES = { es: 'spa', en: 'eng', pt: 'por', fr: 'fra', de: 'deu', it: 'ita' }
@@ -39,13 +39,13 @@ const LANGUAGES = { es: 'spa', en: 'eng', pt: 'por', fr: 'fra', de: 'deu', it: '
  * @param {Array}  [p.effects]    [{ at, file, volume? }] recording seconds: sound effects, not ducked or polished
  * @param {Array}  p.captions     [{ start, end, text }] recording seconds
  * @param {Array}  p.marks        [{ start, title }] recording seconds (chapters)
- * @param {object} [p.music]      { file, volume = 0.15, duck = true, fadeIn = 0, fadeOut = 2 }
+ * @param {Record<string, any>} [p.music] { file, volume = 0.15, duck = true, fadeIn = 0, fadeOut = 2 }
  * @param {string} [p.polish]     narration sound preset (default, clean, warm, radio, podcast, none)
  * @param {string} p.out          output path without extension
  * @param {string} p.title
  * @param {string} [p.voice]      voice spec, for the manifest
  * @param {string} [p.language]   'es', 'en'…
- * @param {object} p.quality      { crf, preset }
+ * @param {Record<string, any>} p.quality { crf, preset }
  * @param {string} p.workDir
  */
 export const compose = async (p, config = loadConfig()) => {

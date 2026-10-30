@@ -72,8 +72,8 @@ export const recordScreen = ({ display, width, height, offsetY, fps, file }, con
 
 const stopFfmpeg = proc =>
   new Promise(resolve => {
-    if (proc.exitCode !== null) return resolve()
-    proc.on('exit', () => resolve())
+    if (proc.exitCode !== null) return resolve(undefined)
+    proc.on('exit', () => resolve(undefined))
     proc.stdin.end('q')
   })
 
@@ -110,7 +110,7 @@ export const recordScreencast = async ({ page, context, width, height, fps, file
       clearInterval(tick)
       await cdp.send('Page.stopScreencast').catch(() => {})
       await new Promise((resolve, reject) => {
-        ff.on('exit', code => (code === 0 ? resolve() : reject(new Error(`ffmpeg screencast failed (${code}): ${stderr.trim()}`))))
+        ff.on('exit', code => (code === 0 ? resolve(undefined) : reject(new Error(`ffmpeg screencast failed (${code}): ${stderr.trim()}`))))
         ff.stdin.end()
       })
     },
