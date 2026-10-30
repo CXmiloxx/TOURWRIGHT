@@ -1,0 +1,15 @@
+# A browser walkthrough of a public page. `tourwright render examples/example-com.yaml`
+title: A tour of example.com
+language: en
+voice: lessac
+baseUrl: https://example.com
+steps:
+  - goto: /
+  - title: { text: "Example Domain", subtitle: "A narrated walkthrough made with Tourwright" }
+  - say: "This is <b>example.com</b>, a domain reserved for documentation."
+  - highlight: { text: "This domain is for use in documentation" }
+  - say: { caption: "The same notice, in many languages.", speak: "The same notice is repeated in many languages. Let's scroll down." }
+  - scroll: 500
+  - zoom: { target: { role: link }, ms: 1500 }
+  - say: null
+  - pause: 500

@@ -1,0 +1,23 @@
+# A narrated slideshow: no website, no virtual display. `tourwright render examples/slides.yaml`
+type: slides
+title: Tourwright en un minuto
+language: es
+voice: piper:es_MX-claude-high
+transition: 0.5
+slides:
+  - title: Tourwright
+    subtitle: De un guion a un video narrado
+    say: Hola. Esto es Tourwright, una herramienta libre para crear videos narrados desde un guion.
+  - html: |
+      <h1>Cómo funciona</h1>
+      <ol>
+        <li>Escribes un <b>guion</b> en YAML, JSON o JavaScript.</li>
+        <li>Tourwright graba el navegador o arma las diapositivas.</li>
+        <li>La <b>voz</b> se sintetiza y se mezcla con subtítulos y capítulos.</li>
+      </ol>
+    say: Escribes un guion. Tourwright graba el navegador, o arma diapositivas como estas. Después sintetiza la voz y la mezcla con subtítulos y capítulos.
+    motion: zoom-in
+  - title: Para personas y agentes
+    subtitle: CLI · API HTTP · cola de trabajos · MCP
+    say: Lo puedes usar desde la terminal, desde una API, o desde un agente de inteligencia artificial.
+    duration: 4

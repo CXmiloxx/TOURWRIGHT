@@ -1,0 +1,30 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Tienda Andina — Pago</title>
+<style>
+body{margin:0;font:16px/1.5 system-ui,sans-serif;background:#f1f5f9;color:#0f172a}
+header{background:#0f172a;color:#fff;padding:18px 40px;font-weight:700;font-size:20px}
+main{display:grid;grid-template-columns:1.4fr 1fr;gap:32px;max-width:1100px;margin:40px auto;padding:0 24px}
+.card{background:#fff;border-radius:16px;padding:28px;box-shadow:0 4px 20px rgba(15,23,42,.08)}
+h2{margin:0 0 18px;font-size:20px} label{display:block;font-size:14px;color:#475569;margin:14px 0 6px}
+input{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px}
+.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e2e8f0}
+.total{font-size:22px;font-weight:800;border:0;padding-top:18px}
+button{margin-top:24px;width:100%;padding:16px;border:0;border-radius:12px;background:#16a34a;color:#fff;font-size:18px;font-weight:700;cursor:pointer}
+.methods{display:flex;gap:10px;margin-top:8px}.methods span{flex:1;text-align:center;padding:10px;border:2px solid #e2e8f0;border-radius:10px}
+.methods span.on{border-color:#16a34a;background:#f0fdf4}
+#ok{display:none;margin-top:16px;padding:14px;border-radius:10px;background:#dcfce7;color:#166534;font-weight:600}
+</style></head><body>
+<header>Tienda Andina</header>
+<main>
+ <section class="card"><h2>Datos de pago</h2>
+  <label for="name">Nombre en la tarjeta</label><input id="name" placeholder="Como aparece en la tarjeta">
+  <label>Método</label><div class="methods"><span class="on">Tarjeta</span><span>PSE</span><span>Nequi</span></div>
+  <label for="card">Número de tarjeta</label><input id="card" placeholder="0000 0000 0000 0000">
+ </section>
+ <aside class="card"><h2>Tu pedido</h2>
+  <div class="row"><span>Café de origen × 2</span><span>$64.000</span></div>
+  <div class="row"><span>Envío</span><span>$8.000</span></div>
+  <div class="row total" data-testid="total"><span>Total</span><span>$72.000</span></div>
+  <button onclick="document.getElementById('ok').style.display='block'">Pagar $72.000</button>
+  <div id="ok">✓ Pago aprobado</div>
+ </aside>
+</main></body></html>

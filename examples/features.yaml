@@ -1,0 +1,41 @@
+# Most of what a script can do, on a public page. `tourwright render examples/features.yaml --dry-run`
+# With the example plugin: TOURWRIGHT_PLUGINS=./examples/plugins/banner.js (then add `- banner: Hello`)
+title: "{{site}}: a guided tour"
+language: en
+baseUrl: https://example.com
+voice: guide
+voices:
+  guide: lessac
+  second: "lessac?pitch=-3st&rate=-8%"
+pronounce:
+  IANA: eye anna
+vars:
+  site: example.com
+  sections: [heading, link]
+audio:
+  polish: warm
+  clicks: true
+  pause: 0.35
+blocks:
+  point:
+    - spotlight: { target: "{{what}}", ms: 1500 }
+steps:
+  - goto: /
+  - if: { visible: { text: Accept cookies }, then: [ { click: { text: Accept cookies } } ] }
+  - title: { text: "{{site}}", subtitle: "Variables, voices, sounds and callouts", say: "Welcome. [[400ms]] Let's take a look." }
+  - say: "This is <b>{{site}}</b>, a domain reserved by IANA for documentation."
+  - use: { block: point, with: { what: h1 } }
+  - callout: { target: { role: link }, text: "More <b>information</b> lives here", ms: 2500 }
+  - focus:
+      target: { role: link }
+      say: "And if you want the details, they are {here}."
+      text: "Opens the <b>IANA</b> page"
+      step: 1/1
+      zoom: 1.4
+      pulse: true
+  - say: { caption: "Shall we follow it?", voice: second }
+  - sound: pop
+  - say: { caption: "Not today.", rate: "+10%", pitch: "+1st" }
+  - try: [ { click: { role: button, name: Close } } ]
+  - say: null
+  - pause: 500

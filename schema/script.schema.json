@@ -1,0 +1,2871 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/CXmiloxx/tourwright/schema/script.schema.json",
+  "title": "Tourwright script",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "slides"
+        },
+        "title": {
+          "description": "Video title (metadata and manifest)",
+          "type": "string",
+          "maxLength": 200
+        },
+        "language": {
+          "description": "Language of the narration: es, en, pt… (subtitle track)",
+          "type": "string",
+          "maxLength": 10
+        },
+        "voice": {
+          "description": "engine:id or alias. See `tourwright voices`",
+          "type": "string"
+        },
+        "quality": {
+          "type": "string",
+          "enum": [
+            "sd",
+            "hd",
+            "fullhd",
+            "vertical",
+            "square"
+          ]
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 320,
+          "maximum": 3840
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 320,
+          "maximum": 3840
+        },
+        "fps": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 60
+        },
+        "theme": {
+          "description": "Colors, font and logo of title cards, captions and cursor",
+          "type": "object",
+          "properties": {
+            "accent": {
+              "type": "string"
+            },
+            "background": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "gradient": {
+              "type": "string"
+            },
+            "font": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "voices": {
+          "description": "The cast: names for the voices of this script, { ana: salome, guide: \"piper:es_MX-claude-high?rate=-5%\" }",
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[\\w-]+$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "pronounce": {
+          "description": "How to say words the voice reads wrong: { SaaS: sas, CRM: ce erre eme }. Captions keep the original",
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "audio": {
+          "type": "object",
+          "properties": {
+            "polish": {
+              "description": "Sound of the narration",
+              "type": "string",
+              "enum": [
+                "default",
+                "clean",
+                "warm",
+                "radio",
+                "podcast",
+                "none"
+              ]
+            },
+            "pause": {
+              "description": "Seconds of silence between sentences",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "clicks": {
+              "description": "A click sound on every click (true, or a sound file)",
+              "type": [
+                "boolean",
+                "string"
+              ]
+            },
+            "typing": {
+              "description": "Keyboard sound while typing",
+              "type": "boolean"
+            },
+            "effects": {
+              "description": "Volume of sound effects (1 = as recorded)",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            }
+          },
+          "additionalProperties": false
+        },
+        "music": {
+          "description": "Background music file (looped and lowered under the voice)",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "type": "string"
+                },
+                "volume": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "duck": {
+                  "type": "boolean"
+                },
+                "fadeIn": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30
+                },
+                "fadeOut": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30
+                }
+              },
+              "required": [
+                "file"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "vars": {
+          "description": "Variables: {{name}} in any text is replaced with its value",
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^\\w+$"
+          },
+          "additionalProperties": {}
+        },
+        "transition": {
+          "description": "Crossfade seconds between slides",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "slides": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "subtitle": {
+                "type": "string"
+              },
+              "image": {
+                "description": "Image path (relative to the script) or https URL",
+                "type": "string"
+              },
+              "html": {
+                "description": "Custom HTML for the slide",
+                "type": "string"
+              },
+              "caption": {
+                "description": "Text shown at the bottom",
+                "type": "string"
+              },
+              "say": {
+                "description": "Narration of this slide",
+                "type": "string"
+              },
+              "duration": {
+                "description": "Minimum seconds on screen (narration extends it)",
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 600
+              },
+              "chapter": {
+                "type": "string"
+              },
+              "motion": {
+                "description": "Slow camera movement over the slide",
+                "type": "string",
+                "enum": [
+                  "none",
+                  "zoom-in",
+                  "zoom-out",
+                  "pan"
+                ]
+              },
+              "sound": {
+                "description": "A sound when the slide appears",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "volume": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 2
+                      },
+                      "wait": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "file"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "voice": {
+                "description": "Voice for this line: a name from `voices`, an alias or engine:id",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "rate": {
+                "description": "Speed: -20% slower, +15% faster",
+                "type": "string",
+                "pattern": "^[+-]?\\d{1,3}(\\.\\d+)?%$"
+              },
+              "pitch": {
+                "description": "Pitch: +2st (semitones), -5%, +10Hz",
+                "type": "string",
+                "pattern": "^[+-]?\\d{1,3}(\\.\\d+)?(%|st|Hz)$"
+              },
+              "volume": {
+                "description": "Loudness: +3dB, -20%",
+                "type": "string",
+                "pattern": "^[+-]?\\d{1,3}(\\.\\d+)?(%|dB)$"
+              },
+              "style": {
+                "description": "How to say it, for engines that take instructions (openai): \"cheerful and calm\"",
+                "type": "string",
+                "maxLength": 300,
+                "pattern": "^[^&=?]*$"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "type",
+        "slides"
+      ],
+      "additionalProperties": false,
+      "title": "Slides video"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "browser"
+        },
+        "title": {
+          "description": "Video title (metadata and manifest)",
+          "type": "string",
+          "maxLength": 200
+        },
+        "language": {
+          "description": "Language of the narration: es, en, pt… (subtitle track)",
+          "type": "string",
+          "maxLength": 10
+        },
+        "voice": {
+          "description": "engine:id or alias. See `tourwright voices`",
+          "type": "string"
+        },
+        "quality": {
+          "type": "string",
+          "enum": [
+            "sd",
+            "hd",
+            "fullhd",
+            "vertical",
+            "square"
+          ]
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 320,
+          "maximum": 3840
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 320,
+          "maximum": 3840
+        },
+        "fps": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 60
+        },
+        "theme": {
+          "description": "Colors, font and logo of title cards, captions and cursor",
+          "type": "object",
+          "properties": {
+            "accent": {
+              "type": "string"
+            },
+            "background": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "gradient": {
+              "type": "string"
+            },
+            "font": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "voices": {
+          "description": "The cast: names for the voices of this script, { ana: salome, guide: \"piper:es_MX-claude-high?rate=-5%\" }",
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[\\w-]+$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "pronounce": {
+          "description": "How to say words the voice reads wrong: { SaaS: sas, CRM: ce erre eme }. Captions keep the original",
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "audio": {
+          "type": "object",
+          "properties": {
+            "polish": {
+              "description": "Sound of the narration",
+              "type": "string",
+              "enum": [
+                "default",
+                "clean",
+                "warm",
+                "radio",
+                "podcast",
+                "none"
+              ]
+            },
+            "pause": {
+              "description": "Seconds of silence between sentences",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "clicks": {
+              "description": "A click sound on every click (true, or a sound file)",
+              "type": [
+                "boolean",
+                "string"
+              ]
+            },
+            "typing": {
+              "description": "Keyboard sound while typing",
+              "type": "boolean"
+            },
+            "effects": {
+              "description": "Volume of sound effects (1 = as recorded)",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            }
+          },
+          "additionalProperties": false
+        },
+        "music": {
+          "description": "Background music file (looped and lowered under the voice)",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "type": "string"
+                },
+                "volume": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "duck": {
+                  "type": "boolean"
+                },
+                "fadeIn": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30
+                },
+                "fadeOut": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30
+                }
+              },
+              "required": [
+                "file"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "vars": {
+          "description": "Variables: {{name}} in any text is replaced with its value",
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^\\w+$"
+          },
+          "additionalProperties": {}
+        },
+        "baseUrl": {
+          "description": "Relative paths in goto resolve against it. Local scripts may use a folder next to them (\"./site/\"): pages without a server",
+          "type": "string"
+        },
+        "session": {
+          "description": "Name of a saved browser session (cookies) reused between renders",
+          "type": "string",
+          "pattern": "^[\\w.-]+$"
+        },
+        "setup": {
+          "description": "Steps run off camera before recording (log in…). Skipped while `session` is still valid",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        },
+        "sessionCheck": {
+          "description": "How to know the saved session is valid: open `goto`; valid if the URL does not contain `notUrl`",
+          "type": "object",
+          "properties": {
+            "goto": {
+              "type": "string"
+            },
+            "notUrl": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "goto",
+            "notUrl"
+          ],
+          "additionalProperties": false
+        },
+        "warmup": {
+          "description": "Pages opened before recording so they load fast on camera",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hosts": {
+          "description": "Serve a hostname from another origin: { \"app.example.com\": \"http://localhost:3000\" }",
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "blur": {
+          "description": "Selectors blurred during the whole video",
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "css": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "placeholder": {
+                    "type": "string"
+                  },
+                  "testId": {
+                    "type": "string"
+                  },
+                  "exact": {
+                    "type": "boolean"
+                  },
+                  "nth": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "blocks": {
+          "description": "Reusable groups of steps, inserted with `use`",
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[\\w-]+$"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/step"
+            }
+          }
+        },
+        "steps": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        }
+      },
+      "required": [
+        "steps"
+      ],
+      "additionalProperties": false,
+      "title": "Browser walkthrough"
+    }
+  ],
+  "$defs": {
+    "step": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "Open a URL or a path relative to baseUrl",
+          "properties": {
+            "goto": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Open a URL or a path relative to baseUrl"
+            }
+          },
+          "required": [
+            "goto"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Full-screen title card; also starts a chapter",
+          "properties": {
+            "title": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "subtitle": {
+                      "type": "string"
+                    },
+                    "ms": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 600000
+                    },
+                    "say": {
+                      "type": "string"
+                    },
+                    "voice": {
+                      "description": "Voice for this line: a name from `voices`, an alias or engine:id",
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "rate": {
+                      "description": "Speed: -20% slower, +15% faster",
+                      "type": "string",
+                      "pattern": "^[+-]?\\d{1,3}(\\.\\d+)?%$"
+                    },
+                    "pitch": {
+                      "description": "Pitch: +2st (semitones), -5%, +10Hz",
+                      "type": "string",
+                      "pattern": "^[+-]?\\d{1,3}(\\.\\d+)?(%|st|Hz)$"
+                    },
+                    "volume": {
+                      "description": "Loudness: +3dB, -20%",
+                      "type": "string",
+                      "pattern": "^[+-]?\\d{1,3}(\\.\\d+)?(%|dB)$"
+                    },
+                    "style": {
+                      "description": "How to say it, for engines that take instructions (openai): \"cheerful and calm\"",
+                      "type": "string",
+                      "maxLength": 300,
+                      "pattern": "^[^&=?]*$"
+                    }
+                  },
+                  "required": [
+                    "text"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Full-screen title card; also starts a chapter"
+            }
+          },
+          "required": [
+            "title"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Caption at the bottom, narrated aloud. `speak` is said instead of the caption when it must explain more; voice, rate, pitch, volume and style change how. null clears it",
+          "properties": {
+            "say": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "caption": {
+                      "type": "string"
+                    },
+                    "speak": {
+                      "type": "string"
+                    },
+                    "ms": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 600000
+                    },
+                    "voice": {
+                      "description": "Voice for this line: a name from `voices`, an alias or engine:id",
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "rate": {
+                      "description": "Speed: -20% slower, +15% faster",
+                      "type": "string",
+                      "pattern": "^[+-]?\\d{1,3}(\\.\\d+)?%$"
+                    },
+                    "pitch": {
+                      "description": "Pitch: +2st (semitones), -5%, +10Hz",
+                      "type": "string",
+                      "pattern": "^[+-]?\\d{1,3}(\\.\\d+)?(%|st|Hz)$"
+                    },
+                    "volume": {
+                      "description": "Loudness: +3dB, -20%",
+                      "type": "string",
+                      "pattern": "^[+-]?\\d{1,3}(\\.\\d+)?(%|dB)$"
+                    },
+                    "style": {
+                      "description": "How to say it, for engines that take instructions (openai): \"cheerful and calm\"",
+                      "type": "string",
+                      "maxLength": 300,
+                      "pattern": "^[^&=?]*$"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Caption at the bottom, narrated aloud. `speak` is said instead of the caption when it must explain more; voice, rate, pitch, volume and style change how. null clears it"
+            }
+          },
+          "required": [
+            "say"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Caption without narration; null clears it",
+          "properties": {
+            "caption": {
+              "description": "Caption without narration; null clears it",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "caption"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Move the cursor to an element and click it",
+          "properties": {
+            "click": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "target": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "css": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "text": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "placeholder": {
+                              "type": "string"
+                            },
+                            "testId": {
+                              "type": "string"
+                            },
+                            "exact": {
+                              "type": "boolean"
+                            },
+                            "nth": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "target"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Move the cursor to an element and click it"
+            }
+          },
+          "required": [
+            "click"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Move the cursor to an element and double-click it",
+          "properties": {
+            "dblclick": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "target": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "css": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "text": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "placeholder": {
+                              "type": "string"
+                            },
+                            "testId": {
+                              "type": "string"
+                            },
+                            "exact": {
+                              "type": "boolean"
+                            },
+                            "nth": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "target"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Move the cursor to an element and double-click it"
+            }
+          },
+          "required": [
+            "dblclick"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Move the cursor to an element and right-click it",
+          "properties": {
+            "rightClick": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "target": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "css": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "text": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "placeholder": {
+                              "type": "string"
+                            },
+                            "testId": {
+                              "type": "string"
+                            },
+                            "exact": {
+                              "type": "boolean"
+                            },
+                            "nth": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "target"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Move the cursor to an element and right-click it"
+            }
+          },
+          "required": [
+            "rightClick"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Move the cursor over an element",
+          "properties": {
+            "hover": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "css": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "placeholder": {
+                      "type": "string"
+                    },
+                    "testId": {
+                      "type": "string"
+                    },
+                    "exact": {
+                      "type": "boolean"
+                    },
+                    "nth": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Move the cursor over an element"
+            }
+          },
+          "required": [
+            "hover"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Tick a checkbox or radio button",
+          "properties": {
+            "check": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "css": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "placeholder": {
+                      "type": "string"
+                    },
+                    "testId": {
+                      "type": "string"
+                    },
+                    "exact": {
+                      "type": "boolean"
+                    },
+                    "nth": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Tick a checkbox or radio button"
+            }
+          },
+          "required": [
+            "check"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Untick a checkbox",
+          "properties": {
+            "uncheck": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "css": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "placeholder": {
+                      "type": "string"
+                    },
+                    "testId": {
+                      "type": "string"
+                    },
+                    "exact": {
+                      "type": "boolean"
+                    },
+                    "nth": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Untick a checkbox"
+            }
+          },
+          "required": [
+            "uncheck"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Drag an element and drop it on another",
+          "properties": {
+            "drag": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "from",
+                "to"
+              ],
+              "additionalProperties": false,
+              "description": "Drag an element and drop it on another"
+            }
+          },
+          "required": [
+            "drag"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Click a field and type letter by letter",
+          "properties": {
+            "type": {
+              "type": "object",
+              "properties": {
+                "target": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "text": {
+                  "type": "string"
+                },
+                "delay": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000
+                },
+                "clear": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "target",
+                "text"
+              ],
+              "additionalProperties": false,
+              "description": "Click a field and type letter by letter"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Fill a field instantly",
+          "properties": {
+            "fill": {
+              "type": "object",
+              "properties": {
+                "target": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "target",
+                "text"
+              ],
+              "additionalProperties": false,
+              "description": "Fill a field instantly"
+            }
+          },
+          "required": [
+            "fill"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Press a key: Enter, Tab, Control+A…",
+          "properties": {
+            "press": {
+              "type": "string",
+              "description": "Press a key: Enter, Tab, Control+A…"
+            }
+          },
+          "required": [
+            "press"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Choose an option of a <select>",
+          "properties": {
+            "select": {
+              "type": "object",
+              "properties": {
+                "target": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "target",
+                "value"
+              ],
+              "additionalProperties": false,
+              "description": "Choose an option of a <select>"
+            }
+          },
+          "required": [
+            "select"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Draw a frame around an element",
+          "properties": {
+            "highlight": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "target": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "css": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "text": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "placeholder": {
+                              "type": "string"
+                            },
+                            "testId": {
+                              "type": "string"
+                            },
+                            "exact": {
+                              "type": "boolean"
+                            },
+                            "nth": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "ms": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 600000
+                    }
+                  },
+                  "required": [
+                    "target"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Draw a frame around an element"
+            }
+          },
+          "required": [
+            "highlight"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Dim everything except an element",
+          "properties": {
+            "spotlight": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "target": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "css": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "text": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "placeholder": {
+                              "type": "string"
+                            },
+                            "testId": {
+                              "type": "string"
+                            },
+                            "exact": {
+                              "type": "boolean"
+                            },
+                            "nth": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "ms": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 600000
+                    }
+                  },
+                  "required": [
+                    "target"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Dim everything except an element"
+            }
+          },
+          "required": [
+            "spotlight"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Onboarding-style focus: dims everything but the element, rings it, explains it in a bubble and zooms in, timed to the narration",
+          "properties": {
+            "focus": {
+              "type": "object",
+              "properties": {
+                "target": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "text": {
+                  "description": "Bubble next to the element; may have <b>",
+                  "type": "string"
+                },
+                "say": {
+                  "description": "Narration (and caption). {word} marks the word the focus lands on: \"Then press {Pay}.\"",
+                  "type": "string"
+                },
+                "caption": {
+                  "description": "Caption to show instead of the narration",
+                  "type": "string"
+                },
+                "step": {
+                  "description": "Badge in the bubble, like \"3/5\"",
+                  "type": "string",
+                  "maxLength": 16
+                },
+                "zoom": {
+                  "description": "Camera zoom on the element (1.3 is a gentle push in)",
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 3
+                },
+                "pulse": {
+                  "description": "A ring that pulses around the element",
+                  "type": "boolean"
+                },
+                "click": {
+                  "description": "Click the element when the focus ends",
+                  "type": "boolean"
+                },
+                "ms": {
+                  "description": "How long the focus stays after the narration ends (default 1200)",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 600000
+                },
+                "position": {
+                  "type": "string",
+                  "enum": [
+                    "auto",
+                    "top",
+                    "bottom",
+                    "left",
+                    "right"
+                  ]
+                },
+                "voice": {
+                  "description": "Voice for this line: a name from `voices`, an alias or engine:id",
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "rate": {
+                  "description": "Speed: -20% slower, +15% faster",
+                  "type": "string",
+                  "pattern": "^[+-]?\\d{1,3}(\\.\\d+)?%$"
+                },
+                "pitch": {
+                  "description": "Pitch: +2st (semitones), -5%, +10Hz",
+                  "type": "string",
+                  "pattern": "^[+-]?\\d{1,3}(\\.\\d+)?(%|st|Hz)$"
+                },
+                "volume": {
+                  "description": "Loudness: +3dB, -20%",
+                  "type": "string",
+                  "pattern": "^[+-]?\\d{1,3}(\\.\\d+)?(%|dB)$"
+                },
+                "style": {
+                  "description": "How to say it, for engines that take instructions (openai): \"cheerful and calm\"",
+                  "type": "string",
+                  "maxLength": 300,
+                  "pattern": "^[^&=?]*$"
+                }
+              },
+              "required": [
+                "target"
+              ],
+              "additionalProperties": false,
+              "description": "Onboarding-style focus: dims everything but the element, rings it, explains it in a bubble and zooms in, timed to the narration"
+            }
+          },
+          "required": [
+            "focus"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "A speech bubble pointing at an element",
+          "properties": {
+            "callout": {
+              "type": "object",
+              "properties": {
+                "target": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "ms": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 600000
+                },
+                "position": {
+                  "type": "string",
+                  "enum": [
+                    "auto",
+                    "top",
+                    "bottom",
+                    "left",
+                    "right"
+                  ]
+                }
+              },
+              "required": [
+                "target",
+                "text"
+              ],
+              "additionalProperties": false,
+              "description": "A speech bubble pointing at an element"
+            }
+          },
+          "required": [
+            "callout"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Zoom the camera into an element and back",
+          "properties": {
+            "zoom": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "target": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "css": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "text": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "placeholder": {
+                              "type": "string"
+                            },
+                            "testId": {
+                              "type": "string"
+                            },
+                            "exact": {
+                              "type": "boolean"
+                            },
+                            "nth": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "ms": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 600000
+                    },
+                    "scale": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 4
+                    }
+                  },
+                  "required": [
+                    "target"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Zoom the camera into an element and back"
+            }
+          },
+          "required": [
+            "zoom"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Scroll smoothly until an element is centered",
+          "properties": {
+            "scrollTo": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "css": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "placeholder": {
+                      "type": "string"
+                    },
+                    "testId": {
+                      "type": "string"
+                    },
+                    "exact": {
+                      "type": "boolean"
+                    },
+                    "nth": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Scroll smoothly until an element is centered"
+            }
+          },
+          "required": [
+            "scrollTo"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Scroll by this many pixels (negative = up)",
+          "properties": {
+            "scroll": {
+              "type": "number",
+              "description": "Scroll by this many pixels (negative = up)"
+            }
+          },
+          "required": [
+            "scroll"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Show or hide the animated cursor",
+          "properties": {
+            "cursor": {
+              "type": "string",
+              "enum": [
+                "show",
+                "hide"
+              ],
+              "description": "Show or hide the animated cursor"
+            }
+          },
+          "required": [
+            "cursor"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Go back to the previous page",
+          "properties": {
+            "back": {
+              "anyOf": [
+                {
+                  "type": "boolean",
+                  "const": true
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Go back to the previous page"
+            }
+          },
+          "required": [
+            "back"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Reload the page",
+          "properties": {
+            "reload": {
+              "anyOf": [
+                {
+                  "type": "boolean",
+                  "const": true
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Reload the page"
+            }
+          },
+          "required": [
+            "reload"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Let the viewer look",
+          "properties": {
+            "pause": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 600000,
+              "description": "Let the viewer look"
+            }
+          },
+          "required": [
+            "pause"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Play a sound: click, pop, ding, whoosh or a file; { file, volume, wait }",
+          "properties": {
+            "sound": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "volume": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 2
+                    },
+                    "wait": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "file"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Play a sound: click, pop, ding, whoosh or a file; { file, volume, wait }"
+            }
+          },
+          "required": [
+            "sound"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Wait off camera (cut from the video): an element, a URL, a text or milliseconds",
+          "properties": {
+            "wait": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 600000
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "target": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "css": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "text": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "placeholder": {
+                              "type": "string"
+                            },
+                            "testId": {
+                              "type": "string"
+                            },
+                            "exact": {
+                              "type": "boolean"
+                            },
+                            "nth": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "timeout": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 600000
+                    },
+                    "state": {
+                      "type": "string",
+                      "enum": [
+                        "visible",
+                        "hidden",
+                        "attached",
+                        "detached"
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Wait off camera (cut from the video): an element, a URL, a text or milliseconds"
+            }
+          },
+          "required": [
+            "wait"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Blur personal data from now on",
+          "properties": {
+            "blur": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "css": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "text": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "placeholder": {
+                            "type": "string"
+                          },
+                          "testId": {
+                            "type": "string"
+                          },
+                          "exact": {
+                            "type": "boolean"
+                          },
+                          "nth": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                }
+              ],
+              "description": "Blur personal data from now on"
+            }
+          },
+          "required": [
+            "blur"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Put files in an <input type=file> (paths relative to the script or job assets)",
+          "properties": {
+            "upload": {
+              "type": "object",
+              "properties": {
+                "target": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "files": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "target",
+                "files"
+              ],
+              "additionalProperties": false,
+              "description": "Put files in an <input type=file> (paths relative to the script or job assets)"
+            }
+          },
+          "required": [
+            "upload"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Steps that happen but are cut from the video",
+          "properties": {
+            "offCamera": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/step"
+              }
+            }
+          },
+          "required": [
+            "offCamera"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Run steps only when an element, a text or a URL is there (a cookie banner, an optional dialog…)",
+          "properties": {
+            "if": {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "description": "An element is visible",
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "css": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "type": "string"
+                        },
+                        "testId": {
+                          "type": "string"
+                        },
+                        "exact": {
+                          "type": "boolean"
+                        },
+                        "nth": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "text": {
+                  "description": "A text is visible",
+                  "type": "string"
+                },
+                "url": {
+                  "description": "The URL contains this",
+                  "type": "string"
+                },
+                "timeout": {
+                  "description": "Wait up to this long for the condition (default: check once)",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 600000
+                },
+                "then": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/step"
+                  }
+                },
+                "else": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/step"
+                  }
+                }
+              },
+              "required": [
+                "then"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "if"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Steps that may fail without stopping the video; each one waits at most `timeout` ms (default 3000)",
+          "properties": {
+            "try": {
+              "oneOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/step"
+                  }
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "steps": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/step"
+                      }
+                    },
+                    "timeout": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "steps"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "required": [
+            "try"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Insert the steps of a block from `blocks`, with optional variables",
+          "properties": {
+            "use": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "block": {
+                      "type": "string"
+                    },
+                    "with": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "block"
+                  ],
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Insert the steps of a block from `blocks`, with optional variables"
+            }
+          },
+          "required": [
+            "use"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Repeat steps `times` times, or once per item of `each` ({{index}}, {{item}} or the name in `as`)",
+          "properties": {
+            "repeat": {
+              "type": "object",
+              "properties": {
+                "times": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 500
+                },
+                "each": {
+                  "type": "array"
+                },
+                "as": {
+                  "type": "string"
+                },
+                "steps": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/step"
+                  }
+                }
+              },
+              "required": [
+                "steps"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "repeat"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

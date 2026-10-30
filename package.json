@@ -1,0 +1,77 @@
+{
+  "name": "tourwright",
+  "version": "1.0.0",
+  "description": "Scripted, narrated product tours and how-to videos: a real browser follows your script with a guided focus, captions and text-to-speech, and you get a finished MP4. CLI, HTTP API, job queue and MCP server for AI agents.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "tourwright": "bin/tourwright.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "schema",
+    "docs",
+    "examples",
+    "scripts",
+    "!scripts/check-schema.js",
+    "README.md",
+    "README.es.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "lint": "biome lint",
+    "typecheck": "tsc -p jsconfig.json",
+    "check": "npm run lint && npm run typecheck && npm test && node scripts/check-schema.js",
+    "schema": "node bin/tourwright.js schema > schema/script.schema.json"
+  },
+  "keywords": [
+    "product-tour",
+    "onboarding",
+    "walkthrough",
+    "tutorial",
+    "demo-video",
+    "video",
+    "narration",
+    "text-to-speech",
+    "tts",
+    "screencast",
+    "playwright",
+    "ffmpeg",
+    "mcp",
+    "ai-agents",
+    "piper"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "playwright": "^1.64.1",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.7"
+  },
+  "optionalDependencies": {
+    "bullmq": "^6.5.1",
+    "ioredis": "^6.0.0"
+  },
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CXmiloxx/tourwright.git"
+  },
+  "homepage": "https://github.com/CXmiloxx/tourwright",
+  "bugs": {
+    "url": "https://github.com/CXmiloxx/tourwright/issues"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.4",
+    "@types/node": "^20.19.43",
+    "typescript": "^5.9.3"
+  }
+}

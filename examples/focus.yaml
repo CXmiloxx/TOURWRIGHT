@@ -1,0 +1,30 @@
+# Guided focus, like the tour an app shows the first time you open it. `tourwright render examples/focus.yaml`
+title: Cómo pagar en Tienda Andina
+voice: claude
+# A page next to the script: no website or internet needed (Piper speaks offline)
+baseUrl: ./site/
+steps:
+  - goto: checkout.html
+  - title: { text: "Tu primer pago", subtitle: "Tres pasos, menos de un minuto" }
+  - focus:
+      target: { label: Nombre en la tarjeta }
+      say: "Primero escribe tu {nombre}, tal como aparece en la tarjeta."
+      text: "Escríbelo <b>igual que en la tarjeta</b>"
+      step: 1/3
+  - type: { target: { label: Nombre en la tarjeta }, text: "Ana María Ríos" }
+  - focus:
+      target: { testId: total }
+      say: "Antes de pagar, revisa el {total}: ya incluye el envío."
+      text: "Incluye el <b>envío</b>"
+      step: 2/3
+      zoom: 1.5
+  - focus:
+      target: { role: button, name: "Pagar $72.000" }
+      say: "Cuando todo esté listo, presiona {Pagar}."
+      text: "Pago <b>seguro</b> con tarjeta, PSE o Nequi"
+      step: 3/3
+      zoom: 1.3
+      pulse: true
+      click: true
+  - say: "Listo. Tu pago quedó aprobado."
+  - pause: 1500
