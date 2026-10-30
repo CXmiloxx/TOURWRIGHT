@@ -35,7 +35,7 @@ const launch = async ({ headless, display, width, height, locale }, config) => {
 
 /**
  * @param {import('../script/load.js').Loaded & { kind: 'browser' }} loaded
- * @param {object} opts     { out, voice, quality, capture, dryRun, timeout, onProgress, sessionNamespace, workDir }
+ * @param {Record<string, any>} opts     { out, voice, quality, capture, dryRun, timeout, onProgress, sessionNamespace, workDir }
  */
 export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   const { name, dir, sandboxed } = loaded

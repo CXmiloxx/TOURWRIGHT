@@ -34,7 +34,7 @@ export const outputBase = (out, name) => {
 
 /**
  * @param {import('../script/load.js').Loaded} loaded  a script from script/load.js
- * @param {object} [opts]  { out, voice, quality, width, height, capture, dryRun, timeout (s), onProgress, sessionNamespace }
+ * @param {Record<string, any>} [opts]  { out, voice, quality, width, height, capture, dryRun, timeout (s), onProgress, sessionNamespace }
  * @returns manifest: { title, duration, files, chapters, captions, paths } (or a dry-run summary)
  */
 export const render = async (loaded, opts = {}, config = loadConfig()) => {
