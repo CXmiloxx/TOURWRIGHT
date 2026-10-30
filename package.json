@@ -70,7 +70,7 @@
     "url": "https://github.com/CXmiloxx/tourwright/issues"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.4",
+    "@biomejs/biome": "^2.6.3",
     "@types/node": "^20.19.43",
     "typescript": "^5.9.3"
   }
