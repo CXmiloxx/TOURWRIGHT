@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import YAML from 'yaml'
-import { describe, draftScript, keyControls, outline, sections } from '../src/explore.js'
+import { describe, draftScript, keyControls, outline, secretPrefix, sections } from '../src/explore.js'
 import { validateScript } from '../src/script/schema.js'
 
 const SNAPSHOT = `- link "Skip to content":
@@ -72,6 +72,26 @@ test('the draft is a valid script with one narrated stop per section', () => {
   assert.match(text, /say: "?Invoices\. Every invoice sent this year/)
   assert.match(text, /# +\{ role: button, name: Export \}/)
   assert.match(text, /\$\{secret:APP_PASSWORD\}/)
+})
+
+test('a page under two paths (/ and /index.html) is one section', () => {
+  const nav = `- navigation "Menu":
+  - link "Home":
+    - /url: /
+  - link "Start":
+    - /url: /index.html
+  - link "Bills":
+    - /url: /bills/index.php
+  - link "Bills again":
+    - /url: /bills/`
+  assert.deepEqual(sections(outline(nav), 'https://app.example/').map(s => s.path), ['/', '/bills/index.php'])
+})
+
+test('the secrets of a site are named after its host, starting with a letter', () => {
+  assert.equal(secretPrefix('app.example.com'), 'APP')
+  assert.equal(secretPrefix('my-app.example.com'), 'MY_APP')
+  assert.equal(secretPrefix('127.0.0.1'), 'SITE_127')
+  assert.equal(secretPrefix('3d.example'), 'SITE_3D')
 })
 
 test('a section points at its filters and main buttons first, never at generic controls', () => {
