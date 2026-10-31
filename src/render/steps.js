@@ -60,7 +60,7 @@ export const runSteps = async (steps, v, page) => {
       case 'goto': await v.goto(arg); break
       case 'title':
         if (typeof arg === 'string') await v.title(arg)
-        else await v.title(arg.text, arg.subtitle, arg.ms, arg.say, prosodyOf(arg))
+        else await v.title(arg.text, arg.subtitle, arg.ms, arg.say, prosodyOf(arg), { kicker: arg.kicker, animation: arg.animation, background: arg.background })
         break
       case 'say':
         if (arg === null) await v.say(null)

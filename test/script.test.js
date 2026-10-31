@@ -98,3 +98,14 @@ test('focus: the marked word and what is said before it', async () => {
   assert.equal(ok.ok, true)
   assert.equal(validateScript({ steps: [{ focus: { target: 'a', zoom: 9 } }] }).ok, false)
 })
+
+test('a title card: words to animate, escaped text, known styles only', async () => {
+  const { titleHtml } = await import('../src/render/theme.js')
+  const html = titleHtml({ text: 'Tu <b>primera</b> factura', subtitle: 'Paso a paso', kicker: 'Tutorial', animation: 'rise', background: 'aurora' })
+  assert.match(html, /class="tw-s-rise tw-bg-aurora"/)
+  assert.equal((html.match(/class="tw-w"/g) ?? []).length, 3)
+  assert.match(html, /&lt;b&gt;primera&lt;\/b&gt;/)
+  assert.match(html, /<div class="tw-kicker">Tutorial<\/div>/)
+  assert.equal((titleHtml({ text: 'Hola', animation: 'type' }).match(/class="tw-c"/g) ?? []).length, 4)
+  assert.match(titleHtml({ text: 'x', animation: 'evil" onload="x', background: 'nope' }), /class="tw-s-rise tw-bg-gradient"/)
+})

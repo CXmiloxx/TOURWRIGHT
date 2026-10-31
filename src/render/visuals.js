@@ -3,35 +3,21 @@
 
 /** @typedef {{ x: number, y: number, width: number, height: number }} Box */
 
-/** @param {import('playwright').Page} page */
-export const showTitle = (page, text, subtitle = '') =>
-  page.evaluate(([text, subtitle]) => {
+// `html` comes from titleHtml (theme.js): the same card as in slides, animated by the theme's CSS
+/** @param {import('playwright').Page} page @param {string} html */
+export const showTitle = (page, html) =>
+  page.evaluate(html => {
     document.getElementById('tw-title')?.remove()
-    const t = document.createElement('div')
-    t.id = 'tw-title'
-    if (window.__tourwright?.logo) {
-      const img = document.createElement('img')
-      img.src = window.__tourwright.logo
-      t.appendChild(img)
-    }
-    const h = document.createElement('h1')
-    h.textContent = text
-    t.appendChild(h)
-    if (subtitle) {
-      const p = document.createElement('p')
-      p.textContent = subtitle
-      t.appendChild(p)
-    }
-    document.body.appendChild(t)
-  }, [text, subtitle ?? ''])
+    document.body.insertAdjacentHTML('beforeend', html)
+  }, html)
 
 /** @param {import('playwright').Page} page */
 export const hideTitle = page =>
   page.evaluate(() => {
     const t = document.getElementById('tw-title')
     if (!t) return
-    t.style.opacity = '0'
-    setTimeout(() => t.remove(), 500)
+    t.classList.add('tw-out')
+    setTimeout(() => t.remove(), 550)
   })
 
 // An empty `html` removes the caption

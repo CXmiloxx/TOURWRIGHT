@@ -8,7 +8,7 @@ import { loadConfig } from '../config.js'
 import { concatEntry, escapeHtml, log, plainText, UserError } from '../util.js'
 import { builtInSound } from '../voice/effects.js'
 import { narrate, stripMarks, withProsody } from '../voice/index.js'
-import { resolveTheme, safePath, themeCss, toDataUrl } from './theme.js'
+import { resolveTheme, safePath, themeCss, titleHtml, toDataUrl } from './theme.js'
 
 // Clips and the crossfade are temporary (compose encodes the final video): fastest preset, low CRF
 const INTERMEDIATE_PRESET = 'ultrafast'
@@ -23,7 +23,8 @@ const slideHtml = (s, theme, { width, height, image }) => {
     ? `<div class="tw-html">${s.html}</div>`
     : image
       ? `<div class="tw-image" style="background-image:url('${image}')"></div>${s.title ? `<div class="tw-image-title">${escapeHtml(s.title)}</div>` : ''}`
-      : `<div id="tw-title">${theme.logo ? `<img src="${theme.logo}">` : ''}<h1>${escapeHtml(s.title ?? '')}</h1>${s.subtitle ? `<p>${escapeHtml(s.subtitle)}</p>` : ''}</div>`
+      // A slide has no page behind it: `page` falls back to the gradient
+      : titleHtml({ text: s.title ?? '', subtitle: s.subtitle, kicker: s.kicker, animation: s.animation ?? theme.titleAnimation, background: (s.background ?? theme.titleBackground) === 'page' ? 'gradient' : (s.background ?? theme.titleBackground), logo: theme.logo })
   return `<!doctype html><html><head><meta charset="utf-8"><style>
     ${themeCss(theme)}
     html, body { margin: 0; width: ${width}px; height: ${height}px; overflow: hidden; background: var(--tw-gradient); color: var(--tw-text); font-family: var(--tw-font); }
@@ -37,6 +38,24 @@ const slideHtml = (s, theme, { width, height, image }) => {
     .tw-html h1 { font-size: 1.8em; } .tw-html li { margin: .35em 0; }
     .tw-html h1, .tw-html h2 { color: var(--tw-text); margin: 0 0 .5em; } .tw-html b, .tw-html strong, .tw-html em { color: var(--tw-accent); }
   </style></head><body>${body}${s.caption ? `<div id="tw-caption">${stripMarks(s.caption)}</div>` : ''}</body></html>`
+}
+
+// The frames of an animated title card, drawn one by one with the page's animations paused at each instant,
+// so the video is smooth whatever the speed of the machine. Only the entrance is drawn, unless something
+// keeps moving (the aurora, the grid, the caret): then the whole slide is.
+const drawAnimation = async (page, prefix, seconds, fps) => {
+  const entrance = await page.evaluate(() => {
+    const all = document.getAnimations()
+    for (const a of all) a.pause()
+    const timing = all.map(a => a.effect?.getComputedTiming())
+    return { end: Math.max(0, ...timing.filter(t => t?.iterations !== Infinity).map(t => Number(t?.endTime ?? 0))) / 1000, endless: timing.some(t => t?.iterations === Infinity) }
+  })
+  const count = Math.max(1, Math.ceil(Math.min(seconds, entrance.endless ? seconds : entrance.end + 0.1) * fps))
+  for (let k = 0; k < count; k++) {
+    await page.evaluate(ms => { for (const a of document.getAnimations()) a.currentTime = ms }, (k * 1000) / fps)
+    await page.screenshot({ path: `${prefix}${String(k + 1).padStart(4, '0')}.jpg`, type: 'jpeg', quality: 95 })
+  }
+  return count
 }
 
 // Slow camera movement over a still image (Ken Burns)
@@ -78,7 +97,7 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
     if (spec && spec !== 'none' && s.say) narration = await narrate(s.say, withProsody(spec, s), config, speech)
     const duration = Math.max(s.duration ?? 0, narration ? narration.duration + LEAD + TAIL : (s.duration ?? DEFAULT_DURATION))
     // `frame` (the drawn PNG) and `source` (what ffmpeg reads) are filled in while drawing
-    timed.push({ ...s, index: i, start: t, duration, narration, frame: '', source: '' })
+    timed.push({ ...s, index: i, start: t, duration, narration, frame: '', source: '', frames: 0 })
     t += duration
   }
   const end = t
@@ -111,6 +130,11 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
       }
       await page.setContent(slideHtml(s, theme, { width, height, image }), { waitUntil: 'load' })
       await page.evaluate(() => document.fonts?.ready)
+      if (!image && !s.html) {
+        s.frames = await drawAnimation(page, join(work, `slide-${String(s.index).padStart(3, '0')}-`), s.duration + fade, fps)
+        s.source = join(work, `slide-${String(s.index).padStart(3, '0')}-%04d.jpg`)
+        continue
+      }
       await page.screenshot({ path: s.frame })
       s.source = s.frame
     }
@@ -125,6 +149,14 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
     const clip = join(work, `clip-${String(s.index).padStart(3, '0')}.mp4`)
     const frames = Math.round((s.duration + fade) * fps)
     const fit = `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2:color=${theme.background.replace('#', '0x')},setsar=1`
+    if (s.frames) {
+      // An animated title: its frames, then the last one held until the slide ends
+      const hold = Math.max(0, s.duration + fade - s.frames / fps)
+      await ffmpeg(['-framerate', String(fps), '-i', s.source, '-t', (s.duration + fade).toFixed(3), '-vf', `${fit},tpad=stop_mode=clone:stop_duration=${hold.toFixed(3)},fps=${fps},format=yuv420p`,
+        '-c:v', 'libx264', '-preset', INTERMEDIATE_PRESET, '-crf', '16', '-threads', String(config.threads), '-r', String(fps), clip], config)
+      clips.push(clip)
+      continue
+    }
     const motion = motionFilter(s.motion, frames, width, height, fps)
     const vf = motion ? `${fit},scale=${width * 2}:${height * 2},${motion},format=yuv420p` : `${fit},fps=${fps},format=yuv420p`
     await ffmpeg(['-loop', '1', '-framerate', String(fps), '-i', s.source, '-t', (s.duration + fade).toFixed(3), '-vf', vf, '-c:v', 'libx264', '-preset', INTERMEDIATE_PRESET,
