@@ -9,6 +9,8 @@ Order: built-in defaults < `tourwright.config.json` in the working directory (or
 |---|---|---|
 | `TOURWRIGHT_HOME` | `~/.local/share/tourwright` (Windows: `%LOCALAPPDATA%\tourwright`) | Base folder. `tourwright install` puts everything here (programs, voices, a Python of its own and its virtual environment) and nothing on the system: deleting it uninstalls. If you move it, run `tourwright install` again to rebuild the Python environment |
 | `TOURWRIGHT_DATA_DIR` | `$TOURWRIGHT_HOME/data` | Jobs, queue, saved sessions |
+| `TOURWRIGHT_SECRETS_FILE` | `$TOURWRIGHT_HOME/secrets.json` | Credentials saved with `tourwright secret set` (readable only by its owner) |
+| `TOURWRIGHT_SECRET_<NAME>` | — | A secret for `${secret:NAME}`; wins over the saved one |
 | `TOURWRIGHT_CACHE_DIR` | `$TOURWRIGHT_HOME/cache` | Voice cache (safe to delete) |
 | `TOURWRIGHT_TMP_DIR` | `/dev/shm` if it exists | Work files of each render |
 | `TOURWRIGHT_FFMPEG`, `TOURWRIGHT_FFPROBE` | from `PATH`, then `$TOURWRIGHT_HOME/bin` | |
