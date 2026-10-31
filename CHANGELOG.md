@@ -27,6 +27,12 @@ All notable changes to this project are documented here. The format follows
 - In slides the animation is drawn frame by frame, so it is smooth whatever the machine.
 - Bigger, bolder titles.
 
+### Changed
+
+- The voices come calibrated, so `tourwright voices --check` and `install --whisper` are no longer needed:
+  both are still accepted and only print a notice. `tourwright clean --whisper` removes Whisper if an earlier
+  version installed it.
+
 ### Fixed
 
 - `explore` on a site by IP (`http://127.0.0.1:…`) or with a host that starts with a digit named its secrets

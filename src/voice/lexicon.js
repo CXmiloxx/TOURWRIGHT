@@ -48,7 +48,7 @@ export const voiceLanguage = voice => {
   return /(?:^|[:_-])(es|en|pt|fr|de|it)[_-]/i.exec(voice.id)?.[1]?.toLowerCase()
 }
 
-// Per engine, measured by scripts/calibrate-voices.js: how each term is best written for that engine
+// Per engine, measured once with a speech-to-text model (Whisper): how each term is best written for that engine
 // (null: as it is). Neural engines (Edge, Pocket TTS) say most English words right as written and only get
 // the respellings that won; Piper also keeps the rest of the list above.
 const CALIBRATED = JSON.parse(readFileSync(new URL('./calibrated.json', import.meta.url), 'utf8'))
