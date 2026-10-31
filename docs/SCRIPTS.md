@@ -264,7 +264,14 @@ Codes sent by SMS or email cannot be read by a script: log in by hand once (belo
 With `session: name`, the login of `setup` is saved after the first render and reused: the next renders skip it
 while `sessionCheck` says it is still valid. If the login fails, the render stops right there and says so.
 
+A login no script can do, with a Google or Microsoft account, a captcha or a code by SMS, is done by hand once:
+`tourwright session login app.yaml` opens a browser window, you log in as usual, press Enter in the terminal
+and the session is saved under the script's `session`. The renders start logged in and skip `setup` while it
+lasts; when it expires the render stops and says to log in again. Give the script a `sessionCheck` so that
+is noticed.
+
 ```bash
+tourwright session login app.yaml       # log in by hand, once
 tourwright render app.yaml --fresh      # log in again, ignoring the saved session
 tourwright session list                 # saved logins
 tourwright session delete app           # forget one

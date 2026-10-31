@@ -71,6 +71,8 @@ Credentials and sessions (kept in TOURWRIGHT_HOME, readable only by you):
                                               A script uses it as "\${secret:NAME}"
   tourwright secret list                      the names saved (never the values)
   tourwright secret delete <NAME>
+  tourwright session login <script>           log in by hand in a browser window (Google, SSO, a captcha,
+                                              a code by SMS) and save it as the script's \`session\`
   tourwright session list                     logins saved by \`session:\` in scripts
   tourwright session delete <name>
   tourwright forget                           delete every saved credential and session
@@ -259,7 +261,33 @@ export const main = async argv => {
       } else if (action === 'delete') {
         if (!name) throw new UserError('usage: tourwright session delete <name>')
         log.info(deleteSession(config, name) ? `session ${name} deleted: the next render logs in again` : `there is no session ${name}`)
-      } else throw new UserError('usage: tourwright session list|delete [name]')
+      } else if (action === 'login') {
+        if (!name) throw new UserError('usage: tourwright session login <script>')
+        const loaded = await loadFile(name, { allowJs: true })
+        if (loaded.kind !== 'browser' || !loaded.script.session) throw new UserError(`${name}: a session is saved under the script's \`session: name\`, add it to the script`)
+        const script = loaded.script
+        if (!process.stdin.isTTY) throw new UserError('session login needs someone at the keyboard: it opens a browser to log in by hand')
+        const { launch, urlResolver } = await import('./render/browser.js')
+        const { loginByHand, sessionPath } = await import('./render/session.js')
+        const { createInterface } = await import('node:readline/promises')
+        const { resolveUrl } = urlResolver(script, loaded.dir, false)
+        const start = script.sessionCheck?.goto ?? script.steps.find(s => 'goto' in s)?.goto ?? '/'
+        const browser = await launch({ headless: false, display: null, width: 1280, height: 800, locale: script.language === 'en' ? 'en-US' : (script.language ?? 'es-CO') }, config)
+        const rl = createInterface({ input: process.stdin, output: process.stderr })
+        try {
+          await loginByHand({
+            browser,
+            url: resolveUrl(start),
+            sessionFile: sessionPath(config, script.session),
+            notUrl: script.sessionCheck?.notUrl,
+            done: () => rl.question('log in in the browser window (Google, SSO, a code…), then press Enter here ')
+          })
+        } finally {
+          rl.close()
+          await browser.close().catch(() => {})
+        }
+        log.info(`session ${script.session} saved: renders of ${name} start logged in (setup is skipped while it lasts)`)
+      } else throw new UserError('usage: tourwright session login|list|delete [script|name]')
       return
     }
     case 'clean': {
