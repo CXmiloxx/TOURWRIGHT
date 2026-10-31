@@ -33,8 +33,9 @@ tourwright render recorrido.yaml   # → videos/recorrido.mp4 (+ .srt .vtt .jpg 
   elemento, un anillo lo marca, un globo con un contador `2/4` lo explica y la cámara se acerca, justo en la
   palabra que está diciendo la voz.
 - **Diapositivas narradas**: carteles, imágenes (con paneo o zoom lento), HTML, fundidos. Sin sitio web.
-- **La voz que quieras**: [Piper](https://github.com/rhasspy/piper) (sin internet, open source, por
-  defecto), voces neuronales de Microsoft Edge, cualquier servidor TTS compatible con OpenAI (OpenAI,
+- **La voz que quieras**: [Pocket TTS](https://github.com/kyutai-labs/pocket-tts) (sin internet, abierta y natural:
+  `tourwright install --pocket`), [Piper](https://github.com/rhasspy/piper) (sin internet, open source, ligera),
+  voces neuronales de Microsoft Edge, cualquier servidor TTS compatible con OpenAI (OpenAI,
   Kokoro, LocalAI…) o tu propio comando. Cada oración queda en caché: volver a grabar no la pide otra vez.
 - **Un reparto, y cómo se dice cada frase**: varias voces por video; velocidad, tono y volumen por frase en
   cualquier motor; pausas exactas (`[[1s]]`); diccionario de pronunciación; perfiles de sonido (cálido,
@@ -73,6 +74,7 @@ Con Node.js 20 o superior, en Linux, macOS o Windows:
 ```bash
 npm install -g tourwright
 tourwright install                    # ffmpeg, Piper y voces, edge-tts, Chromium (sin root)
+tourwright install --pocket           # + Pocket TTS: voces naturales sin internet (cerca de 1 GB)
 tourwright doctor                     # qué funciona en esta máquina
 ```
 

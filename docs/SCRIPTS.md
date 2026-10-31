@@ -293,15 +293,26 @@ Slides with `title` and no image start a chapter; `chapter` names one explicitly
 
 | Voice | Engine | Notes |
 |---|---|---|
-| `piper:es_MX-claude-high`, `piper:en_US-lessac-medium`… | Piper | Offline and open source. `tourwright install-voice <name>`; catalogue at huggingface.co/rhasspy/piper-voices |
+| `pocket:lola` (Spanish), `pocket:alba` (English)… | [Pocket TTS](https://github.com/kyutai-labs/pocket-tts) | The most natural offline voices: an open model (Kyutai, MIT code) on the CPU. `tourwright install --pocket`. The default voice once installed |
+| `piper:es_MX-claude-high`, `piper:en_US-lessac-medium`… | Piper | Offline and open source, very light, more synthetic. `tourwright install-voice <name>`; catalogue at huggingface.co/rhasspy/piper-voices |
 | `edge:es-CO-SalomeNeural` | edge-tts | Neural Microsoft voices, free, needs internet (unofficial service) |
 | `openai:alloy?model=tts-1-hd` | OpenAI-compatible | OpenAI, Kokoro-FastAPI, LocalAI… (`TOURWRIGHT_OPENAI_TTS_URL`) |
 | `command:<id>` | Your command | `TOURWRIGHT_TTS_COMMAND` |
 | `none` | — | Silent video |
 
-Names: `gonzalo`, `salome` (Spanish, Colombia), `jorge`, `dalia` (Mexico), `alonso`, `paloma` (US Spanish),
+Names: `lola` (Pocket TTS, Spanish), `lola-rapida` (the same voice with the smaller model: about three times faster,
+a bit flatter), `gonzalo`, `salome` (Spanish, Colombia), `jorge`, `dalia` (Mexico), `alonso`, `paloma` (US Spanish),
 `andrew`, `ava`, `emma`, `brian` (multilingual), `claude`, `davefx`, `lessac` (Piper), plus the server's
 aliases and plugins. `tourwright voices` lists what this server can use.
+
+**Which one?** For a natural voice offline, `lola` (Pocket TTS): it takes about as long to make a sentence as the
+sentence lasts, once, and the cache keeps it. `salome` and `gonzalo` (Edge) sound as natural and are instant, but
+need internet and use an unofficial Microsoft service. Piper (`claude`) is the lightest and the most robotic.
+
+Pocket TTS models: `pocket:lola` uses `spanish_24l` (the best); `?model=spanish` is the fast one. Other languages
+have their own voice (`giovanni` Italian, `juergen` German, `rafael` Portuguese, `estelle` French, `alba` English).
+A `.wav` of 10–20 s of clean speech in the voices folder (`TOURWRIGHT_HOME/voices/ana.wav`) becomes `pocket:ana`:
+the narration in that voice. Only with the consent of whoever it belongs to.
 
 ### A cast of voices
 
@@ -339,7 +350,11 @@ Every voice, on every engine, takes these (in a step, a slide, or after a name: 
 
 - `[[800ms]]` or `[[1.5s]]`: an exact silence. Captions do not show it.
 - `|`: a short pause (reads as a comma).
-- `pronounce` fixes words a voice reads wrong; captions keep the written form:
+- Tech words, acronyms and numbers are said the way people say them, in the voice's language: in Spanish "API"
+  is "a pe i", "JSON" "yei son", "CSV" "ce ese ve", "25.800" "veinticinco mil ochocientos", "95 %" "noventa y cinco
+  por ciento", "21 consultas" "veintiuna consultas"; an id like 1088248203 is read digit by digit, and acronyms
+  without vowels ("CC") are spelled. The list is in `src/voice/lexicon.js`; captions keep what is written.
+- `pronounce` fixes any other word (and wins over the built-in list); captions keep the written form:
 
 ```yaml
 pronounce:

@@ -27,7 +27,8 @@ Order: built-in defaults < `tourwright.config.json` in the working directory (or
 
 | Variable | Default | |
 |---|---|---|
-| `TOURWRIGHT_VOICE` | `piper:es_MX-claude-high` | Default voice |
+| `TOURWRIGHT_VOICE` | `pocket:lola` when Pocket TTS is installed, else `piper:es_MX-claude-high` | Default voice |
+| `TOURWRIGHT_POCKET_PYTHON` | the Python of `$TOURWRIGHT_HOME/venv` when `pocket-tts` is in it | A Python with `pocket-tts` installed, for the `pocket` engine |
 | `TOURWRIGHT_PIPER_BIN` | `piper` in `PATH`, `$TOURWRIGHT_HOME/piper/piper`, `$TOURWRIGHT_HOME/venv/bin/piper` | The `piper-tts` Python package works too |
 | `TOURWRIGHT_PIPER_VOICES` | `$TOURWRIGHT_HOME/voices` | `.onnx` + `.onnx.json` models |
 | `TOURWRIGHT_EDGE_TTS_BIN` | `edge-tts` in `PATH`, `$TOURWRIGHT_HOME/venv/bin/edge-tts` (Windows: `venv\Scripts`) | |

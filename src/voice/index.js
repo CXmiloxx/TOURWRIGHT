@@ -2,7 +2,8 @@
 //
 // A voice is a string `engine:id[?option=value&…]`, or an alias (built-in, from the config or from the
 // script's `voices`), optionally with more options: `salome?rate=+10%` is Salome, a bit faster.
-//   piper:es_MX-claude-high                 offline, open source (default)
+//   pocket:lola                             offline, open, natural (default once installed)
+//   piper:es_MX-claude-high                 offline, open source, light (default without Pocket TTS)
 //   edge:es-CO-SalomeNeural?rate=-4%        Microsoft Edge neural voices (needs internet, unofficial)
 //   openai:alloy?model=tts-1-hd             any OpenAI-compatible /v1/audio/speech server
 //   command:my-voice                        TOURWRIGHT_TTS_COMMAND, for any other engine
@@ -15,9 +16,11 @@
 // rendering the same script twice never asks the engine again.
 import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { loadConfig } from '../config.js'
 import { concatEntry, hash, run, UserError } from '../util.js'
 import { ENGINES } from './engines.js'
+import { lexicon, speakable, voiceLanguage } from './lexicon.js'
 
 // Built-in aliases: tested voices that sound good. Config `tts.aliases` adds or overrides.
 export const ALIASES = {
@@ -34,10 +37,23 @@ export const ALIASES = {
   ava: 'edge:en-US-AvaMultilingualNeural?rate=-4%',
   emma: 'edge:en-US-EmmaMultilingualNeural?rate=-4%',
   brian: 'edge:en-US-BrianMultilingualNeural?rate=-6%',
-  // Offline (Piper)
+  // English · US, UK
+  jenny: 'edge:en-US-JennyNeural?rate=-4%',
+  guy: 'edge:en-US-GuyNeural?rate=-6%',
+  sonia: 'edge:en-GB-SoniaNeural?rate=-4%',
+  // Offline, open and natural (Pocket TTS: tourwright install --pocket). Spanish, then English
+  lola: 'pocket:lola',
+  'lola-rapida': 'pocket:lola?model=spanish',
+  alba: 'pocket:alba',
+  jane: 'pocket:jane',
+  mary: 'pocket:mary',
+  michael: 'pocket:michael',
+  george: 'pocket:george',
+  // Offline (Piper): lighter, more synthetic
   claude: 'piper:es_MX-claude-high',
   davefx: 'piper:es_ES-davefx-medium',
   lessac: 'piper:en_US-lessac-medium',
+  ryan: 'piper:en_US-ryan-high',
 }
 
 // Warmth in the lows, a bit of presence, gentle compression, a small room and loudness normalized to
@@ -246,14 +262,17 @@ const silence = async (seconds, config) => {
 }
 
 // Narrates `text` with `voiceSpec` (or takes it from the cache). Returns the wav file and its duration in seconds.
-// Options: aliases (the script's voices), pause (seconds between sentences), pronounce ({ word: how it is said }).
+// Options: aliases (the script's voices), pause (seconds between sentences), pronounce ({ word: how it is said }),
+// language (the script's, when the voice's name does not tell it). Tech words, acronyms and numbers are said
+// the way people say them in the voice's language (src/voice/lexicon.js); `pronounce` wins over that.
 /**
  * @param {string} text @param {string} [voiceSpec] @param {any} [config]
- * @param {{ aliases?: Record<string, string>, pause?: number, pronounce?: Record<string, string> }} [options]
+ * @param {{ aliases?: Record<string, string>, pause?: number, pronounce?: Record<string, string>, language?: string }} [options]
  */
-export const narrate = async (text, voiceSpec, config = loadConfig(), { aliases = undefined, pause = config.tts.pause, pronounce = undefined } = {}) => {
+export const narrate = async (text, voiceSpec, config = loadConfig(), { aliases = undefined, pause = config.tts.pause, pronounce = undefined, language = undefined } = {}) => {
   const voice = parseVoice(voiceSpec, config, aliases)
-  const parts = splitNarration(applyPronunciation(text, { ...config.tts.pronounce, ...pronounce }))
+  const lang = voiceLanguage(voice) ?? language
+  const parts = splitNarration(speakable(applyPronunciation(text, { ...lexicon(lang), ...config.tts.pronounce, ...pronounce }), lang))
   if (!parts.some(p => p.text)) throw new UserError('nothing to narrate')
   const dir = join(config.cacheDir, 'voice')
   mkdirSync(dir, { recursive: true })
@@ -282,6 +301,50 @@ export const narrate = async (text, voiceSpec, config = loadConfig(), { aliases 
   return { file, duration: await durationOf(file, config), voice: voice.spec }
 }
 
+// The languages a voice is for: its own, and Spanish and English for the multilingual ones
+/** @returns {string[]} */
+export const voiceLanguages = voice => (/Multilingual/.test(voice.id) ? ['es', 'en'] : [voiceLanguage(voice) ?? 'es'])
+
+// A recorded sample of every built-in voice comes with Tourwright (docs/voices/<name>.mp3): anyone can listen
+// to them and choose before installing anything. `tourwright voices --samples` records them again, with
+// this server's voices or another text.
+export const SAMPLES_DIR = fileURLToPath(new URL('../../docs/voices/', import.meta.url))
+
+const SAMPLE_TEXT = {
+  es: 'Hola, soy {name}. Así sueno narrando un video: la API responde en JSON, el informe llega en PDF, y este mes van 25.800 consultas, el 95 % con resultado.',
+  en: "Hi, I'm {name}. This is how I sound narrating a video: the API answers in JSON, the report comes as a PDF, and this month there were twenty-five thousand searches.",
+}
+
+/**
+ * Records a sample of each named voice into `out` (mp3). Multilingual voices speak Spanish, the rest their language.
+ * @param {any} config @param {{ out: string, text?: string, only?: string[] }} options
+ * @returns {Promise<{ name: string, voice: string, language: string, file?: string, error?: string }[]>}
+ */
+export const recordSamples = async (config, { out, text, only = [] }) => {
+  const named = Object.entries({ ...ALIASES, ...config.tts.aliases }).filter(([name]) => !only.length || only.includes(name))
+  const results = []
+  for (const [name, spec] of named) {
+    let languages = ['es']
+    try {
+      languages = voiceLanguages(parseVoice(spec, config))
+    } catch {}
+    // One folder per language: docs/voices/es/lola.mp3, docs/voices/en/alba.mp3
+    for (const lang of languages) {
+      try {
+        const said = (text ?? SAMPLE_TEXT[lang] ?? SAMPLE_TEXT.es).replaceAll('{name}', name.split('-')[0].replace(/^./, c => c.toUpperCase()))
+        const n = await narrate(said, spec, config, { language: lang })
+        mkdirSync(join(out, lang), { recursive: true })
+        const file = join(out, lang, `${name}.mp3`)
+        await run(requireFfmpeg(config), ['-y', '-v', 'error', '-i', n.file, '-af', polishFilter(config) ?? 'anull', '-ac', '1', '-c:a', 'libmp3lame', '-b:a', '64k', file])
+        results.push({ name, voice: spec, language: lang, file })
+      } catch (error) {
+        results.push({ name, voice: spec, language: lang, error: String(error.message).split('\n')[0] })
+      }
+    }
+  }
+  return results
+}
+
 // Every voice this server can use right now, with the engines that are (not) available.
 export const listVoices = async (config = loadConfig()) => {
   const engines = Object.fromEntries(
@@ -294,11 +357,17 @@ export const listVoices = async (config = loadConfig()) => {
       const model = spec.slice(6).split('?')[0]
       if (!existsSync(join(config.tts.piper.voicesDir, `${model}.onnx`))) continue
     }
-    voices.push({ name: alias, voice: spec, engine, available: Boolean(engines[engine]?.ok) })
+    let languages = []
+    try {
+      languages = voiceLanguages(parseVoice(spec, config))
+    } catch {}
+    const samples = Object.fromEntries(languages.map(l => [l, join(SAMPLES_DIR, l, `${alias}.mp3`)]).filter(([, f]) => existsSync(f)))
+    voices.push({ name: alias, voice: spec, engine, languages, available: Boolean(engines[engine]?.ok), samples })
   }
   if (engines.piper.ok && existsSync(config.tts.piper.voicesDir)) {
-    for (const f of readdirSync(config.tts.piper.voicesDir).filter(f => f.endsWith('.onnx'))) {
-      voices.push({ name: `piper:${f.slice(0, -5)}`, voice: `piper:${f.slice(0, -5)}`, engine: 'piper', available: true })
+    // Installed Piper voices without a name of their own
+    for (const f of readdirSync(config.tts.piper.voicesDir).filter(f => f.endsWith('.onnx') && !voices.some(v => v.voice === `piper:${f.slice(0, -5)}`))) {
+      voices.push({ name: `piper:${f.slice(0, -5)}`, voice: `piper:${f.slice(0, -5)}`, engine: 'piper', languages: [f.slice(0, 2)], available: true, samples: {} })
     }
   }
   return { default: config.tts.defaultVoice, engines, voices }

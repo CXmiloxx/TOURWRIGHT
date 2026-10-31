@@ -5,6 +5,7 @@ import { spawn } from 'node:child_process'
 import { existsSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { run, runWithInput, UserError } from '../util.js'
+import { pythonProcess } from './python.js'
 
 // "+10%" / "-4.5%" → "+10%" / "-5%" (edge-tts takes whole signed numbers only)
 const signed = (value, unit) => {
@@ -85,4 +86,27 @@ const command = {
   },
 }
 
-export const ENGINES = { piper, edge, openai, command }
+// Kyutai Pocket TTS: an open model (MIT code) with natural Spanish, English, French, German, Italian and
+// Portuguese, on the CPU, offline once downloaded. `pocket:lola` (Spanish), `pocket:lola?model=spanish` (faster,
+// a bit flatter), or the name of a .wav in the voices folder to speak with that voice (`pocket:my-voice`,
+// with the consent of whoever it belongs to). Loading the model takes seconds, so one process per model and
+// voice stays loaded for the whole render (src/voice/pocket.py) and gets one sentence at a time.
+const POCKET_MODELS = { lola: 'spanish_24l', giovanni: 'italian_24l', juergen: 'german_24l', rafael: 'portuguese_24l', estelle: 'french_24l' }
+const pocket = {
+  native: [],
+  available: async config =>
+    config.tts.pocket.python
+      ? { ok: true, python: config.tts.pocket.python, note: 'downloads its model the first time' }
+      : { ok: false, reason: 'not installed (tourwright install --pocket)' },
+  synthesize: async ({ text, voice, out, config }) => {
+    if (!config.tts.pocket.python) throw new UserError('Pocket TTS is not installed: tourwright install --pocket')
+    // A voice of your own: a .wav in the voices folder
+    const wav = join(config.tts.piper.voicesDir, `${voice.id}.wav`)
+    const source = existsSync(wav) ? wav : voice.id
+    const model = voice.options.model ?? POCKET_MODELS[voice.id] ?? 'english'
+    if (!/^[a-z0-9_.-]+$/.test(model)) throw new UserError(`invalid pocket model "${model}"`)
+    await pythonProcess(config.tts.pocket.python, 'pocket.py', [model, source]).send({ text, out })
+  },
+}
+
+export const ENGINES = { piper, pocket, edge, openai, command }

@@ -33,7 +33,8 @@ tourwright render tour.yaml        # → videos/tour.mp4 (+ .srt .vtt .jpg .json
   ring marks it, a bubble with a `2/4` badge explains it and the camera pushes in, right on the word the
   voice is saying.
 - **Narrated slides**: title cards, images (with slow pan/zoom), HTML, crossfades. No website needed.
-- **Voices, your choice**: [Piper](https://github.com/rhasspy/piper) (offline, open source, default),
+- **Voices, your choice**: [Pocket TTS](https://github.com/kyutai-labs/pocket-tts) (offline, open, natural:
+  `tourwright install --pocket`), [Piper](https://github.com/rhasspy/piper) (offline, open source, light),
   Microsoft Edge neural voices, any OpenAI-compatible TTS server (OpenAI, Kokoro, LocalAI…), or your own
   command. Every sentence is cached: re-rendering never re-synthesizes.
 - **A cast, and how each line is said**: several voices per video, speed, pitch and volume per line on any
@@ -73,6 +74,7 @@ Node.js 20+, on Linux, macOS or Windows:
 ```bash
 npm install -g tourwright
 tourwright install                    # ffmpeg, Piper + voices, edge-tts, Chromium (no root)
+tourwright install --pocket           # + Pocket TTS: natural offline voices (about 1 GB)
 tourwright doctor                     # what works on this machine
 ```
 

@@ -64,7 +64,7 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
   const work = opts.workDir
   const fade = script.transition ?? 0.4
   const audio = script.audio ?? {}
-  const speech = { aliases: script.voices, pause: audio.pause, pronounce: script.pronounce }
+  const speech = { aliases: script.voices, pause: audio.pause, pronounce: script.pronounce, language: script.language }
   if (!opts.dryRun && !config.ffmpeg) throw new Error('ffmpeg not found (install ffmpeg or set TOURWRIGHT_FFMPEG)')
 
   // Narration first: it decides how long each slide stays

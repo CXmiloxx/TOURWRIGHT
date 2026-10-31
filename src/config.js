@@ -18,6 +18,10 @@ const defaultHome = () => {
 // A program installed by `tourwright install` in its Python virtual environment (TOURWRIGHT_HOME/venv)
 export const venvBin = (home, name) => (isWindows ? join(home, 'venv', 'Scripts', name) : join(home, 'venv', 'bin', name))
 
+// Pocket TTS lives in that environment too (tourwright install --pocket); its Python runs src/voice/pocket.py
+const pocketPython = (home, file) =>
+  env.TOURWRIGHT_POCKET_PYTHON ?? file.tts?.pocket?.python ?? (findBinary(venvBin(home, 'pocket-tts')) ? findBinary(venvBin(home, 'python')) : null)
+
 const readConfigFile = () => {
   const file = env.TOURWRIGHT_CONFIG ?? (existsSync('tourwright.config.json') ? 'tourwright.config.json' : null)
   if (!file) return {}
@@ -50,6 +54,7 @@ export const loadConfig = (overrides = {}) => {
   if (cached && !Object.keys(overrides).length) return cached
   const file = readConfigFile()
   const home = overrides.home ?? file.home ?? defaultHome()
+  const pocket = pocketPython(home, file)
   const config = {
     home,
     // Rendered jobs (queue, outputs) and the shared voice cache
@@ -73,7 +78,9 @@ export const loadConfig = (overrides = {}) => {
     preset: preset(env.TOURWRIGHT_PRESET ?? file.preset),
 
     tts: {
-      defaultVoice: env.TOURWRIGHT_VOICE ?? file.tts?.defaultVoice ?? 'piper:es_MX-claude-high',
+      // The most natural voice installed: Pocket TTS when it is there, else Piper
+      defaultVoice: env.TOURWRIGHT_VOICE ?? file.tts?.defaultVoice ?? (pocket ? 'pocket:lola' : 'piper:es_MX-claude-high'),
+      pocket: { python: pocket },
       piper: {
         bin: findBinary(env.TOURWRIGHT_PIPER_BIN, file.tts?.piper?.bin, 'piper', join(home, 'piper', 'piper'), venvBin(home, 'piper')),
         voicesDir: resolve(env.TOURWRIGHT_PIPER_VOICES ?? file.tts?.piper?.voicesDir ?? join(home, 'voices')),

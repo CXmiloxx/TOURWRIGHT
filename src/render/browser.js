@@ -74,7 +74,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   const theme = resolveTheme(script.theme, config.theme, dir, { sandboxed })
   const audio = script.audio ?? {}
   const effectsVolume = audio.effects ?? 1
-  const speech = { aliases: script.voices, pause: audio.pause, pronounce: script.pronounce }
+  const speech = { aliases: script.voices, pause: audio.pause, pronounce: script.pronounce, language: script.language }
   // Unknown voices fail now, not halfway through the recording
   if (!dryRun) for (const spec of [voice, ...Object.values(script.voices ?? {})]) if (spec && spec !== 'none') parseVoice(spec, config, script.voices)
   if (sandboxed && script.hosts && Object.keys(script.hosts).length) throw new UserError('`hosts` is not available for API jobs')
