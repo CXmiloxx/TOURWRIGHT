@@ -269,6 +269,15 @@ const installPocket = async config => {
   log.info('Pocket TTS: installed. It is now the default voice (pocket:lola); TOURWRIGHT_VOICE changes it')
 }
 
+// Whisper (faster-whisper), to listen to the voices: `tourwright voices --check` finds the words they get wrong
+const installWhisper = async config => {
+  const why = await pipInstall(config.home, 'faster-whisper')
+  if (why) return log.warn(`Whisper: not installed, ${why}`)
+  log.info('Whisper: downloading the "small" model (about 500 MB, once)')
+  await run(findBinary(venvBin(config.home, 'python')), ['-c', "from faster_whisper import WhisperModel; WhisperModel('small', device='cpu', compute_type='int8')"], { timeout: 1_800_000, maxBuffer: 16 * 1024 * 1024 })
+  log.info('Whisper: installed (tourwright voices --check)')
+}
+
 const installChromium = async config => {
   const cli = join(dirname(createRequire(import.meta.url).resolve('playwright/package.json')), 'cli.js')
   // As root on Linux, the system libraries Chromium needs come along
@@ -279,9 +288,9 @@ const installChromium = async config => {
 }
 
 /**
- * @param {{ voices?: string[], edge?: boolean, chromium?: boolean, pocket?: boolean }} [options]
+ * @param {{ voices?: string[], edge?: boolean, chromium?: boolean, pocket?: boolean, whisper?: boolean }} [options]
  */
-export const installAll = async ({ voices = DEFAULT_VOICES, edge = true, chromium = true, pocket = false } = {}, config = loadConfig()) => {
+export const installAll = async ({ voices = DEFAULT_VOICES, edge = true, chromium = true, pocket = false, whisper = false } = {}, config = loadConfig()) => {
   const key = `${platform()}-${arch()}`
   log.info(`installing into ${config.home} (${key})`)
   await installFfmpeg(config, key)
@@ -289,6 +298,7 @@ export const installAll = async ({ voices = DEFAULT_VOICES, edge = true, chromiu
   for (const v of voices) log.info(`voice: ${await installVoice(v, config)}`)
   if (edge) await installEdge(config)
   if (pocket) await installPocket(config)
+  if (whisper) await installWhisper(config)
   if (chromium) await installChromium(config)
   if (platform() === 'linux' && !config.xvfb) log.info('Optional, for the sharpest capture: install Xvfb (apt install xvfb)')
 }

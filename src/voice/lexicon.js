@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+
 // What narration says for what is written for the eye: tech words, acronyms and numbers. A voice reads
 // "API" or "JSON" letter by letter in the wrong language, or as a word; these say them the way people who
 // work with them do. Captions keep the original text. The config's `tts.pronounce` and a script's
@@ -46,8 +48,21 @@ export const voiceLanguage = voice => {
   return /(?:^|[:_-])(es|en|pt|fr|de|it)[_-]/i.exec(voice.id)?.[1]?.toLowerCase()
 }
 
-/** @param {string} language */
-export const lexicon = language => LEXICONS[String(language ?? '').slice(0, 2).toLowerCase()] ?? {}
+// Per engine, measured by scripts/calibrate-voices.js: how each term is best written for that engine
+// (null: as it is). Neural engines (Edge, Pocket TTS) say most English words right as written and only get
+// the respellings that won; Piper also keeps the rest of the list above.
+const CALIBRATED = JSON.parse(readFileSync(new URL('./calibrated.json', import.meta.url), 'utf8'))
+
+/** @param {string} language @param {string} [engine] @returns {Record<string, string>} */
+export const lexicon = (language, engine) => {
+  const lang = String(language ?? '').slice(0, 2).toLowerCase()
+  const base = LEXICONS[lang] ?? {}
+  const tuned = engine ? CALIBRATED[lang]?.[engine] : undefined
+  if (!tuned) return base
+  const said = Object.fromEntries(Object.entries(tuned).filter(([, t]) => t.say).map(([term, t]) => [term, t.say]))
+  if (engine !== 'piper') return said
+  return { ...Object.fromEntries(Object.entries(base).filter(([term]) => !(term in tuned))), ...said }
+}
 
 // Acronyms no dictionary knows: "RUT" is read as a word, but "CC" or "NNA" (no vowels) and "UE" (only
 // vowels) are spelled with the language's letter names. "PDFs" → "pe de efes".
