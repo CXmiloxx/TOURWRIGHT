@@ -12,13 +12,13 @@
     "src",
     "schema",
     "docs",
+    "!docs/voices",
     "examples",
     "scripts",
     "!scripts/check-schema.js",
     "README.md",
     "README.es.md",
-    "LICENSE",
-    "!scripts/calibrate-voices.js"
+    "LICENSE"
   ],
   "engines": {
     "node": ">=20"

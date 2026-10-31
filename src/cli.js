@@ -11,7 +11,7 @@ import { loadFile, missingSecretsMessage, secretsIn, secretsShown } from './scri
 import { jsonSchema } from './script/schema.js'
 import { clearSecrets, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret } from './secrets.js'
 import { log, openPath, UserError } from './util.js'
-import { listVoices, narrate, recordSamples, SAMPLES_DIR } from './voice/index.js'
+import { listVoices, narrate, recordSamples, SAMPLES_DIR, SAMPLES_URL } from './voice/index.js'
 
 const HELP = `tourwright — scripts into narrated videos
 
@@ -43,7 +43,7 @@ Usage:
       --fresh                                 log in again instead of reusing the saved session
       --json                                  the report as JSON on stdout
   tourwright validate <script> [--var n=v]    check a script without running it (and its secrets)
-  tourwright voices [--json] [--open]         voices and engines here; --open opens a sample of each voice
+  tourwright voices [--json] [--open]         voices and engines here; --open opens the samples of each voice
   tourwright voices --samples [names] [--text "…"] [--out dir]
                                               record a sample of each voice (default: ./videos/voces/)
   tourwright say "<text>" [--voice v] [--out file.wav]
@@ -335,8 +335,10 @@ export const main = async argv => {
           process.stdout.write(`  ${voice.available ? '✔' : ' '} ${voice.name.padEnd(28)} ${voice.voice.padEnd(46)} ${sample}\n`)
         }
       }
-      process.stdout.write(`\nListen before choosing: a sample of each voice is in ${SAMPLES_DIR}\n(tourwright voices --open opens that folder; --samples records them again with your text)\n`)
-      if (values.open) await openPath(SAMPLES_DIR).catch(() => {})
+      // The samples come with a clone of the repository, not with the npm package: there, they are online
+      const samples = existsSync(SAMPLES_DIR) ? SAMPLES_DIR : SAMPLES_URL
+      process.stdout.write(`\nListen before choosing: a sample of each voice is in ${samples}\n(tourwright voices --open opens it; --samples records them on this machine, with your text if you like)\n`)
+      if (values.open) await openPath(samples).catch(() => {})
       return
     }
     case 'say': {

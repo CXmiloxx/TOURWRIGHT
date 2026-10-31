@@ -32,6 +32,8 @@ All notable changes to this project are documented here. The format follows
 - The voices come calibrated, so `tourwright voices --check` and `install --whisper` are no longer needed:
   both are still accepted and only print a notice. `tourwright clean --whisper` removes Whisper if an earlier
   version installed it.
+- A lighter npm package (0.6 MB instead of 3.3 MB): the voice samples are listened to on GitHub, and
+  `tourwright voices --open` opens them there when they are not on disk.
 
 ### Fixed
 

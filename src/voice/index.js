@@ -309,6 +309,7 @@ export const voiceLanguages = voice => (/Multilingual/.test(voice.id) ? ['es', '
 // to them and choose before installing anything. `tourwright voices --samples` records them again, with
 // this server's voices or another text.
 export const SAMPLES_DIR = fileURLToPath(new URL('../../docs/voices/', import.meta.url))
+export const SAMPLES_URL = 'https://github.com/CXmiloxx/TOURWRIGHT/tree/main/docs/voices'
 
 const SAMPLE_TEXT = {
   es: 'Hola, soy {name}. Así sueno narrando un video: la API responde en JSON, el informe llega en PDF, y este mes van 25.800 consultas, el 95 % con resultado.',
