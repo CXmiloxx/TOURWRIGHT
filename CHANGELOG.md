@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- `explore` on a site by IP (`http://127.0.0.1:…`) or with a host that starts with a digit named its secrets
+  `_127_USER`, which is not a valid name: they are `SITE_127_USER` now.
+- `explore` no longer lists a site's home twice when its menu links to `/index.html` and the home is `/`.
+
 ## [1.1.0]
 
 From a site to a video with only the script: Tourwright now explores the site, keeps the credentials out

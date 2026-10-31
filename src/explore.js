@@ -66,6 +66,9 @@ export const describe = items => {
   return { heading: h1?.name, description, targets }
 }
 
+// One page under two paths, / and /index.html, is one section
+const samePage = path => path.replace(/\/index\.(html?|php|aspx?)(?=$|\?)/i, '/')
+
 // The sections of a site: the links of its navigation (and of its top bar), same origin, once each
 export const sections = (items, pageUrl) => {
   const origin = new URL(pageUrl).origin
@@ -76,7 +79,7 @@ export const sections = (items, pageUrl) => {
     const u = new URL(i.url, pageUrl)
     if (u.origin !== origin) continue
     const path = u.pathname + u.search
-    if (!found.has(path)) found.set(path, { name: i.name, path })
+    if (![...found.values()].some(f => samePage(f.path) === samePage(path))) found.set(path, { name: i.name, path })
   }
   return [...found.values()]
 }
@@ -185,7 +188,12 @@ const findLogin = async page => {
   })
 }
 
-const secretPrefix = host => host.split('.')[0].toUpperCase().replace(/[^A-Z0-9]/g, '_').replace(/^(\d)/, '_$1')
+// The secrets' names for a site, from its host: app.example.com → APP; a name must start with a letter, so an
+// IP (127.0.0.1) or a host like 3d.example becomes SITE_127, SITE_3D
+export const secretPrefix = host => {
+  const name = host.split('.')[0].toUpperCase().replace(/[^A-Z0-9]/g, '_')
+  return /^[A-Z]/.test(name) ? name : `SITE_${name}`
+}
 
 // The credentials of a login: saved ones are used; missing ones are asked for when someone is at the keyboard
 const askCredentials = async (config, names) => {
@@ -305,7 +313,7 @@ export const explore = async (input, { pages: only, draft, fresh = false, max = 
     const bodyItems = outline(await page.locator('body').ariaSnapshot())
     const homePath = new URL(home.url).pathname
     const list = (only?.length ? only.map(p => ({ name: p, path: p })) : sections(bodyItems, home.url))
-      .filter(s => s.path !== homePath).slice(0, max)
+      .filter(s => samePage(s.path) !== samePage(homePath)).slice(0, max)
     const pages = []
     for (const [i, s] of list.entries()) {
       log.info(`${s.name}…`)
