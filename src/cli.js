@@ -2,7 +2,7 @@
 import { existsSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { parseArgs } from 'node:util'
-import { loadConfig } from './config.js'
+import { loadConfig, reloadConfig } from './config.js'
 import { DEFAULT_VOICES, installAll, installVoice } from './install.js'
 import { loadPlugins } from './plugins.js'
 import { render } from './render/index.js'
@@ -177,7 +177,7 @@ export const main = async argv => {
       const voices = values.voices === undefined ? DEFAULT_VOICES : values.voices.split(/[\s,]+/).filter(Boolean)
       await installAll({ voices, edge: !values['no-edge'], chromium: !values['no-chromium'] }, config)
       // A fresh look: what was just installed is found now
-      const checks = await doctor(loadConfig())
+      const checks = await doctor(reloadConfig())
       for (const c of checks) process.stdout.write(`${c.ok ? '✔' : '✘'} ${c.name.padEnd(22)} ${c.detail}\n`)
       return
     }

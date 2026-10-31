@@ -40,6 +40,12 @@ const list = value => (value ? String(value).split(',').map(x => x.trim()).filte
 
 let cached
 
+// Binaries are looked up once; after installing them, a new lookup finds them
+export const reloadConfig = () => {
+  cached = undefined
+  return loadConfig()
+}
+
 export const loadConfig = (overrides = {}) => {
   if (cached && !Object.keys(overrides).length) return cached
   const file = readConfigFile()
