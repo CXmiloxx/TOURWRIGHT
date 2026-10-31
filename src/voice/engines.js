@@ -4,7 +4,7 @@
 import { spawn } from 'node:child_process'
 import { existsSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { run, runWithInput, UserError } from '../util.js'
+import { run, runWithInput, sleep, UserError } from '../util.js'
 import { pythonProcess } from './python.js'
 
 // "+10%" / "-4.5%" → "+10%" / "-5%" (edge-tts takes whole signed numbers only)
@@ -41,8 +41,17 @@ const edge = {
   synthesize: async ({ text, voice, out, config }) => {
     if (!config.tts.edge.bin) throw new Error('edge-tts not installed (pip install edge-tts or set TOURWRIGHT_EDGE_TTS_BIN)')
     const o = voice.options
-    await run(config.tts.edge.bin, ['--voice', voice.id, `--rate=${signed(o.rate, '%') ?? '+0%'}`, `--pitch=${signed(o.pitch, 'Hz') ?? '+0Hz'}`,
-      `--volume=${signed(o.volume, '%') ?? '+0%'}`, '--text', text, '--write-media', out], { timeout: 90_000 })
+    const args = ['--voice', voice.id, `--rate=${signed(o.rate, '%') ?? '+0%'}`, `--pitch=${signed(o.pitch, 'Hz') ?? '+0Hz'}`,
+      `--volume=${signed(o.volume, '%') ?? '+0%'}`, '--text', text, '--write-media', out]
+    // An online service: a dropped connection or "No audio was received" usually works on the next try
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return void (await run(config.tts.edge.bin, args, { timeout: 90_000 }))
+      } catch (error) {
+        if (attempt >= 3) throw error
+        await sleep(attempt * 2000)
+      }
+    }
   },
 }
 
