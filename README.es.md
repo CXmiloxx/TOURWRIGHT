@@ -75,6 +75,7 @@ Con Node.js 20 o superior, en Linux, macOS o Windows:
 npm install -g tourwright
 tourwright install                    # ffmpeg, Piper y voces, edge-tts, Chromium (sin root)
 tourwright install --pocket           # + Pocket TTS: voces naturales sin internet (cerca de 1 GB)
+tourwright clean                      # cuánto ocupa cada parte; borra descargas y sobrantes
 tourwright doctor                     # qué funciona en esta máquina
 ```
 

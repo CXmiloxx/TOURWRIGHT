@@ -19,6 +19,7 @@ import { arch, platform } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
+import { cleanDownloads, human } from './clean.js'
 import { loadConfig, venvBin } from './config.js'
 import { findBinary, isInside, isWindows, log, run, UserError, which } from './util.js'
 
@@ -207,7 +208,7 @@ const pipInstall = async (home, pkg, extra = []) => {
     }
   }
   log.info(`pip install ${pkg}`)
-  await run(findBinary(venvBin(home, 'pip')), ['install', '--quiet', '--disable-pip-version-check', ...extra, pkg], { maxBuffer: 16 * 1024 * 1024, timeout: 1_800_000 })
+  await run(findBinary(venvBin(home, 'pip')), ['install', '--quiet', '--disable-pip-version-check', '--no-cache-dir', ...extra, pkg], { maxBuffer: 16 * 1024 * 1024, timeout: 1_800_000 })
   return null
 }
 
@@ -301,4 +302,7 @@ export const installAll = async ({ voices = DEFAULT_VOICES, edge = true, chromiu
   if (whisper) await installWhisper(config)
   if (chromium) await installChromium(config)
   if (platform() === 'linux' && !config.xvfb) log.info('Optional, for the sharpest capture: install Xvfb (apt install xvfb)')
+  // The packages are installed: what was downloaded to install them is not needed any more
+  const freed = cleanDownloads(config)
+  if (freed) log.info(`removed ${human(freed)} of downloads (tourwright clean shows what Tourwright takes)`)
 }
