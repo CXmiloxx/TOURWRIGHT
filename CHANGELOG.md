@@ -14,6 +14,9 @@ All notable changes to this project are documented here. The format follows
   a secret. The warning is now only for a secret in a narration, a caption or anything else in view.
 - `${totp:NAME}`: the code of an authenticator app, made from its key the moment it is typed (RFC 6238); a
   code about to expire waits for the next one.
+- `tourwright session login <script>`: log in by hand in a browser window (Google or Microsoft accounts, a
+  captcha, a code by SMS) and save it as the script's `session`. A render whose session is missing or
+  expired, with no `setup` to log in again, stops and says to run it.
 
 ### Fixed
 

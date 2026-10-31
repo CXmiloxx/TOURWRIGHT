@@ -32,10 +32,16 @@ export const prepare = async ({ browser, common, script, loaded, network, resolv
   if (valid) log.info('session reused (setup skipped; --fresh logs in again)')
   else if (script.setup?.length) await runSteps(script.setup, plainHelpers(page, resolveUrl, network.uploads, f => safePath(f, dir, sandboxed)), page)
   if (!valid && loaded.setupFn) await loaded.setupFn({ page, context: pre })
+  // No login of its own (one done by hand with `session login`): find out on the page that checks it
+  if (!valid && script.sessionCheck && !script.setup?.length && !loaded.setupFn) {
+    await page.goto(resolveUrl(script.sessionCheck.goto), { waitUntil: 'networkidle', timeout: 60_000 }).catch(() => {})
+    await page.waitForTimeout(1000)
+  }
   // The login did not get past the login page: say so now, not as a missing element halfway through
   if (!valid && script.sessionCheck) await page.waitForURL(u => !String(u).includes(script.sessionCheck.notUrl), { timeout: 20_000 }).catch(() => {})
   if (!valid && script.sessionCheck && page.url().includes(script.sessionCheck.notUrl)) {
     await pre.close()
+    if (!script.setup?.length && !loaded.setupFn) throw new UserError(`the session ${script.session ?? ''} is not logged in (or it expired): log in again with tourwright session login <script>`)
     throw new UserError(`the login in \`setup\` did not work: the page is still ${script.sessionCheck.notUrl}. Check the secrets (tourwright secret list) and the targets of \`setup\``)
   }
   for (const path of script.warmup ?? []) {
@@ -46,6 +52,30 @@ export const prepare = async ({ browser, common, script, loaded, network, resolv
   if (sessionFile) saveSession(sessionFile, state)
   await pre.close()
   return state
+}
+
+/**
+ * A login no script can do (Google or Microsoft accounts, a captcha, a code by SMS): the person logs in by hand
+ * in a browser window, once, and the session is saved for the renders, which then skip `setup` while it lasts.
+ * @param {{ browser: import('playwright').Browser, url: string, sessionFile: string, notUrl?: string, done: () => Promise<unknown> }} p
+ *   done resolves when the person says the login is finished
+ */
+export const loginByHand = async ({ browser, url, sessionFile, notUrl, done }) => {
+  const context = await browser.newContext({ viewport: null })
+  const page = await context.newPage()
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 }).catch(() => {})
+  const closed = new Promise(resolve => page.on('close', resolve))
+  await Promise.race([done(), closed])
+  if (page.isClosed()) {
+    await context.close().catch(() => {})
+    throw new UserError('the browser window was closed before the login was finished: nothing was saved')
+  }
+  if (notUrl && page.url().includes(notUrl)) {
+    await context.close()
+    throw new UserError(`the page is still ${notUrl}: the login was not finished, nothing was saved`)
+  }
+  saveSession(sessionFile, await context.storageState())
+  await context.close()
 }
 
 // Only the owner can read it: it holds login cookies
