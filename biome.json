@@ -1,12 +1,11 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
   "files": { "includes": ["bin/**", "src/**", "test/**", "examples/**/*.js", "scripts/**/*.js"] },
   "formatter": { "enabled": false },
   "assist": { "enabled": false },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "correctness": {
         "noUnusedVariables": { "level": "error", "options": { "ignoreRestSiblings": true } },
         "noUnusedImports": "error"
