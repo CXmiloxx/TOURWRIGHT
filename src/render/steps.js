@@ -3,6 +3,7 @@
 // Plugins' steps run here too.
 import { basename } from 'node:path'
 import { PLUGIN_STEPS } from '../script/schema.js'
+import { withCodes } from '../secrets.js'
 import { holdsSecret, log, sleep, UserError } from '../util.js'
 
 // A target of a script (a selector, or { role, name }, { label }…) → a Playwright locator
@@ -77,11 +78,11 @@ export const runSteps = async (steps, v, page) => {
       case 'type':
         if (arg.clear) await locate(page, arg.target).first().fill('')
         if (holdsSecret(arg.text)) await hideTyped(locate(page, arg.target))
-        await v.type(locate(page, arg.target), arg.text, arg.delay)
+        await v.type(locate(page, arg.target), await withCodes(arg.text), arg.delay)
         break
       case 'fill':
         if (holdsSecret(arg.text)) await hideTyped(locate(page, arg.target))
-        await locate(page, arg.target).first().fill(arg.text)
+        await locate(page, arg.target).first().fill(await withCodes(arg.text))
         break
       case 'press': await page.keyboard.press(arg); await v.pause(300); break
       case 'select': await locate(page, arg.target).first().selectOption(arg.value); await v.pause(400); break

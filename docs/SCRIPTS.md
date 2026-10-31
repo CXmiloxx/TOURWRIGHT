@@ -243,6 +243,22 @@ still works and means the same.
   be seen or heard: Tourwright warns about it, in `validate` too.
 - API jobs can use secrets only with `TOURWRIGHT_ALLOW_SECRETS=true`.
 
+#### Codes from an authenticator app
+
+When the site asks for a code from an authenticator app, save the key it shows under its QR code ("can't scan
+it? enter this key") and write `${totp:NAME}` where the code goes. The code is made the moment it is typed,
+and one about to expire waits for the next, so it is always valid.
+
+```bash
+tourwright secret set APP_TOTP            # the key, like JBSW Y3DP EHPK 3PXP
+```
+
+```yaml
+  - fill: { target: { label: Verification code }, text: "${totp:APP_TOTP}" }
+```
+
+Codes sent by SMS or email cannot be read by a script: log in by hand once (below).
+
 ### Sessions
 
 With `session: name`, the login of `setup` is saved after the first render and reused: the next renders skip it
