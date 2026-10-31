@@ -593,6 +593,53 @@
             ]
           }
         },
+        "dismiss": {
+          "description": "Things the app puts in the way (its own product tour, a cookie banner, a chat bubble): clicked off camera whenever they show up, like { role: button, name: Skip }",
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "css": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "placeholder": {
+                    "type": "string"
+                  },
+                  "testId": {
+                    "type": "string"
+                  },
+                  "exact": {
+                    "type": "boolean"
+                  },
+                  "nth": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
         "blocks": {
           "description": "Reusable groups of steps, inserted with `use`",
           "type": "object",
