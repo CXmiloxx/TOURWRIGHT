@@ -79,12 +79,28 @@ export const doctor = async (config = loadConfig()) => {
   return checks
 }
 
+// A mistyped option is the user's to fix: a short message, not a stack trace
+/**
+ * @template {import('node:util').ParseArgsConfig} T
+ * @param {T} options
+ * @returns {ReturnType<typeof parseArgs<T>>}
+ */
+const parseCliArgs = options => {
+  try {
+    return parseArgs(options)
+  } catch (error) {
+    if (String(error.code).startsWith('ERR_PARSE_ARGS_')) throw new UserError(`${error.message.split('. ')[0]} — tourwright help`)
+    throw error
+  }
+}
+
 export const main = async argv => {
   const [command, ...rest] = argv
-  const { values, positionals } = parseArgs({
+  const { values, positionals } = parseCliArgs({
     args: rest,
     allowPositionals: true,
     options: {
+      help: { type: 'boolean', short: 'h' },
       out: { type: 'string', short: 'o' },
       voice: { type: 'string' },
       quality: { type: 'string' },
@@ -103,6 +119,7 @@ export const main = async argv => {
       'no-chromium': { type: 'boolean' },
     },
   })
+  if (values.help) return void process.stdout.write(HELP)
   const config = loadConfig()
   await loadPlugins(config)
   // --var name=value (repeatable) overrides the script's `vars`
