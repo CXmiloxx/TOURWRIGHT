@@ -36,6 +36,15 @@ about itself, and a `focus` (a bubble, a numbered badge, a gentle zoom) on the k
 filters, tabs and main buttons. The other targets of each page are listed under it as comments: rewrite the
 narration in your own words and point at whatever else matters. `tourwright explore app.yaml` later shows the targets again, logged in.
 
+To show the login itself in the video, add `--login camera`: the draft starts logged out on the login page and
+types each field on camera, with a focus that says what goes in it, then presses the button. The password
+shows as dots, as in any password field, and a secret typed in any other field (the user) is blurred. To show
+a demo user instead, write it in the script in place of its `${secret:…}`.
+
+```bash
+tourwright explore https://app.example.com/login --draft app.yaml --login camera
+```
+
 ## Browser walkthrough
 
 ```yaml
@@ -229,7 +238,9 @@ still works and means the same.
 
 - A secret's value is replaced with `•••` in every log line and error, a failing `fill` included.
 - Missing secrets are all named at once, with the command that saves each one; `tourwright validate` checks them too.
-- What is typed on camera is visible: use secrets in `setup` (off camera). Tourwright warns when one is in `steps`.
+- A secret can be typed on camera with `type` or `fill`: a password field shows dots, and any other field is
+  blurred while it holds a secret. Anything else in `steps` that holds a secret (a narration, a caption) can
+  be seen or heard: Tourwright warns about it, in `validate` too.
 - API jobs can use secrets only with `TOURWRIGHT_ALLOW_SECRETS=true`.
 
 ### Sessions

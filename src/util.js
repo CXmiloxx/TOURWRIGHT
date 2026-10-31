@@ -97,6 +97,8 @@ const hidden = new Set()
 export const hideSecret = value => {
   if (typeof value === 'string' && value.length >= 3) hidden.add(value)
 }
+// Whether a text carries the value of a secret (to keep it off the screen as it is typed)
+export const holdsSecret = text => typeof text === 'string' && [...hidden].some(value => text.includes(value))
 export const redact = text => {
   let s = String(text)
   for (const value of hidden) s = s.split(value).join('•••')

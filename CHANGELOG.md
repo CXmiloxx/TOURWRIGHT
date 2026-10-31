@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Logins
+
+- `tourwright explore --login camera`: the draft shows the login in the video, field by field, each with a
+  focus that says what goes in it, instead of logging in off camera in `setup`.
+- Secrets can be typed on camera: a password field shows dots and any other field is blurred while it holds
+  a secret. The warning is now only for a secret in a narration, a caption or anything else in view.
+
 ### Fixed
 
 - `explore` on a site by IP (`http://127.0.0.1:…`) or with a host that starts with a digit named its secrets

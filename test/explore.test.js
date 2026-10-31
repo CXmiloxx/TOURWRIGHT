@@ -94,6 +94,27 @@ test('the secrets of a site are named after its host, starting with a letter', (
   assert.equal(secretPrefix('3d.example'), 'SITE_3D')
 })
 
+test('with the login on camera, the draft types each field with a focus and starts logged out', () => {
+  const page = describe(outline(SNAPSHOT))
+  const login = { path: '/login', user: { label: 'Email', exact: true }, password: { label: 'Password', exact: true }, submit: { role: 'button', name: 'Sign in' }, names: ['APP_USER', 'APP_PASSWORD'] }
+  const text = draftScript({
+    header: { title: 'App', language: 'en', baseUrl: 'https://app.example', session: 'app.example', sessionCheck: { goto: '/', notUrl: '/login' }, setup: [{ goto: '/login' }] },
+    start: '/',
+    home: page,
+    pages: [{ name: 'Invoices', path: '/invoices', page }],
+    site: 'App',
+    login,
+  })
+  const script = YAML.parse(text)
+  const r = validateScript(script)
+  assert.equal(r.ok, true, r.errors?.join('\n'))
+  assert.equal(script.setup, undefined)
+  assert.equal(script.session, undefined)
+  assert.deepEqual(script.steps[0], { goto: '/login' })
+  assert.deepEqual(script.steps.filter(s => s.type).map(s => s.type.text), ['${secret:APP_USER}', '${secret:APP_PASSWORD}'])
+  assert.equal(script.steps.find(s => s.focus?.target.name === 'Sign in').focus.click, true)
+})
+
 test('a section points at its filters and main buttons first, never at generic controls', () => {
   const page = { targets: [
     { role: 'button', name: 'Elegir la fecha en el calendario' },

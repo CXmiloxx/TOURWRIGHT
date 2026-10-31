@@ -4,9 +4,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Readable } from 'node:stream'
 import { test } from 'node:test'
-import { interpolate, secretsIn } from '../src/script/load.js'
+import { interpolate, secretsIn, secretsShown } from '../src/script/load.js'
 import { clearSecrets, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret } from '../src/secrets.js'
-import { redact } from '../src/util.js'
+import { holdsSecret, redact } from '../src/util.js'
 
 const withStore = fn => () => {
   const dir = mkdtempSync(join(tmpdir(), 'tw-secrets-'))
@@ -55,6 +55,24 @@ test('${secret:NAME} and ${env:TOURWRIGHT_SECRET_NAME} are the same secret; valu
   assert.equal(out.setup[0].fill.text, 'correct horse')
   assert.equal(out.steps[0], 'correct horse')
   assert.equal(redact('fill("correct horse") timed out'), 'fill("•••") timed out')
+}))
+
+test('a secret typed on camera is not shown; one in a narration or a caption is', () => {
+  const steps = [
+    { type: { target: { label: 'Password' }, text: '${secret:PASS}' } },
+    { fill: { target: { label: 'User' }, text: '${secret:USER}' } },
+    { if: { visible: '#otp', then: [{ say: 'Your code is ${secret:CODE}' }] } },
+    { caption: '${secret:TOKEN}' },
+  ]
+  assert.deepEqual(secretsShown(steps), ['CODE', 'TOKEN'])
+})
+
+test('a text that holds a secret value is recognised, to blur the field it is typed into', withStore(config => {
+  setSecret(config, 'SHOWN_USER', 'ana@example.com')
+  interpolate({ a: '${secret:SHOWN_USER}' }, { config })
+  assert.equal(holdsSecret('ana@example.com'), true)
+  assert.equal(holdsSecret('demo@example.com'), false)
+  assert.equal(holdsSecret(undefined), false)
 }))
 
 test('every missing secret is named at once, with the command that saves it', withStore(config => {

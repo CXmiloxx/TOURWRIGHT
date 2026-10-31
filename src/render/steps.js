@@ -3,7 +3,7 @@
 // Plugins' steps run here too.
 import { basename } from 'node:path'
 import { PLUGIN_STEPS } from '../script/schema.js'
-import { log, sleep, UserError } from '../util.js'
+import { holdsSecret, log, sleep, UserError } from '../util.js'
 
 // A target of a script (a selector, or { role, name }, { label }…) → a Playwright locator
 export const locate = (page, t) => {
@@ -43,6 +43,12 @@ export const dismissing = async (page, targets = []) => {
 // How a line is spoken, from a step's value
 const prosodyOf = a => ({ voice: a.voice, rate: a.rate, pitch: a.pitch, volume: a.volume, style: a.style })
 
+// A secret typed on camera stays unreadable: a password field already shows dots, any other field is blurred
+export const hideTyped = locator =>
+  locator.first().evaluate(el => {
+    if (!(el instanceof HTMLInputElement && el.type === 'password')) el.classList.add('tw-blur')
+  })
+
 // Runs declarative steps with the helpers `v`.
 export const runSteps = async (steps, v, page) => {
   for (const step of steps) {
@@ -70,9 +76,13 @@ export const runSteps = async (steps, v, page) => {
       case 'drag': await v.drag(locate(page, arg.from), locate(page, arg.to)); break
       case 'type':
         if (arg.clear) await locate(page, arg.target).first().fill('')
+        if (holdsSecret(arg.text)) await hideTyped(locate(page, arg.target))
         await v.type(locate(page, arg.target), arg.text, arg.delay)
         break
-      case 'fill': await locate(page, arg.target).first().fill(arg.text); break
+      case 'fill':
+        if (holdsSecret(arg.text)) await hideTyped(locate(page, arg.target))
+        await locate(page, arg.target).first().fill(arg.text)
+        break
       case 'press': await page.keyboard.press(arg); await v.pause(300); break
       case 'select': await locate(page, arg.target).first().selectOption(arg.value); await v.pause(400); break
       case 'highlight': { const a = withTarget(arg); await v.highlight(locate(page, a.target), a.ms); break }
