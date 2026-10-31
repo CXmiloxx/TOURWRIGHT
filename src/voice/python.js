@@ -1,4 +1,4 @@
-// A Python helper kept running: models that take seconds to load (Pocket TTS, Whisper) are loaded once and
+// A Python helper kept running: models that take seconds to load (Pocket TTS) are loaded once and
 // then get one JSON line per job and answer one JSON line. Jobs go one at a time. While idle the process
 // does not keep Tourwright running, and it ends with it.
 import { spawn } from 'node:child_process'
@@ -9,7 +9,7 @@ const running = new Map()
 
 /**
  * @param {string} python  the Python that has the packages
- * @param {string} script  a file next to this one (pocket.py, transcribe.py)
+ * @param {string} script  a file next to this one (pocket.py)
  * @param {string[]} args
  * @returns {{ send: (job: object) => Promise<any> }}
  */

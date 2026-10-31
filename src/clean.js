@@ -60,7 +60,7 @@ export const diskUsage = async config => {
     { name: 'Python packages (edge-tts, Pocket TTS, Whisper)', path: join(home, 'venv'), bytes: sizeOf(join(home, 'venv')), note: 'needed' },
     { name: 'Piper voices', path: config.tts.piper.voicesDir, bytes: sizeOf(config.tts.piper.voicesDir), note: 'needed' },
     { name: 'Pocket TTS models', bytes: modelBytes('pocket'), remove: '--pocket', note: 'the natural voices (lola, alba…)' },
-    { name: 'Whisper models', bytes: modelBytes('whisper'), remove: '--whisper', note: 'only for voices --check' },
+    { name: 'Whisper models', bytes: modelBytes('whisper'), remove: '--whisper', note: 'installed by Tourwright 1.1, no longer used' },
     { name: 'download cache', path: join(home, 'cache', 'uv'), bytes: sizeOf(join(home, 'cache', 'uv')), remove: 'always', note: 'packages already installed' },
     { name: 'voice cache', path: join(config.cacheDir, 'voice'), bytes: sizeOf(join(config.cacheDir, 'voice')), remove: '--voice-cache', note: 'sentences already said: renders reuse them' },
     { name: 'rendered jobs (API)', path: join(config.dataDir, 'jobs'), bytes: sizeOf(join(config.dataDir, 'jobs')), note: `kept ${config.queue.retentionHours} h` },
@@ -121,7 +121,7 @@ export const clean = async (config, { voiceCache = false, pocket = false, whispe
   if (whisper) {
     removed.push({ name: 'Whisper models', bytes: await deleteModels(config, 'whisper') })
     await pipUninstall(config, ['faster-whisper', 'ctranslate2'])
-    log.info('Whisper uninstalled (tourwright install --whisper brings it back)')
+    log.info('Whisper uninstalled')
   }
   if (pocket) {
     removed.push({ name: 'Pocket TTS models', bytes: await deleteModels(config, 'pocket') })

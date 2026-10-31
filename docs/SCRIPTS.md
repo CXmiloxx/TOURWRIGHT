@@ -379,17 +379,11 @@ words, numbers, a question), so you can choose before installing anything: `tour
 folder. `tourwright voices --samples` records them again with the voices of your machine, and `--text "…"` with
 your own words. Then write the name in the script: `voice: lola`.
 
-**How they were tuned.** Every built-in voice reads a set of sentences full of what narrations hold (API, JSON,
-PDF, `25.800`, `95 %`, `$ 409.360`, an email, Ctrl K…); Whisper, an open speech-to-text model, writes down what it
-heard. Then each engine was calibrated on its own (`scripts/calibrate-voices.js`): every term was said written several
-ways (as is, respelled, spelled out) and the one Whisper understood best was kept, in `src/voice/calibrated.json`.
-Neural voices (Edge, Pocket TTS) say most English words right as written, so they only get the respellings that
-won; Piper needs more of them. You can check any voice, yours too:
-
-```bash
-tourwright install --whisper           # once: Whisper (about 500 MB)
-tourwright voices --check lola salome  # the share of words understood, and each word that failed
-```
+**How they were tuned.** Every built-in voice read sentences full of what narrations hold (API, JSON, PDF,
+`25.800`, `95 %`, `$ 409.360`, an email, Ctrl K…) and a speech-to-text model wrote down what it heard. Each term
+was said written several ways (as is, respelled, spelled out) and the one understood best was kept for each
+engine, in `src/voice/calibrated.json`: neural voices (Edge, Pocket TTS) say most English words right as
+written, Piper needs more respellings. If a voice still says a word wrong, `pronounce` fixes it in your script.
 
 **Which one?** For a natural voice offline, `lola` (Pocket TTS): it takes about as long to make a sentence as the
 sentence lasts, once, and the cache keeps it. `salome` and `gonzalo` (Edge) sound as natural and are instant, but

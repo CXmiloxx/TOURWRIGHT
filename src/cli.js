@@ -10,7 +10,7 @@ import { clearSessions, deleteSession, listSessions } from './render/session.js'
 import { loadFile, missingSecretsMessage, secretsIn, secretsShown } from './script/load.js'
 import { jsonSchema } from './script/schema.js'
 import { clearSecrets, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret } from './secrets.js'
-import { findBinary, log, openPath, UserError } from './util.js'
+import { log, openPath, UserError } from './util.js'
 import { listVoices, narrate, recordSamples, SAMPLES_DIR } from './voice/index.js'
 
 const HELP = `tourwright — scripts into narrated videos
@@ -46,8 +46,6 @@ Usage:
   tourwright voices [--json] [--open]         voices and engines here; --open opens a sample of each voice
   tourwright voices --samples [names] [--text "…"] [--out dir]
                                               record a sample of each voice (default: ./videos/voces/)
-  tourwright voices --check [names] [--out f.json]  each voice reads tech words, numbers, dates…; Whisper listens
-                                              and the words it gets wrong are listed (install --whisper)
   tourwright say "<text>" [--voice v] [--out file.wav]
                                               say one text ([[1s]] = exact pause; voice?rate=+10%&pitch=+2st)
   tourwright install [options]                ffmpeg, Piper, voices, edge-tts and Chromium into TOURWRIGHT_HOME
@@ -57,7 +55,6 @@ Usage:
       --no-chromium                           skip Chromium
       --pocket                                Pocket TTS: open, natural voices (Spanish: pocket:lola), CPU only;
                                               about 1 GB with PyTorch. Becomes the default voice
-      --whisper                               Whisper, to check how the voices sound (voices --check)
   tourwright install-voice <piper-voice>      download a Piper voice (es_MX-claude-high, en_US-lessac-medium…)
   tourwright doctor                           check ffmpeg, Xvfb, Chromium and TTS engines
   tourwright init [file]                      write an example script
@@ -81,7 +78,7 @@ Disk:
   tourwright clean [options]                  what each part takes, and removes downloads and leftovers
       --voice-cache                           also the sentences already said (made again when needed)
       --pocket                                also Pocket TTS and its models (the default voice goes back to Piper)
-      --whisper                               also Whisper and its models (only used by voices --check)
+      --whisper                               also Whisper and its models (installed by Tourwright 1.1, no longer used)
 
 Configuration: environment variables TOURWRIGHT_* or tourwright.config.json (see docs/CONFIGURATION.md).
 `
@@ -163,14 +160,14 @@ export const main = async argv => {
       'voice-cache': { type: 'boolean' },
       pocket: { type: 'boolean' },
       whisper: { type: 'boolean' },
-      check: { type: 'boolean' },
-      model: { type: 'string' },
       open: { type: 'boolean' },
       fresh: { type: 'boolean' },
       draft: { type: 'string' },
       login: { type: 'string' },
       pages: { type: 'string' },
       export: { type: 'string' },
+      // Retired in 1.2 (the voices come calibrated); still accepted so commands that pass them keep working
+      check: { type: 'boolean' },
       samples: { type: 'boolean' },
       text: { type: 'string' },
     },
@@ -315,35 +312,7 @@ export const main = async argv => {
       return
     }
     case 'voices': {
-      if (values.check) {
-        const { checkVoice } = await import('./voice/check.js')
-        const whisper = process.env.TOURWRIGHT_WHISPER_PYTHON ?? findBinary(join(config.home, 'venv', process.platform === 'win32' ? 'Scripts' : 'bin', 'python'))
-        if (!whisper) throw new UserError('Whisper is not installed: tourwright install --whisper')
-        const { voices: all, engines } = await listVoices(config)
-        const names = positionals.length ? positionals : all.filter(v => v.available && !v.name.includes(':')).map(v => v.name)
-        const report = []
-        for (const name of names) {
-          const engine = all.find(v => v.name === name)?.engine
-          if (engine && !engines[engine]?.ok) {
-            log.warn(`${name}: ${engines[engine].reason}`)
-            continue
-          }
-          log.info(`${name}…`)
-          // A multilingual voice is checked in each of its languages
-          for (const language of all.find(v => v.name === name)?.languages ?? [undefined]) {
-            const r = await checkVoice(name, config, { whisper, model: values.model, language })
-            report.push({ name, ...r })
-            // Saved after each voice: a long check that stops halfway keeps what it measured
-            if (values.out) writeFileSync(values.out, JSON.stringify(report, null, 2))
-            if (!values.json) {
-              process.stdout.write(`\n${`${name} (${r.language})`.padEnd(18)} ${(100 - r.wer * 100).toFixed(1)} % of words understood\n`)
-              for (const s of r.sentences) for (const m of s.mistakes) process.stdout.write(`   "${m.expected || '—'}" → heard "${m.heard || '—'}"\n`)
-            }
-          }
-        }
-        if (values.json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
-        return
-      }
+      if (values.check) log.warn('voices --check was retired: every voice comes calibrated. If one says a word wrong, `pronounce` in the script fixes it')
       if (values.samples) {
         const out = resolve(values.out ?? join('videos', 'voces'))
         log.info(`recording a sample of each voice in ${out}…`)
@@ -382,7 +351,8 @@ export const main = async argv => {
     }
     case 'install': {
       const voices = values.voices === undefined ? DEFAULT_VOICES : values.voices.split(/[\s,]+/).filter(Boolean)
-      await installAll({ voices, edge: !values['no-edge'], chromium: !values['no-chromium'], pocket: values.pocket, whisper: values.whisper }, config)
+      if (values.whisper) log.warn('--whisper: Whisper is no longer needed (the voices come calibrated), skipped')
+      await installAll({ voices, edge: !values['no-edge'], chromium: !values['no-chromium'], pocket: values.pocket }, config)
       // A fresh look: what was just installed is found now
       const checks = await doctor(reloadConfig())
       for (const c of checks) process.stdout.write(`${c.ok ? '✔' : '✘'} ${c.name.padEnd(22)} ${c.detail}\n`)
