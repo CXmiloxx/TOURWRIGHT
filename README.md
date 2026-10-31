@@ -106,6 +106,18 @@ touched. To uninstall, delete that folder.
 
 ## Use it
 
+From a site to a video, without writing selectors by hand:
+
+```bash
+tourwright explore https://app.example.com/login --draft app.yaml   # asks for the login, writes the script
+tourwright render app.yaml --dry-run                               # checks every step in seconds
+tourwright render app.yaml --open                                  # the video, in ./videos/app/
+```
+
+The draft goes through every section of the site with narration taken from its pages; edit it in your words.
+Credentials are asked for once, never shown and never written in the script (`tourwright secret list`;
+`tourwright forget` deletes them).
+
 ```bash
 tourwright init video.yaml                  # an example script
 tourwright validate video.yaml

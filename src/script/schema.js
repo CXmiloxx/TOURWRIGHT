@@ -153,6 +153,8 @@ const common = {
     fadeIn: z.number().min(0).max(30).optional(), fadeOut: z.number().min(0).max(30).optional(),
   }).strict()]).optional().describe('Background music file (looped and lowered under the voice)'),
   vars: z.record(z.string().regex(/^\w+$/), z.unknown()).optional().describe('Variables: {{name}} in any text is replaced with its value'),
+  export: z.array(z.enum(['video', 'audio', 'silent'])).min(1).optional()
+    .describe('What to deliver (default [video]): video = the narrated .mp4, audio = only the sound (.mp3), silent = the video without sound. Subtitles, poster and manifest always come'),
 }
 
 const browser = z.object({

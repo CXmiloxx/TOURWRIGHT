@@ -78,6 +78,19 @@ export const runWithInput = (command, args, input, { timeout = 120_000, env = un
     child.stdin.end(input)
   })
 
+// Opens a file or folder with the system's own program (the video player, the file browser)
+export const openPath = path => {
+  const [command, args] = isWindows ? ['explorer.exe', [path]] : process.platform === 'darwin' ? ['open', [path]] : ['xdg-open', [path]]
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { detached: true, stdio: 'ignore' })
+    child.once('error', reject)
+    child.once('spawn', () => {
+      child.unref()
+      resolve(undefined)
+    })
+  })
+}
+
 // Secret values a script used: every log line and error shown to the user has them replaced, so a password
 // typed by a failing `fill` never ends up in a terminal, a job record or an API answer.
 const hidden = new Set()

@@ -188,6 +188,19 @@
           },
           "additionalProperties": {}
         },
+        "export": {
+          "description": "What to deliver (default [video]): video = the narrated .mp4, audio = only the sound (.mp3), silent = the video without sound. Subtitles, poster and manifest always come",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "video",
+              "audio",
+              "silent"
+            ]
+          }
+        },
         "transition": {
           "description": "Crossfade seconds between slides",
           "type": "number",
@@ -494,6 +507,19 @@
             "pattern": "^\\w+$"
           },
           "additionalProperties": {}
+        },
+        "export": {
+          "description": "What to deliver (default [video]): video = the narrated .mp4, audio = only the sound (.mp3), silent = the video without sound. Subtitles, poster and manifest always come",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "video",
+              "audio",
+              "silent"
+            ]
+          }
         },
         "baseUrl": {
           "description": "Relative paths in goto resolve against it. Local scripts may use a folder next to them (\"./site/\"): pages without a server",
