@@ -36,7 +36,7 @@ test('voice, ducked music and effects end up in one track; cuts move everything'
     assert.deepEqual(result.captions, [{ text: 'Hola', start: 1, end: 2 }])
     assert.deepEqual(result.chapters.map(c => [c.title, c.start]), [['Uno', 0]])
     const { stdout } = await run(cfg.ffprobe, ['-v', 'error', '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', result.paths.video])
-    assert.deepEqual(stdout.trim().split('\n').slice(0, 3), ['video', 'audio', 'subtitle'])
+    assert.deepEqual(stdout.trim().split(/\r?\n/).slice(0, 3), ['video', 'audio', 'subtitle'])
     // loudnorm in the polish works at 192 kHz: the file must still come out at 48 kHz for every player
     const rate = await run(cfg.ffprobe, ['-v', 'error', '-select_streams', 'a', '-show_entries', 'stream=sample_rate', '-of', 'csv=p=0', result.paths.video])
     assert.equal(rate.stdout.trim(), '48000')
