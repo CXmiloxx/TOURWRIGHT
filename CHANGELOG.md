@@ -4,7 +4,9 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.2.0]
+
+Logins of every kind on video, and title cards that move.
 
 ### Logins
 
@@ -156,4 +158,6 @@ First release.
 - Quality checks: lint (Biome), types (JSDoc checked by `tsc`), tests and a real render on the three
   systems in CI.
 
+[1.2.0]: https://github.com/CXmiloxx/tourwright/releases/tag/v1.2.0
+[1.1.0]: https://github.com/CXmiloxx/tourwright/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/CXmiloxx/tourwright/releases/tag/v1.0.0
