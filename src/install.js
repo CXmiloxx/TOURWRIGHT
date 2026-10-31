@@ -176,7 +176,8 @@ const venvWorks = home =>
 const usable = async (bin, home) => Boolean(bin) && (!isInside(bin, join(home, 'venv')) || (await venvWorks(home)))
 
 // Installs a Python package in TOURWRIGHT_HOME/venv. Returns why it could not, or null when it did.
-const pipInstall = async (home, pkg) => {
+// `extra`: more pip arguments (another package index).
+const pipInstall = async (home, pkg, extra = []) => {
   const venv = join(home, 'venv')
   if (existsSync(venv) && !(await venvWorks(home))) {
     log.info('the Python environment no longer works (was the folder moved?): making it again')
@@ -192,7 +193,7 @@ const pipInstall = async (home, pkg) => {
       await run(uv, ['venv', '--quiet', '--python', PYTHON_VERSION, venv], { env: uvEnv(home), maxBuffer: 16 * 1024 * 1024 })
     }
     log.info(`installing ${pkg}`)
-    await run(uv, ['pip', 'install', '--quiet', '--python', venv, pkg], { env: uvEnv(home), maxBuffer: 16 * 1024 * 1024 })
+    await run(uv, ['pip', 'install', '--quiet', '--python', venv, ...extra, pkg], { env: uvEnv(home), maxBuffer: 16 * 1024 * 1024, timeout: 1_800_000 })
     return null
   }
   if (!findBinary(venvBin(home, 'pip'))) {
@@ -206,7 +207,7 @@ const pipInstall = async (home, pkg) => {
     }
   }
   log.info(`pip install ${pkg}`)
-  await run(findBinary(venvBin(home, 'pip')), ['install', '--quiet', '--disable-pip-version-check', pkg], { maxBuffer: 16 * 1024 * 1024 })
+  await run(findBinary(venvBin(home, 'pip')), ['install', '--quiet', '--disable-pip-version-check', ...extra, pkg], { maxBuffer: 16 * 1024 * 1024, timeout: 1_800_000 })
   return null
 }
 
@@ -257,6 +258,17 @@ const installEdge = async config => {
   log.warn(`edge-tts: skipped, ${why} (only the Microsoft voices need it; Piper voices work without it)`)
 }
 
+// Pocket TTS: the natural voices (Spanish `pocket:lola`). PyTorch comes with it; on Linux the CPU-only build,
+// not the 2 GB one for NVIDIA cards. The Spanish model is downloaded now, not during the first render.
+const installPocket = async config => {
+  const why = await pipInstall(config.home, 'pocket-tts', platform() === 'linux' ? ['--extra-index-url', 'https://download.pytorch.org/whl/cpu'] : [])
+  if (why) return log.warn(`Pocket TTS: not installed, ${why}`)
+  const python = findBinary(venvBin(config.home, 'python'))
+  log.info('Pocket TTS: downloading the Spanish model (a few hundred MB, once)')
+  await run(python, ['-c', "from pocket_tts import TTSModel; TTSModel.load_model(language='spanish_24l')"], { timeout: 1_800_000, maxBuffer: 16 * 1024 * 1024 })
+  log.info('Pocket TTS: installed. It is now the default voice (pocket:lola); TOURWRIGHT_VOICE changes it')
+}
+
 const installChromium = async config => {
   const cli = join(dirname(createRequire(import.meta.url).resolve('playwright/package.json')), 'cli.js')
   // As root on Linux, the system libraries Chromium needs come along
@@ -267,15 +279,16 @@ const installChromium = async config => {
 }
 
 /**
- * @param {{ voices?: string[], edge?: boolean, chromium?: boolean }} [options]
+ * @param {{ voices?: string[], edge?: boolean, chromium?: boolean, pocket?: boolean }} [options]
  */
-export const installAll = async ({ voices = DEFAULT_VOICES, edge = true, chromium = true } = {}, config = loadConfig()) => {
+export const installAll = async ({ voices = DEFAULT_VOICES, edge = true, chromium = true, pocket = false } = {}, config = loadConfig()) => {
   const key = `${platform()}-${arch()}`
   log.info(`installing into ${config.home} (${key})`)
   await installFfmpeg(config, key)
   await installPiper(config, key)
   for (const v of voices) log.info(`voice: ${await installVoice(v, config)}`)
   if (edge) await installEdge(config)
+  if (pocket) await installPocket(config)
   if (chromium) await installChromium(config)
   if (platform() === 'linux' && !config.xvfb) log.info('Optional, for the sharpest capture: install Xvfb (apt install xvfb)')
 }

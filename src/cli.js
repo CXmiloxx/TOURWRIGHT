@@ -1,6 +1,6 @@
 // tourwright <command> — see `tourwright help`.
 import { existsSync, writeFileSync } from 'node:fs'
-import { basename, dirname, resolve } from 'node:path'
+import { basename, dirname, join, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 import { loadConfig, reloadConfig } from './config.js'
 import { DEFAULT_VOICES, installAll, installVoice } from './install.js'
@@ -11,7 +11,7 @@ import { loadFile, missingSecretsMessage, secretsIn } from './script/load.js'
 import { jsonSchema } from './script/schema.js'
 import { clearSecrets, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret } from './secrets.js'
 import { log, openPath, UserError } from './util.js'
-import { listVoices, narrate } from './voice/index.js'
+import { listVoices, narrate, recordSamples, SAMPLES_DIR } from './voice/index.js'
 
 const HELP = `tourwright — scripts into narrated videos
 
@@ -42,7 +42,9 @@ Usage:
       --fresh                                 log in again instead of reusing the saved session
       --json                                  the report as JSON on stdout
   tourwright validate <script> [--var n=v]    check a script without running it (and its secrets)
-  tourwright voices [--json]                  voices and engines available on this server
+  tourwright voices [--json] [--open]         voices and engines here; --open opens a sample of each voice
+  tourwright voices --samples [names] [--text "…"] [--out dir]
+                                              record a sample of each voice (default: ./videos/voces/)
   tourwright say "<text>" [--voice v] [--out file.wav]
                                               say one text ([[1s]] = exact pause; voice?rate=+10%&pitch=+2st)
   tourwright install [options]                ffmpeg, Piper, voices, edge-tts and Chromium into TOURWRIGHT_HOME
@@ -50,6 +52,8 @@ Usage:
       --voices a,b                            Piper voices (default: ${DEFAULT_VOICES.join(',')})
       --no-edge                               skip edge-tts (Microsoft voices, online)
       --no-chromium                           skip Chromium
+      --pocket                                Pocket TTS: open, natural voices (Spanish: pocket:lola), CPU only;
+                                              about 1 GB with PyTorch. Becomes the default voice
   tourwright install-voice <piper-voice>      download a Piper voice (es_MX-claude-high, en_US-lessac-medium…)
   tourwright doctor                           check ffmpeg, Xvfb, Chromium and TTS engines
   tourwright init [file]                      write an example script
@@ -144,11 +148,14 @@ export const main = async argv => {
       voices: { type: 'string' },
       'no-edge': { type: 'boolean' },
       'no-chromium': { type: 'boolean' },
+      pocket: { type: 'boolean' },
       open: { type: 'boolean' },
       fresh: { type: 'boolean' },
       draft: { type: 'string' },
       pages: { type: 'string' },
       export: { type: 'string' },
+      samples: { type: 'boolean' },
+      text: { type: 'string' },
     },
   })
   if (values.help) return void process.stdout.write(HELP)
@@ -247,12 +254,30 @@ export const main = async argv => {
       return
     }
     case 'voices': {
+      if (values.samples) {
+        const out = resolve(values.out ?? join('videos', 'voces'))
+        log.info(`recording a sample of each voice in ${out}…`)
+        const made = await recordSamples(config, { out, text: values.text, only: positionals })
+        for (const s of made) process.stdout.write(s.file ? `✔ ${s.language}/${basename(s.file)}\n` : `✘ ${s.language}/${s.name}: ${s.error}\n`)
+        process.stdout.write(`\nListen to them in ${out} and put the one you like in the script: voice: <name>\n`)
+        if (values.open) await openPath(out).catch(() => {})
+        return
+      }
       const v = await listVoices(config)
       if (values.json) return void process.stdout.write(`${JSON.stringify(v, null, 2)}\n`)
       process.stdout.write(`default: ${v.default}\n\n`)
       for (const [e, s] of Object.entries(v.engines)) process.stdout.write(`${s.ok ? '✔' : '✘'} ${e.padEnd(8)} ${s.ok ? '' : s.reason}\n`)
       process.stdout.write('\n')
-      for (const voice of v.voices) process.stdout.write(`${voice.available ? '✔' : ' '} ${voice.name.padEnd(30)} ${voice.voice}\n`)
+      const NAMES = { es: 'Español', en: 'English', fr: 'Français', de: 'Deutsch', it: 'Italiano', pt: 'Português' }
+      for (const lang of [...new Set(v.voices.flatMap(x => x.languages))]) {
+        process.stdout.write(`\n${NAMES[lang] ?? lang}\n`)
+        for (const voice of v.voices.filter(x => x.languages.includes(lang))) {
+          const sample = voice.samples[lang] ? `♪ ${lang}/${basename(voice.samples[lang])}` : ''
+          process.stdout.write(`  ${voice.available ? '✔' : ' '} ${voice.name.padEnd(28)} ${voice.voice.padEnd(46)} ${sample}\n`)
+        }
+      }
+      process.stdout.write(`\nListen before choosing: a sample of each voice is in ${SAMPLES_DIR}\n(tourwright voices --open opens that folder; --samples records them again with your text)\n`)
+      if (values.open) await openPath(SAMPLES_DIR).catch(() => {})
       return
     }
     case 'say': {
@@ -267,7 +292,7 @@ export const main = async argv => {
     }
     case 'install': {
       const voices = values.voices === undefined ? DEFAULT_VOICES : values.voices.split(/[\s,]+/).filter(Boolean)
-      await installAll({ voices, edge: !values['no-edge'], chromium: !values['no-chromium'] }, config)
+      await installAll({ voices, edge: !values['no-edge'], chromium: !values['no-chromium'], pocket: values.pocket }, config)
       // A fresh look: what was just installed is found now
       const checks = await doctor(reloadConfig())
       for (const c of checks) process.stdout.write(`${c.ok ? '✔' : '✘'} ${c.name.padEnd(22)} ${c.detail}\n`)
