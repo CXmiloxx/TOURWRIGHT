@@ -94,6 +94,11 @@ const say = {
     end: site => `Eso es ${site}.`,
     subtitle: 'Recorrido',
     menu: 'En el {menú} están todas las secciones.',
+    login: {
+      user: ['Primero, escribe tu {usuario}.', '<b>Usuario</b>'],
+      password: ['Luego, tu {contraseña}.', '<b>Contraseña</b>'],
+      submit: n => [`Y presiona {${n}}.`, `<b>${n}</b>`],
+    },
     controls: {
       radiogroup: n => [`{${n}}: estas opciones cambian lo que se ve.`, `<b>${n}</b>`],
       tablist: n => ['Las {pestañas} separan cada parte.', `<b>${n}</b>`],
@@ -108,6 +113,11 @@ const say = {
     end: site => `That's ${site}.`,
     subtitle: 'A guided tour',
     menu: 'Every section is in the {menu}.',
+    login: {
+      user: ['First, type your {user name}.', '<b>User</b>'],
+      password: ['Then your {password}.', '<b>Password</b>'],
+      submit: n => [`And press {${n}}.`, `<b>${n}</b>`],
+    },
     controls: {
       radiogroup: n => [`{${n}}: these options change what you see.`, `<b>${n}</b>`],
       tablist: n => ['The {tabs} split each part.', `<b>${n}</b>`],
@@ -132,10 +142,11 @@ export const keyControls = (page, max = 2) =>
 const flow = value => YAML.stringify(value, { collectionStyle: 'flow', lineWidth: 0 }).trim()
 
 /**
- * A first script: the header (login, blur, dismiss…) and one narrated stop per section.
- * @param {{ header: Record<string, any>, start: string, home: ReturnType<typeof describe>, pages: { name: string, path: string, page: ReturnType<typeof describe> }[], site: string, menu?: string }} draft
+ * A first script: the header (login, blur, dismiss…) and one narrated stop per section. With `login`, the login
+ * is shown on camera, field by field, instead of done off camera in `setup`.
+ * @param {{ header: Record<string, any>, start: string, home: ReturnType<typeof describe>, pages: { name: string, path: string, page: ReturnType<typeof describe> }[], site: string, menu?: string, login?: { path: string, user: any, password: any, submit: any, names: string[] } }} draft
  */
-export const draftScript = ({ header, start, home, pages, site, menu }) => {
+export const draftScript = ({ header, start, home, pages, site, menu, login }) => {
   const words = say[header.language === 'en' ? 'en' : 'es']
   // Each section points at its key controls, like a product tour: a bubble, a numbered badge, a gentle zoom
   const focuses = (page, badge) =>
@@ -146,15 +157,34 @@ export const draftScript = ({ header, start, home, pages, site, menu }) => {
   const step = (action, value) => `  - ${action}: ${flow(value)}`
   const others = page => page.targets.filter(t => CONTROLS.includes(t.role)).slice(0, 8)
     .map(t => `  #   ${flow(t)}`)
+  // On camera the video starts logged out: no saved session, no login off camera
+  const { session, sessionCheck, setup, ...loggedOut } = header
+  const head = login ? loggedOut : header
   const lines = [
     '# Draft written by `tourwright explore`: every section, with what each page says about itself.',
     '# Rewrite the narration in your own words, then point at what matters with focus, using the targets',
     '# listed under each section. Check it fast with: tourwright render <this file> --dry-run',
-    YAML.stringify(header, { lineWidth: 0 }).trim(),
+    YAML.stringify(head, { lineWidth: 0 }).trim(),
     'steps:',
-    step('goto', start),
-    step('title', { text: header.title ?? site, subtitle: words.subtitle, say: words.intro(site) }),
+    step('goto', login ? login.path : start),
+    step('title', { text: head.title ?? site, subtitle: words.subtitle, say: words.intro(site) }),
   ]
+  if (login) {
+    const [user, password] = login.names.map(n => `\${secret:${n}}`)
+    const [submitLine, submitBubble] = words.login.submit(login.submit.name ?? 'Enter')
+    lines.push(
+      '  # The login, on camera. The password shows as dots and a secret typed anywhere else is blurred.',
+      `  # To show a demo user instead, write it in place of "${user}".`,
+    )
+    if (login.user) lines.push(step('focus', { target: login.user, say: words.login.user[0], text: words.login.user[1] }), step('type', { target: login.user, text: user }))
+    lines.push(
+      step('focus', { target: login.password, say: words.login.password[0], text: words.login.password[1] }),
+      step('type', { target: login.password, text: password }),
+      step('focus', { target: login.submit, say: submitLine, text: submitBubble, click: true }),
+      step('wait', { target: login.password, state: 'hidden' }),
+      step('goto', start),
+    )
+  }
   if (menu) lines.push(step('focus', { target: { role: 'navigation', name: menu }, say: words.menu, text: `<b>${menu}</b>` }))
   if (home.description) lines.push(step('say', home.heading ? `${home.heading}. ${home.description}` : home.description))
   if (others(home).length) lines.push('  # Targets on this page:', ...others(home))
@@ -207,10 +237,12 @@ const askCredentials = async (config, names) => {
 
 /**
  * @param {string} input   a URL, or a script file
- * @param {{ pages?: string[], draft?: string, fresh?: boolean, max?: number }} [options]
+ * @param {{ pages?: string[], draft?: string, fresh?: boolean, max?: number, login?: 'setup' | 'camera' }} [options]
+ *   login: where the draft logs in, off camera in `setup` (default) or on camera, field by field
  */
-export const explore = async (input, { pages: only, draft, fresh = false, max = 20 } = {}, config = loadConfig()) => {
+export const explore = async (input, { pages: only, draft, fresh = false, max = 20, login: loginOn = 'setup' } = {}, config = loadConfig()) => {
   if (draft && existsSync(draft)) throw new UserError(`${draft} already exists: pick another name for the draft`)
+  if (!['setup', 'camera'].includes(loginOn)) throw new UserError(`--login ${loginOn}: use setup (off camera) or camera`)
   const isUrl = /^https?:\/\//i.test(input)
   let loaded
   if (isUrl) {
@@ -236,6 +268,7 @@ export const explore = async (input, { pages: only, draft, fresh = false, max = 
     const network = { uploads: new Map() }
     let start = firstGoto
     let complete = true
+    let onCamera
 
     // A bare URL on a login page: the setup that logs in is written from the form itself
     if (isUrl) {
@@ -260,10 +293,12 @@ export const explore = async (input, { pages: only, draft, fresh = false, max = 
           ],
         })
         start = '/'
+        if (loginOn === 'camera') onCamera = { path: loginPath, ...login, names }
         complete = await askCredentials(config, names)
         if (!complete) log.warn(`a login is needed. Save the credentials, then explore again:\n    tourwright secret set ${names[0]}\n    tourwright secret set ${names[1]}`)
       }
     }
+    if (loginOn === 'camera' && !onCamera) log.warn('--login camera: no login form found on that URL, the draft logs in as the script does')
 
     const script = interpolate({ ...loaded.script, ...header, steps: loaded.script.steps }, { config })
     const sessionFile = script.session ? sessionPath(config, script.session) : null
@@ -326,7 +361,7 @@ export const explore = async (input, { pages: only, draft, fresh = false, max = 
 
     const report = { site: host, start, home: { ...homeInfo, shot: home.shot }, pages, screenshots: outDir, loggedIn: Boolean(state), needsLogin: !complete }
     if (draft) {
-      const text = draftScript({ header: { title: header.title, language: header.language, voice: header.voice, quality: header.quality ?? 'hd', ...header }, start, home: homeInfo, pages, site: header.title ?? host, menu: bodyItems.find(i => i.role === 'navigation' && i.name)?.name })
+      const text = draftScript({ header: { title: header.title, language: header.language, voice: header.voice, quality: header.quality ?? 'hd', ...header }, start, home: homeInfo, pages, site: header.title ?? host, menu: bodyItems.find(i => i.role === 'navigation' && i.name)?.name, login: onCamera })
       fromData(YAML.parse(text), { name: 'draft' })
       writeFileSync(draft, text)
       report.draft = resolve(draft)

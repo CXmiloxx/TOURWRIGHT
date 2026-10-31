@@ -6,8 +6,8 @@ import { pathToFileURL } from 'node:url'
 import { chromium } from 'playwright'
 import { compose, QUALITIES } from '../compose.js'
 import { loadConfig } from '../config.js'
-import { interpolate, secretsIn } from '../script/load.js'
-import { hash, log, plainText, UserError } from '../util.js'
+import { interpolate, secretsShown } from '../script/load.js'
+import { hash, holdsSecret, log, plainText, UserError } from '../util.js'
 import { builtInSound, typingSound } from '../voice/effects.js'
 import { durationOf, markedLine, narrate, parseVoice, stripMarks, withProsody } from '../voice/index.js'
 import { CHROME_MAX, openDisplay, pickCapture, recordScreen, recordScreencast } from './capture.js'
@@ -15,7 +15,7 @@ import { centerOf, createCursor } from './cursor.js'
 import { createGuard, setupNetwork } from './network.js'
 import { OVERLAY } from './overlay.js'
 import { needsPrep, prepare, saveSession, sessionPath } from './session.js'
-import { dismissing, locate, runSteps } from './steps.js'
+import { dismissing, hideTyped, locate, runSteps } from './steps.js'
 import { resolveTheme, safePath, themeCss } from './theme.js'
 import { callout, camera, focusOff, focusOn, frame, hideTitle, setCaption, showTitle, spotlight } from './visuals.js'
 
@@ -59,7 +59,8 @@ export const launch = async ({ headless, display, width, height, locale }, confi
  */
 export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   const { name, dir, sandboxed } = loaded
-  if (secretsIn(loaded.script.steps).length) log.warn('a secret is used on camera (in `steps`): it can be seen in the video. Use it in `setup`, or blur the field')
+  const shown = secretsShown(loaded.script.steps)
+  if (shown.length) log.warn(`${shown.join(', ')}: a secret outside \`type\`/\`fill\` in \`steps\` (a narration, a caption…) can be seen or heard in the video`)
   const script = interpolate(loaded.script, { allowed: !sandboxed || config.api.allowSecrets, config })
   const progress = opts.onProgress ?? (() => {})
   const quality = QUALITIES[opts.quality ?? script.quality ?? 'hd']
@@ -283,6 +284,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       },
       type: async (locator, text, delay = 70) => {
         locator = locator.first()
+        if (holdsSecret(text)) await hideTyped(locator)
         await v.click(locator)
         if (audio.typing && !dryRun && text) effect(await offClock(() => typingSound(text.length, delay, config)), 0.8)
         await locator.pressSequentially(text, { delay: dryRun ? 0 : delay })

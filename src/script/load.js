@@ -93,6 +93,16 @@ export const secretsIn = value => {
   return [...names]
 }
 
+// The secrets someone watching could see or hear: what `type` and `fill` write is kept off the screen as it
+// is typed (password dots, or the field blurred), anything else in the steps (a narration, a caption) is not
+const untyped = value => {
+  if (Array.isArray(value)) return value.map(untyped)
+  if (!value || typeof value !== 'object') return value
+  return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, (k === 'type' || k === 'fill') && v && typeof v === 'object' ? { ...v, text: '' } : untyped(v)]))
+}
+/** @param {unknown} steps @returns {string[]} */
+export const secretsShown = steps => secretsIn(untyped(steps))
+
 // Every missing secret at once, with the command that saves it: not one error per render attempt
 export const missingSecretsMessage = missing =>
   `missing secret${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}\n` +

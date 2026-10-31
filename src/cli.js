@@ -7,7 +7,7 @@ import { DEFAULT_VOICES, installAll, installVoice } from './install.js'
 import { loadPlugins } from './plugins.js'
 import { render } from './render/index.js'
 import { clearSessions, deleteSession, listSessions } from './render/session.js'
-import { loadFile, missingSecretsMessage, secretsIn } from './script/load.js'
+import { loadFile, missingSecretsMessage, secretsIn, secretsShown } from './script/load.js'
 import { jsonSchema } from './script/schema.js'
 import { clearSecrets, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret } from './secrets.js'
 import { findBinary, log, openPath, UserError } from './util.js'
@@ -39,6 +39,7 @@ Usage:
   tourwright explore <url|script> [options]   the sections of a site and the targets to write a script
       --draft <file.yaml>                     write a first script that goes through every section
       --pages /a,/b                           these pages instead of the site's navigation
+      --login setup|camera                    the draft logs in off camera (setup, default) or on camera
       --fresh                                 log in again instead of reusing the saved session
       --json                                  the report as JSON on stdout
   tourwright validate <script> [--var n=v]    check a script without running it (and its secrets)
@@ -165,6 +166,7 @@ export const main = async argv => {
       open: { type: 'boolean' },
       fresh: { type: 'boolean' },
       draft: { type: 'string' },
+      login: { type: 'string' },
       pages: { type: 'string' },
       export: { type: 'string' },
       samples: { type: 'boolean' },
@@ -213,7 +215,7 @@ export const main = async argv => {
     case 'explore': {
       if (!positionals[0]) throw new UserError('usage: tourwright explore <url|script> [--draft file.yaml]')
       const { explore, printReport } = await import('./explore.js')
-      const report = await explore(positionals[0], { draft: values.draft, fresh: values.fresh, pages: values.pages?.split(',').map(p => p.trim()).filter(Boolean) }, config)
+      const report = await explore(positionals[0], { draft: values.draft, fresh: values.fresh, login: /** @type {any} */ (values.login), pages: values.pages?.split(',').map(p => p.trim()).filter(Boolean) }, config)
       if (values.json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
       else printReport(report)
       return
@@ -225,7 +227,8 @@ export const main = async argv => {
       // Secrets are checked here too: a missing one is found before a render, not during it
       const missing = secretsIn(loaded.script).filter(n => getSecret(config, n) === undefined)
       if (missing.length) log.warn(missingSecretsMessage(missing))
-      if (loaded.kind === 'browser' && secretsIn(loaded.script.steps).length) log.warn('a secret is used on camera (in `steps`): use it in `setup`, or blur the field')
+      const shown = loaded.kind === 'browser' ? secretsShown(loaded.script.steps) : []
+      if (shown.length) log.warn(`${shown.join(', ')}: a secret outside \`type\`/\`fill\` in \`steps\` (a narration, a caption…) can be seen or heard in the video`)
       if (missing.length) process.exitCode = 2
       return
     }
