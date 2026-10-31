@@ -1,6 +1,6 @@
 // tourwright <command> — see `tourwright help`.
 import { existsSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { basename, dirname, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 import { loadConfig, reloadConfig } from './config.js'
 import { DEFAULT_VOICES, installAll, installVoice } from './install.js'
@@ -10,14 +10,24 @@ import { clearSessions, deleteSession, listSessions } from './render/session.js'
 import { loadFile, missingSecretsMessage, secretsIn } from './script/load.js'
 import { jsonSchema } from './script/schema.js'
 import { clearSecrets, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret } from './secrets.js'
-import { log, UserError } from './util.js'
+import { log, openPath, UserError } from './util.js'
 import { listVoices, narrate } from './voice/index.js'
 
 const HELP = `tourwright — scripts into narrated videos
 
+From a site to a video:
+  tourwright explore https://app.example.com/login --draft app.yaml
+                                              finds the login (asks for the credentials, never shows them),
+                                              the sections and their targets, and writes a first script
+  tourwright render app.yaml --dry-run        runs every step in seconds: checks the targets
+  tourwright render app.yaml --open           records it with narration; opens the video when done
+
 Usage:
   tourwright render <script> [options]        render a video (.yaml, .json, .js)
-      --out <file.mp4|dir>                    where to write it (default: ./videos/<script>.mp4)
+      --out <file.mp4|dir>                    where to write it (default: ./videos/<script>/<script>.mp4)
+      --export video,audio,silent             what to deliver: the narrated video (default), only the sound
+                                              (.mp3), the video without sound; subtitles and poster always come
+      --open                                  open the video (or its folder) when it is ready
       --voice <voice>                         engine:id or alias (see \`tourwright voices\`); "none" = silent
       --quality sd|hd|fullhd|vertical|square
       --capture auto|screen|screencast|playwright
@@ -134,9 +144,11 @@ export const main = async argv => {
       voices: { type: 'string' },
       'no-edge': { type: 'boolean' },
       'no-chromium': { type: 'boolean' },
+      open: { type: 'boolean' },
       fresh: { type: 'boolean' },
       draft: { type: 'string' },
       pages: { type: 'string' },
+      export: { type: 'string' },
     },
   })
   if (values.help) return void process.stdout.write(HELP)
@@ -162,11 +174,20 @@ export const main = async argv => {
         width: values.width ? Number(values.width) : undefined,
         height: values.height ? Number(values.height) : undefined,
         fresh: values.fresh,
+        export: values.export?.split(',').map(e => e.trim()).filter(Boolean),
         onProgress: p => log.info(`${p.stage}…`),
       }, config)
       if (values.json) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
       else if (result.dryRun) log.info(`dry run: script ran to the end in ${result.seconds} s`)
-      else log.info(`video: ${result.paths.video} · ${Math.round(result.duration)} s · ${result.chapters.length} chapters · ${result.captions.length} captions`)
+      else {
+        const { video, audio, silent, thumbnail, srt, vtt, manifest } = result.paths
+        const row = (label, file) => (file ? `  ${label.padEnd(11)}${file}\n` : '')
+        process.stderr.write(`\n  ${Math.round(result.duration)} s · ${result.chapters.length} chapters · ${result.captions.length} captions\n` +
+          row('video', video && basename(video)) + row('audio', audio && basename(audio)) + row('silent', silent && basename(silent)) +
+          row('subtitles', srt && [srt, vtt].filter(Boolean).map(f => basename(f)).join(', ')) + row('poster', thumbnail && basename(thumbnail)) +
+          `  folder     ${dirname(manifest)}\n\n`)
+      }
+      if (values.open && !result.dryRun) await openPath(result.paths.video ?? dirname(result.paths.manifest)).catch(e => log.warn(`could not open it: ${e.message}`))
       return
     }
     case 'explore': {

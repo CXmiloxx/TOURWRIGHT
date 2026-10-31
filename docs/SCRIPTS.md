@@ -21,7 +21,7 @@ You don't have to find selectors by hand. Point Tourwright at the site and it wr
 ```bash
 tourwright explore https://app.example.com/login --draft app.yaml
 tourwright render app.yaml --dry-run    # every step in seconds: checks the targets
-tourwright render app.yaml              # the video, with narration
+tourwright render app.yaml --open       # the video, with narration; opens it when done
 ```
 
 `explore` opens the page. If it is a login, it finds the form, asks for the user and the password (they are
@@ -404,6 +404,39 @@ leyenda, clic, escribir, resaltar, acercar, ocultar, bajarHasta, fueraDeCamara, 
 
 A server may load plugins that add actions (and voices). They appear in `tourwright schema` and in the errors of
 `tourwright validate` like any other action. Writing one: [PLUGINS.md](PLUGINS.md).
+
+## Where the files go, and what you get
+
+Each video gets its own folder: `videos/<name>/`, named after the script.
+
+```text
+videos/
+  consultar/
+    consultar.yaml        the script (the draft from explore goes wherever you say)
+    consultar.mp4         the narrated video
+    consultar.srt  .vtt   subtitles (also inside the .mp4, as a track)
+    consultar.jpg         poster
+    consultar.json        manifest: duration, chapters, captions, files
+    explore/              screenshots from tourwright explore
+  voces/                  voice samples you recorded (tourwright voices --samples)
+```
+
+`--out` puts it somewhere else (a folder, or a file ending in .mp4). What is delivered is chosen with `export`, in
+the script or on the command line:
+
+```bash
+tourwright render app.yaml                          # the narrated video (default)
+tourwright render app.yaml --export audio           # only the sound: consultar.mp3 (narration, music, effects)
+tourwright render app.yaml --export silent          # the video without sound: consultar-silent.mp4
+tourwright render app.yaml --export video,audio,silent
+```
+
+```yaml
+export: [video, audio]
+```
+
+Subtitles, poster and manifest always come. `--quality` picks the size: `sd`, `hd` (default), `fullhd`,
+`vertical` (1080×1920, for phones and reels) or `square`.
 
 ## Testing a script
 

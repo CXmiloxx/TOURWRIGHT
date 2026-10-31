@@ -107,6 +107,18 @@ cualquier sistema.
 
 ## Usar
 
+De un sitio a un video, sin buscar selectores a mano:
+
+```bash
+tourwright explore https://app.ejemplo.com/login --draft app.yaml   # pide el login y escribe el guion
+tourwright render app.yaml --dry-run                               # prueba cada paso en segundos
+tourwright render app.yaml --open                                  # el video, en ./videos/app/
+```
+
+El borrador recorre cada sección del sitio con una narración tomada de sus páginas; ajústala con tus palabras.
+Las credenciales se piden una vez, no se muestran y nunca quedan en el guion (`tourwright secret list`;
+`tourwright forget` las borra).
+
 ```bash
 tourwright init video.yaml              # un guion de ejemplo
 tourwright validate video.yaml

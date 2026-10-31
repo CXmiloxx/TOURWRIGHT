@@ -341,6 +341,6 @@ export const printReport = (r, write = s => process.stdout.write(s)) => {
   block(r.home.heading ?? r.site, r.start, r.home, r.home.shot)
   for (const p of r.pages) block(p.name, p.path, p.page, p.shot)
   write(`\n${r.pages.length} sections · screenshots in ${r.screenshots}\n`)
-  if (r.draft) write(`draft: ${r.draft}\n  try it:  tourwright render "${r.draft}" --dry-run\n  then:    tourwright render "${r.draft}"\n`)
+  if (r.draft) write(`draft: ${r.draft}\n  try it:  tourwright render "${r.draft}" --dry-run\n  then:    tourwright render "${r.draft}" --open\n`)
 }
 
