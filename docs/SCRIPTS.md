@@ -374,10 +374,10 @@ a bit flatter), `gonzalo`, `salome` (Spanish, Colombia), `jorge`, `dalia` (Mexic
 `andrew`, `ava`, `emma`, `brian` (multilingual), `claude`, `davefx`, `lessac` (Piper), plus the server's
 aliases and plugins. `tourwright voices` lists what this server can use.
 
-**Listen before choosing.** A sample of every voice comes with Tourwright in `docs/voices/` (the same text: tech
-words, numbers, a question), so you can choose before installing anything: `tourwright voices --open` opens that
-folder. `tourwright voices --samples` records them again with the voices of your machine, and `--text "…"` with
-your own words. Then write the name in the script: `voice: lola`.
+**Listen before choosing.** A sample of every voice is in [`docs/voices/`](voices/) (the same text: tech words,
+numbers, a question), so you can choose before installing anything: `tourwright voices --open` opens them.
+`tourwright voices --samples` records them on your machine, and `--text "…"` with your own words. Then write
+the name in the script: `voice: lola`.
 
 **How they were tuned.** Every built-in voice read sentences full of what narrations hold (API, JSON, PDF,
 `25.800`, `95 %`, `$ 409.360`, an email, Ctrl K…) and a speech-to-text model wrote down what it heard. Each term
