@@ -90,7 +90,7 @@ Each step is an object with **exactly one** action.
 | Action | Value | What it does |
 |---|---|---|
 | `goto` | path or URL | Opens a page (paths resolve against `baseUrl`; in a local script `baseUrl` may be a folder next to it, like `./site/`) |
-| `title` | text, or `{ text, subtitle?, ms?, say? }` | Full-screen title card (3.5 s by default). Starts a chapter |
+| `title` | text, or `{ text, subtitle?, kicker?, animation?, background?, ms?, say? }` | Full-screen title card, animated (3.5 s by default). Starts a chapter. See [Title cards](#title-cards) |
 | `say` | text, `{ caption?, speak?, ms? }` or `null` | Caption at the bottom, **narrated aloud**. `speak` is said instead of the caption when it must explain more. `null` clears it |
 | `caption` | text or `null` | Caption without narration |
 | `click` | target | Moves the cursor smoothly to the element and clicks |
@@ -317,6 +317,41 @@ slides:
 ```
 
 `voices`, `pronounce`, `audio`, `music` and `vars` work in slides too.
+
+### Title cards
+
+A title card comes in with an animation and has something behind it. The same options work on a `title` step
+and on a slide with `title`; the theme sets the defaults for the whole video.
+
+```yaml
+  - title:
+      text: Your first invoice
+      subtitle: Step by step, in two minutes
+      kicker: Tutorial · 2 min     # a small label above the title
+      animation: rise              # how it comes in
+      background: aurora           # what is behind it
+```
+
+| `animation` | How the title comes in |
+|---|---|
+| `rise` (default) | The logo pops in, the words come up one by one, the accent line draws itself, the subtitle follows |
+| `type` | Letter by letter, with a caret that follows the text and blinks at the end |
+| `zoom` | Everything comes into focus, from big and blurred |
+| `split` | Aligned to the left: the title comes from the left and the subtitle from the right |
+| `fade` | The card simply fades in |
+
+| `background` | Behind the title |
+|---|---|
+| `gradient` (default) | The theme's `gradient` |
+| `aurora` | Soft lights in the accent color that drift slowly |
+| `grid` | A grid in the accent color that moves slowly, fading at the edges |
+| `page` | The page itself, blurred and darkened (walkthroughs; slides use the gradient) |
+
+```yaml
+theme: { accent: "#22C55E", titleAnimation: split, titleBackground: grid }
+```
+
+Cards leave with a short blur. In slides the animation is drawn frame by frame, so it is smooth on any machine.
 
 Each slide stays on screen while its narration lasts (plus a short margin), or `duration` seconds if longer.
 Slides with `title` and no image start a chapter; `chapter` names one explicitly.

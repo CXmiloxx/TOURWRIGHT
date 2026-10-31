@@ -50,10 +50,21 @@ const condition = {
   timeout: ms.optional().describe('Wait up to this long for the condition (default: check once)'),
 }
 
+// How a title card looks and comes in (walkthroughs and slides); theme.js draws them
+export const TITLE_ANIMATIONS = /** @type {const} */ (['rise', 'type', 'zoom', 'split', 'fade'])
+export const TITLE_BACKGROUNDS = /** @type {const} */ (['gradient', 'aurora', 'grid', 'page'])
+const titleLook = {
+  kicker: z.string().max(60).optional().describe('Small label above the title, like "Tutorial · 2 min"'),
+  animation: z.enum(TITLE_ANIMATIONS).optional()
+    .describe('How the title comes in: rise (word by word, default), type (letter by letter), zoom (into focus), split (from the sides), fade'),
+  background: z.enum(TITLE_BACKGROUNDS).optional()
+    .describe('Behind the title: gradient (default), aurora (drifting lights), grid (a moving grid), page (the page itself, blurred)'),
+}
+
 export const STEPS = {
   goto: z.string().min(1).describe('Open a URL or a path relative to baseUrl'),
-  title: z.union([z.string(), z.object({ text: z.string(), subtitle: z.string().optional(), ms: ms.optional(), say: z.string().optional(), ...prosody }).strict()])
-    .describe('Full-screen title card; also starts a chapter'),
+  title: z.union([z.string(), z.object({ text: z.string(), subtitle: z.string().optional(), ms: ms.optional(), say: z.string().optional(), ...titleLook, ...prosody }).strict()])
+    .describe('Full-screen title card, animated; also starts a chapter'),
   say: z.union([z.string(), z.null(), z.object({ caption: z.string().optional(), speak: z.string().optional(), ms: ms.optional(), ...prosody }).strict()])
     .describe('Caption at the bottom, narrated aloud. `speak` is said instead of the caption when it must explain more; voice, rate, pitch, volume and style change how. null clears it'),
   caption: z.union([z.string(), z.null()]).describe('Caption without narration; null clears it'),
@@ -136,6 +147,7 @@ const common = {
   theme: z.object({
     accent: z.string().optional(), background: z.string().optional(), text: z.string().optional(),
     gradient: z.string().optional(), font: z.string().optional(), logo: z.string().optional(),
+    titleAnimation: titleLook.animation, titleBackground: titleLook.background,
   }).strict().optional().describe('Colors, font and logo of title cards, captions and cursor'),
   voices: z.record(z.string().regex(/^[\w-]+$/), z.string().min(1).max(200)).optional()
     .describe('The cast: names for the voices of this script, { ana: salome, guide: "piper:es_MX-claude-high?rate=-5%" }'),
@@ -177,6 +189,7 @@ const browser = z.object({
 const slide = z.object({
   title: z.string().optional(),
   subtitle: z.string().optional(),
+  ...titleLook,
   image: z.string().optional().describe('Image path (relative to the script) or https URL'),
   html: z.string().optional().describe('Custom HTML for the slide'),
   caption: z.string().optional().describe('Text shown at the bottom'),

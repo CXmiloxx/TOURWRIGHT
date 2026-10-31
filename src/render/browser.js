@@ -16,7 +16,7 @@ import { createGuard, setupNetwork } from './network.js'
 import { OVERLAY } from './overlay.js'
 import { needsPrep, prepare, saveSession, sessionPath } from './session.js'
 import { dismissing, hideTyped, locate, runSteps } from './steps.js'
-import { resolveTheme, safePath, themeCss } from './theme.js'
+import { resolveTheme, safePath, themeCss, titleHtml } from './theme.js'
 import { callout, camera, focusOff, focusOn, frame, hideTitle, setCaption, showTitle, spotlight } from './visuals.js'
 
 // A local script may point baseUrl at a folder or file next to it ("./site/"): pages without a server.
@@ -219,9 +219,10 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         await page.reload({ waitUntil: 'domcontentloaded' })
         await settle()
       },
-      title: async (text, subtitle = '', ms = 3500, speak, prosody) => {
+      // look: { kicker, animation, background }; the theme's titleAnimation and titleBackground are the defaults
+      title: async (text, subtitle = '', ms = 3500, speak, prosody, look = {}) => {
         await waitVoice()
-        await showTitle(page, text, subtitle)
+        await showTitle(page, titleHtml({ text, subtitle, kicker: look.kicker, animation: look.animation ?? theme.titleAnimation, background: look.background ?? theme.titleBackground, logo: theme.logo }))
         await page.waitForTimeout(150)
         markStart()
         marks.push({ start: now(), title: text })

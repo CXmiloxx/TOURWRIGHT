@@ -70,6 +70,27 @@
             },
             "logo": {
               "type": "string"
+            },
+            "titleAnimation": {
+              "description": "How the title comes in: rise (word by word, default), type (letter by letter), zoom (into focus), split (from the sides), fade",
+              "type": "string",
+              "enum": [
+                "rise",
+                "type",
+                "zoom",
+                "split",
+                "fade"
+              ]
+            },
+            "titleBackground": {
+              "description": "Behind the title: gradient (default), aurora (drifting lights), grid (a moving grid), page (the page itself, blurred)",
+              "type": "string",
+              "enum": [
+                "gradient",
+                "aurora",
+                "grid",
+                "page"
+              ]
             }
           },
           "additionalProperties": false
@@ -218,6 +239,32 @@
               },
               "subtitle": {
                 "type": "string"
+              },
+              "kicker": {
+                "description": "Small label above the title, like \"Tutorial · 2 min\"",
+                "type": "string",
+                "maxLength": 60
+              },
+              "animation": {
+                "description": "How the title comes in: rise (word by word, default), type (letter by letter), zoom (into focus), split (from the sides), fade",
+                "type": "string",
+                "enum": [
+                  "rise",
+                  "type",
+                  "zoom",
+                  "split",
+                  "fade"
+                ]
+              },
+              "background": {
+                "description": "Behind the title: gradient (default), aurora (drifting lights), grid (a moving grid), page (the page itself, blurred)",
+                "type": "string",
+                "enum": [
+                  "gradient",
+                  "aurora",
+                  "grid",
+                  "page"
+                ]
               },
               "image": {
                 "description": "Image path (relative to the script) or https URL",
@@ -390,6 +437,27 @@
             },
             "logo": {
               "type": "string"
+            },
+            "titleAnimation": {
+              "description": "How the title comes in: rise (word by word, default), type (letter by letter), zoom (into focus), split (from the sides), fade",
+              "type": "string",
+              "enum": [
+                "rise",
+                "type",
+                "zoom",
+                "split",
+                "fade"
+              ]
+            },
+            "titleBackground": {
+              "description": "Behind the title: gradient (default), aurora (drifting lights), grid (a moving grid), page (the page itself, blurred)",
+              "type": "string",
+              "enum": [
+                "gradient",
+                "aurora",
+                "grid",
+                "page"
+              ]
             }
           },
           "additionalProperties": false
@@ -715,7 +783,7 @@
         },
         {
           "type": "object",
-          "description": "Full-screen title card; also starts a chapter",
+          "description": "Full-screen title card, animated; also starts a chapter",
           "properties": {
             "title": {
               "anyOf": [
@@ -738,6 +806,32 @@
                     },
                     "say": {
                       "type": "string"
+                    },
+                    "kicker": {
+                      "description": "Small label above the title, like \"Tutorial · 2 min\"",
+                      "type": "string",
+                      "maxLength": 60
+                    },
+                    "animation": {
+                      "description": "How the title comes in: rise (word by word, default), type (letter by letter), zoom (into focus), split (from the sides), fade",
+                      "type": "string",
+                      "enum": [
+                        "rise",
+                        "type",
+                        "zoom",
+                        "split",
+                        "fade"
+                      ]
+                    },
+                    "background": {
+                      "description": "Behind the title: gradient (default), aurora (drifting lights), grid (a moving grid), page (the page itself, blurred)",
+                      "type": "string",
+                      "enum": [
+                        "gradient",
+                        "aurora",
+                        "grid",
+                        "page"
+                      ]
                     },
                     "voice": {
                       "description": "Voice for this line: a name from `voices`, an alias or engine:id",
@@ -773,7 +867,7 @@
                   "additionalProperties": false
                 }
               ],
-              "description": "Full-screen title card; also starts a chapter"
+              "description": "Full-screen title card, animated; also starts a chapter"
             }
           },
           "required": [

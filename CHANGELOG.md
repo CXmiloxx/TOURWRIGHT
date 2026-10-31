@@ -18,6 +18,15 @@ All notable changes to this project are documented here. The format follows
   captcha, a code by SMS) and save it as the script's `session`. A render whose session is missing or
   expired, with no `setup` to log in again, stops and says to run it.
 
+### Title cards
+
+- Title cards are animated: `animation` (`rise` word by word, the default; `type` letter by letter with a
+  caret; `zoom` into focus; `split` from the sides; `fade`), a `background` (`gradient`, drifting `aurora`
+  lights, a moving `grid`, or the `page` itself blurred) and a `kicker` label above the title. They leave
+  with a short blur. The theme sets the defaults with `titleAnimation` and `titleBackground`.
+- In slides the animation is drawn frame by frame, so it is smooth whatever the machine.
+- Bigger, bolder titles.
+
 ### Fixed
 
 - `explore` on a site by IP (`http://127.0.0.1:…`) or with a host that starts with a digit named its secrets

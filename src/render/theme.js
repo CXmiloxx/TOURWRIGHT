@@ -2,7 +2,8 @@
 // walkthroughs (an overlay on top of the website) and slides (whole pages).
 import { existsSync, readFileSync } from 'node:fs'
 import { extname, resolve } from 'node:path'
-import { isInside } from '../util.js'
+import { TITLE_ANIMATIONS, TITLE_BACKGROUNDS } from '../script/schema.js'
+import { escapeHtml, isInside } from '../util.js'
 
 export const DEFAULT_THEME = {
   accent: '#F5A524',
@@ -12,6 +13,34 @@ export const DEFAULT_THEME = {
   gradient: 'radial-gradient(ellipse at 30% 20%, #1E3A5F 0%, #111827 50%, #0B1120 100%)',
   font: 'system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif',
   logo: null,
+  titleAnimation: 'rise',
+  titleBackground: 'gradient',
+}
+
+// A known name, else the first (the default): the class names come from these lists only
+/** @param {readonly string[]} list @param {string} value */
+const oneOf = (list, value) => (list.includes(value) ? value : list[0])
+
+/**
+ * The markup of a title card, the same in walkthroughs and slides. The CSS animates it (themeCss).
+ * @param {{ text: string, subtitle?: string, kicker?: string, animation?: string, background?: string, logo?: string | null }} t
+ */
+export const titleHtml = ({ text, subtitle, kicker, animation = 'rise', background = 'gradient', logo }) => {
+  const words = String(text ?? '').split(/(\s+)/).filter(Boolean)
+  let i = 0
+  let c = 0
+  // `rise` moves word by word; `type` shows letter by letter, with a caret
+  const h1 = animation === 'type'
+    ? `${[...String(text ?? '')].map(ch => `<span class="tw-c" style="--i:${c++}">${escapeHtml(ch)}</span>`).join('')}<span class="tw-caret"></span>`
+    : words.map(w => (/^\s+$/.test(w) ? ' ' : `<span class="tw-w" style="--i:${i++}">${escapeHtml(w)}</span>`)).join('')
+  const n = animation === 'type' ? Math.ceil(c * 0.6) : i
+  return `<div id="tw-title" class="tw-s-${oneOf(TITLE_ANIMATIONS, animation)} tw-bg-${oneOf(TITLE_BACKGROUNDS, background)}" style="--n:${n};--c:${c}">` +
+    '<div class="tw-bg"></div>' +
+    (logo ? `<img src="${escapeHtml(logo)}" alt="">` : '') +
+    (kicker ? `<div class="tw-kicker">${escapeHtml(kicker)}</div>` : '') +
+    `<h1>${h1}</h1>` +
+    (subtitle ? `<p>${escapeHtml(subtitle)}</p>` : '') +
+    '</div>'
 }
 
 const MIME = { '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif' }
@@ -59,7 +88,77 @@ export const themeCss = t => `
   #tw-caption b, #tw-caption strong { color: var(--tw-accent); }
   #tw-title { position: fixed; inset: 0; z-index: 2147483644; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 22px; color: var(--tw-text); text-align: center;
-    font-family: var(--tw-font); transition: opacity .5s; background: var(--tw-gradient); }
+    font-family: var(--tw-font); background: var(--tw-gradient); overflow: hidden; }
+  #tw-title > :not(.tw-bg) { position: relative; z-index: 1; }
+  #tw-title.tw-out { animation: tw-out .55s ease-in forwards; }
+  @keyframes tw-out { to { opacity: 0; transform: scale(1.04); filter: blur(10px); } }
+  #tw-title .tw-kicker { font: 700 min(1.3vw, 2vh)/1 var(--tw-font); letter-spacing: .24em; text-transform: uppercase;
+    color: var(--tw-accent); padding: .75em 1.3em; border-radius: 999px; background: color-mix(in srgb, var(--tw-accent) 12%, transparent);
+    border: 1.5px solid color-mix(in srgb, var(--tw-accent) 55%, transparent); }
+  #tw-title h1 .tw-w { display: inline-block; }
+
+  /* Backgrounds: a still gradient, soft lights that drift, a moving grid, or the page itself, blurred */
+  #tw-title .tw-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+  #tw-title.tw-bg-aurora { background: var(--tw-bg); }
+  #tw-title.tw-bg-aurora .tw-bg::before, #tw-title.tw-bg-aurora .tw-bg::after { content: ''; position: absolute; width: 75vmax; height: 75vmax;
+    border-radius: 50%; filter: blur(70px); opacity: .55; }
+  #tw-title.tw-bg-aurora .tw-bg::before { top: -38vmax; left: -22vmax; background: radial-gradient(circle, var(--tw-accent), transparent 62%);
+    animation: tw-drift-a 9s ease-in-out infinite alternate; }
+  #tw-title.tw-bg-aurora .tw-bg::after { bottom: -42vmax; right: -24vmax; background: radial-gradient(circle, color-mix(in srgb, var(--tw-accent) 25%, #6366F1), transparent 62%);
+    animation: tw-drift-b 11s ease-in-out infinite alternate; }
+  @keyframes tw-drift-a { to { transform: translate(18vw, 14vh) scale(1.15); } }
+  @keyframes tw-drift-b { to { transform: translate(-16vw, -12vh) scale(.9); } }
+  #tw-title.tw-bg-grid .tw-bg { background-image: linear-gradient(color-mix(in srgb, var(--tw-accent) 16%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--tw-accent) 16%, transparent) 1px, transparent 1px);
+    background-size: 64px 64px; mask-image: radial-gradient(ellipse at center, #000 10%, transparent 70%);
+    animation: tw-grid 6s linear infinite; }
+  @keyframes tw-grid { to { background-position: 64px 64px, 64px 64px; } }
+  #tw-title.tw-bg-page { background: linear-gradient(160deg, color-mix(in srgb, var(--tw-bg) 80%, transparent), color-mix(in srgb, var(--tw-bg) 62%, transparent));
+    backdrop-filter: blur(18px) saturate(1.2); }
+
+  /* rise: the logo pops, the words come up one by one, the line draws itself, the subtitle follows */
+  .tw-s-rise img { animation: tw-pop .7s cubic-bezier(.2, .9, .3, 1.3) both; }
+  .tw-s-rise .tw-kicker { animation: tw-down .6s .1s ease-out both; }
+  .tw-s-rise h1 .tw-w { animation: tw-rise .75s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(.25s + var(--i) * .08s); }
+  .tw-s-rise h1::after { animation: tw-draw .8s cubic-bezier(.6, 0, .2, 1) both; animation-delay: calc(.45s + var(--n) * .08s); }
+  .tw-s-rise p { animation: tw-up-in .7s ease-out both; animation-delay: calc(.6s + var(--n) * .08s); }
+  @keyframes tw-pop { from { opacity: 0; transform: scale(.6); } }
+  @keyframes tw-down { from { opacity: 0; transform: translateY(-14px); } }
+  @keyframes tw-rise { from { opacity: 0; transform: translateY(.7em) rotate(3deg); filter: blur(6px); } }
+  @keyframes tw-draw { from { width: 0; } }
+  @keyframes tw-up-in { from { opacity: 0; transform: translateY(16px); } }
+
+  /* type: letter by letter, with a blinking caret */
+  .tw-s-type img, .tw-s-type .tw-kicker { animation: tw-up-in .5s ease-out both; }
+  .tw-s-type h1 .tw-c { position: relative; opacity: 0; animation: tw-show .01s both; animation-delay: calc(.35s + var(--i) * .05s); white-space: pre; }
+  /* The caret follows the last letter typed, then blinks after the last one */
+  .tw-s-type h1 .tw-c::before { content: ''; position: absolute; right: -.08em; top: .12em; width: .07em; height: .95em; background: var(--tw-accent);
+    opacity: 0; animation: tw-on .05s linear; animation-delay: calc(.35s + var(--i) * .05s); }
+  .tw-s-type h1 .tw-caret { display: inline-block; width: .07em; height: .95em; margin-left: .06em; vertical-align: -.08em; opacity: 0;
+    background: var(--tw-accent); animation: tw-blink 1s steps(1) infinite; animation-delay: calc(.35s + var(--c) * .05s); }
+  @keyframes tw-on { from, to { opacity: 1; } }
+  .tw-s-type h1::after { animation: tw-draw .6s ease-out both; animation-delay: calc(.4s + var(--n) * .08s); }
+  .tw-s-type p { animation: tw-up-in .6s ease-out both; animation-delay: calc(.5s + var(--n) * .08s); }
+  @keyframes tw-show { to { opacity: 1; } }
+  @keyframes tw-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+  /* zoom: everything comes into focus, from big and blurred */
+  .tw-s-zoom > :not(.tw-bg) { animation: tw-focus-in 1.1s cubic-bezier(.2, .8, .2, 1) both; }
+  .tw-s-zoom h1 { animation-delay: .1s; } .tw-s-zoom p { animation-delay: .35s; }
+  @keyframes tw-focus-in { from { opacity: 0; transform: scale(1.3); filter: blur(16px); } }
+
+  /* split: aligned to the left, the title from the left and the subtitle from the right */
+  #tw-title.tw-s-split { align-items: flex-start; text-align: left; padding: 0 10vw; box-sizing: border-box; }
+  .tw-s-split h1::after { margin: 22px 0 0 !important; animation: tw-draw .8s .5s cubic-bezier(.6, 0, .2, 1) both; }
+  .tw-s-split img, .tw-s-split .tw-kicker { animation: tw-down .6s ease-out both; }
+  .tw-s-split h1 { animation: tw-from-left .8s .15s cubic-bezier(.2, .8, .2, 1) both; }
+  .tw-s-split p { animation: tw-from-right .8s .45s cubic-bezier(.2, .8, .2, 1) both; }
+  @keyframes tw-from-left { from { opacity: 0; transform: translateX(-8vw); } }
+  @keyframes tw-from-right { from { opacity: 0; transform: translateX(6vw); } }
+
+  /* fade: the card simply appears */
+  .tw-s-fade { animation: tw-show-card .6s ease-out both; }
+  @keyframes tw-show-card { from { opacity: 0; } }
   /* The page's own styles for h1, p, b… must not reach Tourwright's layers (Wikipedia makes h1 dark and serif) */
   #tw-title h1, #tw-title p { font-family: var(--tw-font) !important; border: 0 !important; background: none !important;
     padding: 0 !important; text-shadow: none; text-transform: none; }
@@ -68,9 +167,9 @@ export const themeCss = t => `
   #tw-caption, .tw-callout, #tw-caption *, .tw-callout * { font-family: var(--tw-font) !important; }
   #tw-caption, .tw-callout { color: var(--tw-text) !important; }
   #tw-title img { width: min(9vw, 9vh); height: min(9vw, 9vh); object-fit: contain; margin-bottom: 6px; }
-  #tw-title h1 { margin: 0; font-size: min(4.6vw, 6vh); font-weight: 700; max-width: 82%; letter-spacing: -.5px; line-height: 1.15; }
+  #tw-title h1 { margin: 0; font-size: min(5.8vw, 8vh); font-weight: 800; max-width: 82%; letter-spacing: -.02em; line-height: 1.1; }
   #tw-title h1::after { content: ''; display: block; width: 120px; height: 5px; margin: 22px auto 0; border-radius: 3px; background: var(--tw-accent); }
-  #tw-title p { margin: 0; font-size: min(2.2vw, 3vh); color: var(--tw-muted); max-width: 72%; line-height: 1.4; }
+  #tw-title p { margin: 0; font-size: min(2.5vw, 3.4vh); color: var(--tw-muted); max-width: 72%; line-height: 1.4; }
   .tw-frame { position: fixed; z-index: 2147483643; border: 4px solid var(--tw-accent); border-radius: 12px;
     box-shadow: 0 0 0 7px color-mix(in srgb, var(--tw-accent) 22%, transparent); pointer-events: none; transition: opacity .3s; }
   .tw-blur { filter: blur(8px) !important; }
