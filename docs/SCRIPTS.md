@@ -305,6 +305,23 @@ a bit flatter), `gonzalo`, `salome` (Spanish, Colombia), `jorge`, `dalia` (Mexic
 `andrew`, `ava`, `emma`, `brian` (multilingual), `claude`, `davefx`, `lessac` (Piper), plus the server's
 aliases and plugins. `tourwright voices` lists what this server can use.
 
+**Listen before choosing.** A sample of every voice comes with Tourwright in `docs/voices/` (the same text: tech
+words, numbers, a question), so you can choose before installing anything: `tourwright voices --open` opens that
+folder. `tourwright voices --samples` records them again with the voices of your machine, and `--text "…"` with
+your own words. Then write the name in the script: `voice: lola`.
+
+**How they were tuned.** Every built-in voice reads a set of sentences full of what narrations hold (API, JSON,
+PDF, `25.800`, `95 %`, `$ 409.360`, an email, Ctrl K…); Whisper, an open speech-to-text model, writes down what it
+heard. Then each engine was calibrated on its own (`scripts/calibrate-voices.js`): every term was said written several
+ways (as is, respelled, spelled out) and the one Whisper understood best was kept, in `src/voice/calibrated.json`.
+Neural voices (Edge, Pocket TTS) say most English words right as written, so they only get the respellings that
+won; Piper needs more of them. You can check any voice, yours too:
+
+```bash
+tourwright install --whisper           # once: Whisper (about 500 MB)
+tourwright voices --check lola salome  # the share of words understood, and each word that failed
+```
+
 **Which one?** For a natural voice offline, `lola` (Pocket TTS): it takes about as long to make a sentence as the
 sentence lasts, once, and the cache keeps it. `salome` and `gonzalo` (Edge) sound as natural and are instant, but
 need internet and use an unofficial Microsoft service. Piper (`claude`) is the lightest and the most robotic.

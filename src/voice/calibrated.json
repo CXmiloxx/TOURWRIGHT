@@ -1,0 +1,1867 @@
+{
+  "es": {
+    "edge": {
+      "API": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ API → Ahora revisamos API en el sistema.",
+          "✘ a pe i → Ahora revisamos AP y en el sistema.",
+          "✘ a, pe, i → Ahora revisamos a, p y en el sistema.",
+          "✔ ei pi ai → Ahora revisamos API en el sistema."
+        ]
+      },
+      "API key": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ API key → Ahora revisamos a PIKI en el sistema.",
+          "✘ a pe i ki → Ahora revisamos a Pake en el sistema.",
+          "✘ a pe i kei → Ahora revisamos a Pay Key en el sistema.",
+          "✘ a pe i, ki → Ahora revisamos API, quien el sistema."
+        ]
+      },
+      "APIs": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ APIs → Ahora revisamos APIS en el sistema.",
+          "✘ a pe is → Ahora revisamos a PACE en el sistema."
+        ]
+      },
+      "JSON": {
+        "say": "yei son",
+        "heard": true,
+        "tried": [
+          "✘ JSON → Ahora revisamos son en el sistema.",
+          "✔ yei son → Ahora revisamos JSON en el sistema.",
+          "✘ yéison → Ahora revisamos Yason en el sistema.",
+          "✔ jeison → Ahora revisamos JSON en el sistema."
+        ]
+      },
+      "CSV": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ CSV → Ahora revisamos SUV en el sistema.",
+          "✘ ce ese ve → Ahora revisamos eSB en el sistema.",
+          "✘ ce ese uve → Ahora revisamos ESU en el sistema."
+        ]
+      },
+      "PDF": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ PDF → Ahora revisamos PDF en el sistema.",
+          "✔ pe de efe → Ahora revisamos pdf en el sistema."
+        ]
+      },
+      "URL": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ URL → Ahora revisamos URL en el sistema.",
+          "✔ u erre ele → Ahora revisamos URL en el sistema."
+        ]
+      },
+      "HTTP": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ HTTP → Ahora revisamos HTTP en el sistema.",
+          "✔ hache te te pe → Ahora revisamos HTTP en el sistema."
+        ]
+      },
+      "HTTPS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ HTTPS → Ahora revisamos HTTPS en el sistema.",
+          "✘ hache te te pe ese → Ahora revisamos HTTP en el sistema."
+        ]
+      },
+      "HTML": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ HTML → Ahora revisamos HTML en el sistema.",
+          "✔ hache te eme ele → Ahora revisamos HTML en el sistema."
+        ]
+      },
+      "CSS": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ CSS → Ahora revisamos ese en el sistema.",
+          "✘ ce ese ese → Ahora revisamos ES en el sistema."
+        ]
+      },
+      "SQL": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ SQL → Ahora revisamos el SQL en el sistema.",
+          "✘ ese cu ele → Ahora revisamos ese se huele en el sistema."
+        ]
+      },
+      "XML": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ XML → Ahora revisamos xml en el sistema.",
+          "✔ equis eme ele → Ahora revisamos Xml en el sistema."
+        ]
+      },
+      "SDK": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ SDK → Ahora revisamos ese deca en el sistema.",
+          "✘ ese de ca → Ahora revisamos ese deca en el sistema."
+        ]
+      },
+      "CRM": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ CRM → Ahora revisamos CRM en el sistema.",
+          "✔ ce erre eme → Ahora revisamos CRM en el sistema."
+        ]
+      },
+      "ERP": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ ERP → Ahora revisamos ERP en el sistema.",
+          "✘ e erre pe → Ahora revisamos RPNelSistema.",
+          "✔ e, erre, pe → Ahora revisamos ERP en el sistema."
+        ]
+      },
+      "SaaS": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ SaaS → Ahora revisamos AES en el sistema.",
+          "✘ sas → Ahora revisamos así en el sistema.",
+          "✘ saas → Ahora revisamos hacen el sistema."
+        ]
+      },
+      "UI": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ UI → Ahora revisamos huye en el sistema.",
+          "✘ u i → Ahora revisamos huye en el sistema."
+        ]
+      },
+      "UX": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ UX → Ahora revisamos ux en el sistema.",
+          "✔ u equis → Ahora revisamos ux en el sistema."
+        ]
+      },
+      "ID": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ ID → ahora revisamos y en el sistema",
+          "✘ i de → Ahora revisamos y den el sistema."
+        ]
+      },
+      "QR": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ QR → Ahora revisamos QR en el sistema.",
+          "✔ cu erre → Ahora revisamos el QR en el sistema.",
+          "✔ ku erre → Ahora revisamos QR en el sistema."
+        ]
+      },
+      "SMS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ SMS → Ahora revisamos SMS en el sistema.",
+          "✔ ese eme ese → Ahora revisamos SMS en el sistema."
+        ]
+      },
+      "OTP": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ OTP → Ahora revisamos OTP en el sistema.",
+          "✘ o te pe → Ahora revisamos o tepen el sistema."
+        ]
+      },
+      "IA": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ IA → Ahora revisamos ya en el sistema.",
+          "✘ i a → ahora revisamos y en el sistema"
+        ]
+      },
+      "USB": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ USB → Ahora revisamos USB en el sistema.",
+          "✔ u ese be → Ahora revisamos USB en el sistema."
+        ]
+      },
+      "GPS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ GPS → Ahora revisamos GPS en el sistema.",
+          "✔ ge pe ese → Ahora revisamos GPS en el sistema."
+        ]
+      },
+      "CPU": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ CPU → Ahora revisamos CPU en el sistema.",
+          "✘ ce pe u → Ahora revisamos EPU en el sistema.",
+          "✘ ce, pe, u → Ahora revisamos E, P u en el sistema."
+        ]
+      },
+      "RAM": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ RAM → Ahora revisamos RAM en el sistema.",
+          "✔ ram → Ahora revisamos RAM en el sistema."
+        ]
+      },
+      "VPN": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ VPN → Ahora revisamos su VPN en el sistema.",
+          "✘ ve pe ene → Ahora revisamos BPN en el sistema.",
+          "✘ uve pe ene → Ahora revisamos uvp en el sistema."
+        ]
+      },
+      "DNS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ DNS → Ahora revisamos DNS en el sistema.",
+          "✔ de ene ese → Ahora revisamos DNS en el sistema."
+        ]
+      },
+      "SSL": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ SSL → Ahora revisamos SSL en el sistema.",
+          "✔ ese ese ele → Ahora revisamos SSL en el sistema."
+        ]
+      },
+      "2FA": {
+        "say": "doble factor",
+        "heard": true,
+        "tried": [
+          "✘ 2FA → Ahora revisamos dos fan en el sistema.",
+          "✔ doble factor → Ahora revisamos doble factor en el sistema.",
+          "✘ dos efe a → Ahora revisamos 2F en el sistema."
+        ]
+      },
+      "REST": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ REST → Ahora revisamos restenar el sistema.",
+          "✔ rest → Ahora revisamos restenar el sistema.",
+          "✘ res → Ahora revisamos res en el sistema."
+        ]
+      },
+      "iOS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ iOS → Ahora revisamos iOS en el sistema.",
+          "✘ ai o ese → Ahora revisamos ahí o es en el sistema."
+        ]
+      },
+      "npm": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ npm → Ahora revisamos NPM en el sistema.",
+          "✔ ene pe eme → Ahora revisamos NPM en el sistema."
+        ]
+      },
+      "JavaScript": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ JavaScript → Ahora revisamos Javascript en el sistema.",
+          "✔ yavascript → Ahora revisamos JavaScript en el sistema.",
+          "✘ yava script → Ahora revisamos Yavascript en el sistema."
+        ]
+      },
+      "TypeScript": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ TypeScript → Ahora revisamos TypeScript en el sistema.",
+          "✔ taipscript → Ahora revisamos TypeScript en el sistema.",
+          "✔ taip script → Ahora revisamos TypeScript en el sistema."
+        ]
+      },
+      "Python": {
+        "say": "páiton",
+        "heard": true,
+        "tried": [
+          "✘ Python → Ahora revisamos paisan en el sistema.",
+          "✔ páiton → Ahora revisamos Python en el sistema.",
+          "✘ paiton → Ahora revisamos Payton en el sistema."
+        ]
+      },
+      "curl": {
+        "say": "cúrl",
+        "heard": true,
+        "tried": [
+          "✘ curl → Ahora revisamos cool en el sistema.",
+          "✘ kerl → Ahora revisamos que el en el sistema.",
+          "✔ cúrl → Ahora revisamos CURL en el sistema."
+        ]
+      },
+      "Postman": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Postman → Ahora revisamos Postman en el sistema.",
+          "✔ póstman → Ahora revisamos Postman en el sistema."
+        ]
+      },
+      "GitHub": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ GitHub → Ahora revisamos HitHub en el sistema.",
+          "✘ guit jab → Ahora revisamos GitJab en el sistema.",
+          "✘ git hab → Ahora revisamos HITAB en el sistema."
+        ]
+      },
+      "Docker": {
+        "say": "dóquer",
+        "heard": true,
+        "tried": [
+          "✘ Docker → Ahora revisamos DAC en el sistema.",
+          "✔ dóquer → Ahora revisamos Docker en el sistema."
+        ]
+      },
+      "Excel": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Excel → Ahora revisamos Excel en el sistema.",
+          "✔ éxcel → Ahora revisamos Excel en el sistema."
+        ]
+      },
+      "email": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ email → Ahora revisamos Imel en el sistema.",
+          "✘ imeil → Ahora revisamos Imel en el sistema.",
+          "✘ i meil → Ahora revisamos y melen el sistema."
+        ]
+      },
+      "login": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ login → Ahora revisamos login en el sistema.",
+          "✔ loguin → Ahora revisamos login en el sistema."
+        ]
+      },
+      "dashboard": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ dashboard → Ahora revisamos Dashboard en el sistema.",
+          "✔ dáshbord → Ahora revisamos Dashboard en el sistema.",
+          "✔ dash bord → Ahora revisamos Dashboard en el sistema."
+        ]
+      },
+      "endpoint": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ endpoint → Ahora revisamos en point en el sistema.",
+          "✘ éndpoint → Ahora revisamos en Puente en el sistema.",
+          "✘ end point → Ahora revisamos en Puente en el sistema."
+        ]
+      },
+      "webhook": {
+        "say": "uébjuk",
+        "heard": true,
+        "tried": [
+          "✘ webhook → Ahora revisamos Bebop en el sistema.",
+          "✔ uébjuk → Ahora revisamos Webhook en el sistema.",
+          "✔ web juk → Ahora revisamos WebHook en el sistema."
+        ]
+      },
+      "backend": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ backend → Ahora revisamos Backend en el sistema.",
+          "✔ bákend → Ahora revisamos Backend en el sistema.",
+          "✔ back end → Ahora revisamos Backend en el sistema."
+        ]
+      },
+      "frontend": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ frontend → Ahora revisamos front-end en el sistema.",
+          "✔ fróntend → Ahora revisamos frontend en el sistema.",
+          "✘ front end → Ahora revisamos fronten en el sistema."
+        ]
+      },
+      "software": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ software → Ahora revisamos software en el sistema.",
+          "✔ sóftuer → Ahora revisamos software en el sistema."
+        ]
+      },
+      "WhatsApp": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ WhatsApp → Ahora revisamos WhatsApp en el sistema.",
+          "✔ guatsap → Ahora revisamos WhatsApp en el sistema.",
+          "✔ uatsap → Ahora revisamos WhatsApp en el sistema."
+        ]
+      },
+      "Google": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Google → Ahora revisamos Google en el sistema.",
+          "✔ gúgol → Ahora revisamos Google en el sistema."
+        ]
+      },
+      "YouTube": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ YouTube → ahora revisamos youtube en el sistema",
+          "✔ iutiub → Ahora revisamos YouTube en el sistema."
+        ]
+      },
+      "Wi-Fi": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Wi-Fi → Ahora revisamos WIFI en el sistema.",
+          "✔ uaifai → Ahora revisamos Wifi en el sistema."
+        ]
+      },
+      "Ctrl": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Ctrl → Ahora revisamos control en el sistema.",
+          "✔ control → Ahora revisamos control en el sistema."
+        ]
+      },
+      "iPhone": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ iPhone → Ahora revisamos iPhone en el sistema.",
+          "✔ aifon → Ahora revisamos iPhone en el sistema."
+        ]
+      },
+      "streaming": {
+        "say": "estrímin",
+        "heard": true,
+        "tried": [
+          "✘ streaming → Ahora revisamos Trimming en el sistema.",
+          "✔ estrímin → Ahora revisamos streaming en el sistema."
+        ]
+      },
+      "cookies": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ cookies → Ahora revisamos cookies en el sistema.",
+          "✔ cúquis → Ahora revisamos cookies en el sistema."
+        ]
+      },
+      "feedback": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ feedback → Ahora revisamos feedback en el sistema.",
+          "✔ fídbak → Ahora revisamos feedback en el sistema."
+        ]
+      },
+      "checkout": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ checkout → Ahora revisamos Checkout en el sistema.",
+          "✔ chékaut → Ahora revisamos Checkout en el sistema."
+        ]
+      },
+      "Slack": {
+        "say": "eslak",
+        "heard": true,
+        "tried": [
+          "✘ Slack → Ahora revisamos la que en el sistema.",
+          "✔ eslak → Ahora revisamos Slack en el sistema.",
+          "✔ eslák → Ahora revisamos Slack en el sistema."
+        ]
+      },
+      "Teams": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ Teams → Ahora revisamos Tims en el sistema.",
+          "✘ tims → Ahora revisamos Tims en el sistema."
+        ]
+      },
+      "Microsoft": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Microsoft → Ahora revisamos Microsoft en el sistema.",
+          "✔ máicrosoft → Ahora revisamos Microsoft en el sistema."
+        ]
+      },
+      "logs": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ logs → Ahora revisamos logs en el sistema.",
+          "✘ logues → Ahora revisamos lo que es en el sistema.",
+          "✘ log → Ahora revisamos lo que en el sistema."
+        ]
+      },
+      "link": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ link → Ahora revisamos link en el sistema.",
+          "✔ link → Ahora revisamos link en el sistema.",
+          "✔ linc → Ahora revisamos link en el sistema."
+        ]
+      },
+      "app": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✘ app → Ahora revisamos APEN el sistema.",
+          "✘ ap → Ahora revisamos APEN el sistema.",
+          "✔ aplicación → Ahora revisamos aplicación en el sistema."
+        ]
+      }
+    },
+    "pocket": {
+      "API": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ API → Ahora revisamos a pie en el sistema.",
+          "✔ a pe i → Ahora revisamos API en el sistema.",
+          "✘ a, pe, i → Ahora revisamos a P en el sistema.",
+          "✔ ei pi ai → Ahora revisamos API en el sistema."
+        ]
+      },
+      "API key": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ API key → Ahora revisamos a piquei en el sistema.",
+          "✘ a pe i ki → Ahora revisamos a PIKI en el sistema.",
+          "✘ a pe i kei → Ahora revisamos API-K en el sistema.",
+          "✘ a pe i, ki → Ahora revisamos API en el sistema."
+        ]
+      },
+      "APIs": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ APIs → Ahora revisamos a PIS en el sistema.",
+          "✘ a pe is → Ahora revisamos a PACE en el sistema."
+        ]
+      },
+      "JSON": {
+        "say": "yei son",
+        "heard": true,
+        "tried": [
+          "✘ JSON → Ahora revisamos HON en el sistema.",
+          "✔ yei son → Ahora revisamos JSON en el sistema.",
+          "✔ yéison → Ahora revisamos JSON en el sistema.",
+          "✘ jeison → Ahora revisamos Gison en el sistema."
+        ]
+      },
+      "CSV": {
+        "say": "ce ese uve",
+        "heard": true,
+        "tried": [
+          "✘ CSV → Ahora, revisamos Cubs en el sistema.",
+          "✘ ce ese ve → Ahora revisamos CSB en el sistema.",
+          "✔ ce ese uve → Ahora revisamos CSV en el sistema."
+        ]
+      },
+      "PDF": {
+        "say": "pe de efe",
+        "heard": true,
+        "tried": [
+          "✘ PDF → Ahora revisamos plaf en el sistema.",
+          "✔ pe de efe → Ahora revisamos PDF en el sistema."
+        ]
+      },
+      "URL": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ URL → Ahora revisamos URLE en el sistema.",
+          "✔ u erre ele → Ahora revisamos URL en el sistema."
+        ]
+      },
+      "HTTP": {
+        "say": "hache te te pe",
+        "heard": true,
+        "tried": [
+          "✘ HTTP → Ahora revisamos TEP en el sistema.",
+          "✔ hache te te pe → Ahora revisamos HTTP en el sistema."
+        ]
+      },
+      "HTTPS": {
+        "say": "hache te te pe ese",
+        "heard": true,
+        "tried": [
+          "✘ HTTPS → Ahora revisamos test en el sistema.",
+          "✔ hache te te pe ese → Ahora revisamos HTTPS en el sistema."
+        ]
+      },
+      "HTML": {
+        "say": "hache te eme ele",
+        "heard": true,
+        "tried": [
+          "✘ HTML → Ahora revisamos ENTLE en el sistema.",
+          "✔ hache te eme ele → Ahora revisamos HTML en el sistema."
+        ]
+      },
+      "CSS": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ CSS → Ahora revisamos Xes en el sistema.",
+          "✘ ce ese ese → Ahora revisamos ESE en el sistema."
+        ]
+      },
+      "SQL": {
+        "say": "ese cu ele",
+        "heard": true,
+        "tried": [
+          "✘ SQL → Ahora revisamos Ciel en el sistema.",
+          "✔ ese cu ele → Ahora revisamos SQL en el sistema."
+        ]
+      },
+      "XML": {
+        "say": "equis eme ele",
+        "heard": true,
+        "tried": [
+          "✘ XML → Ahora revisamos simple en el sistema.",
+          "✔ equis eme ele → ahora revisamos xml en el sistema."
+        ]
+      },
+      "SDK": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ SDK → Ahora revisamos de qué en el sistema.",
+          "✘ ese de ca → Ahora revisamos ese deca en el sistema."
+        ]
+      },
+      "CRM": {
+        "say": "ce erre eme",
+        "heard": true,
+        "tried": [
+          "✘ CRM → Ahora revisamos creme en el sistema.",
+          "✔ ce erre eme → Ahora revisamos CRM en el sistema."
+        ]
+      },
+      "ERP": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ ERP → Ahora revisamos ERP en el sistema.",
+          "✔ e erre pe → Ahora revisamos ERP en el sistema.",
+          "✔ e, erre, pe → Ahora revisamos ERP en el sistema."
+        ]
+      },
+      "SaaS": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ SaaS → Ahora revisamos SAS en el sistema. . . . . . . . . . . . . . .",
+          "✘ sas → Ahora revisamos esas en el sistema.",
+          "✘ saas → Ahora revisamos A's en el sistema."
+        ]
+      },
+      "UI": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ UI → Ahora revisamos UI en el sistema.",
+          "✘ u i → ahora revisamos hoy en el sistema."
+        ]
+      },
+      "UX": {
+        "say": "u equis",
+        "heard": true,
+        "tried": [
+          "✘ UX → Ahora revisamos UITS en el sistema.",
+          "✔ u equis → Ahora revisamos su X en el sistema."
+        ]
+      },
+      "ID": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ ID → Ahora revisamos id en el sistema.",
+          "✔ i de → Ahora revisamos idea en el sistema."
+        ]
+      },
+      "QR": {
+        "say": "cu erre",
+        "heard": true,
+        "tried": [
+          "✘ QR → Ahora revisamos CrenelSistema.",
+          "✔ cu erre → Ahora revisamos QR en el sistema.",
+          "✔ ku erre → Ahora revisamos QR en el sistema."
+        ]
+      },
+      "SMS": {
+        "say": "ese eme ese",
+        "heard": true,
+        "tried": [
+          "✘ SMS → Ahora revisamos CES en el sistema.",
+          "✔ ese eme ese → Ahora revisamos SMS en el sistema."
+        ]
+      },
+      "OTP": {
+        "say": "o te pe",
+        "heard": true,
+        "tried": [
+          "✘ OTP → Ahora revisamos el tema del sistema.",
+          "✔ o te pe → Ahora revisamos OTP en el sistema."
+        ]
+      },
+      "IA": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ IA → Ahora revisamos ya en el sistema.",
+          "✘ i a → Ahora revisamos ya en el sistema."
+        ]
+      },
+      "USB": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ USB → Ahora revisamos USB en el sistema.",
+          "✔ u ese be → Ahora revisamos USB en el sistema."
+        ]
+      },
+      "GPS": {
+        "say": "ge pe ese",
+        "heard": true,
+        "tried": [
+          "✘ GPS → Ahora, revisamos PES en el sistema.",
+          "✔ ge pe ese → Ahora revisamos GPS en el sistema."
+        ]
+      },
+      "CPU": {
+        "say": "ce pe u",
+        "heard": true,
+        "tried": [
+          "✘ CPU → Ahora revisamos Q en el sistema.",
+          "✔ ce pe u → Ahora, revisamos CPU en el sistema.",
+          "✘ ce, pe, u → Ahora revisamos C, B o en el sistema."
+        ]
+      },
+      "RAM": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ RAM → Ahora revisamos RAM en el sistema.",
+          "✔ ram → Ahora revisamos RAM en el sistema."
+        ]
+      },
+      "VPN": {
+        "say": "uve pe ene",
+        "heard": true,
+        "tried": [
+          "✘ VPN → Ahora revisamos Ben en el sistema.",
+          "✘ ve pe ene → Ahora revisamos BPN en el sistema.",
+          "✔ uve pe ene → Ahora revisamos VPN en el sistema."
+        ]
+      },
+      "DNS": {
+        "say": "de ene ese",
+        "heard": true,
+        "tried": [
+          "✘ DNS → Ahora revisamos Dons en el sistema.",
+          "✔ de ene ese → Ahora revisamos DNS en el sistema."
+        ]
+      },
+      "SSL": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ SSL → Ahora revisamos el en el sistema.",
+          "✘ ese ese ele → Ahora revisamos SSN en el sistema."
+        ]
+      },
+      "2FA": {
+        "say": "doble factor",
+        "heard": true,
+        "tried": [
+          "✘ 2FA → Ahora revisamos VecitaFa en el sistema.",
+          "✔ doble factor → Ahora revisamos doble factor en el sistema.",
+          "✔ dos efe a → Ahora revisamos 2FA en el sistema."
+        ]
+      },
+      "REST": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ REST → Ahora revisamos resten el sistema.",
+          "✔ rest → Ahora revisamos resten el sistema.",
+          "✘ res → Ahora revisamos res en el sistema."
+        ]
+      },
+      "iOS": {
+        "say": "ai o ese",
+        "heard": true,
+        "tried": [
+          "✘ iOS → Ahora revisamos ellos en el sistema.",
+          "✔ ai o ese → Ahora revisamos iOS en el sistema."
+        ]
+      },
+      "npm": {
+        "say": "ene pe eme",
+        "heard": true,
+        "tried": [
+          "✘ npm → Ahora revisamos NOMPEN el sistema.",
+          "✔ ene pe eme → Ahora revisamos NPM en el sistema."
+        ]
+      },
+      "JavaScript": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ JavaScript → Ahora revisamos Javascript en el sistema.",
+          "✔ yavascript → Ahora revisamos JavaScript en el sistema.",
+          "✔ yava script → Ahora revisamos JavaScript en el sistema."
+        ]
+      },
+      "TypeScript": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ TypeScript → Ahora revisamos TypeScript en el sistema.",
+          "✔ taipscript → Ahora revisamos TypeScript en el sistema.",
+          "✔ taip script → Ahora revisamos TypeScript en el sistema."
+        ]
+      },
+      "Python": {
+        "say": "páiton",
+        "heard": true,
+        "tried": [
+          "✘ Python → Ahora revisamos pitón en el sistema.",
+          "✔ páiton → Ahora revisamos Python en el sistema.",
+          "✘ paiton → Ahora revisamos Payton en el sistema."
+        ]
+      },
+      "curl": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ curl → Ahora revisamos CURL en el sistema.",
+          "✔ kerl → Ahora revisamos Kerl en el sistema.",
+          "✔ cúrl → Ahora revisamos Curle en el sistema."
+        ]
+      },
+      "Postman": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Postman → Ahora revisamos Postman en el sistema.",
+          "✔ póstman → Ahora revisamos Postman en el sistema."
+        ]
+      },
+      "GitHub": {
+        "say": "guit jab",
+        "heard": true,
+        "tried": [
+          "✘ GitHub → Ahora revisamos HITUB en el sistema.",
+          "✔ guit jab → Ahora revisamos GitHub en el sistema.",
+          "✘ git hab → Ahora revisamos Hit Ave en el sistema."
+        ]
+      },
+      "Docker": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Docker → Ahora revisamos docker en el sistema.",
+          "✔ dóquer → Ahora revisamos Docker en el sistema."
+        ]
+      },
+      "Excel": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Excel → Ahora revisamos Excel en el sistema.",
+          "✔ éxcel → Ahora revisamos Excel en el sistema."
+        ]
+      },
+      "email": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ email → Ahora revisamos el mail en el sistema.",
+          "✔ imeil → Ahora revisamos e-mail en el sistema.",
+          "✔ i meil → Ahora revisamos e-mail en el sistema."
+        ]
+      },
+      "login": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ login → Ahora revisamos loging en el sistema.",
+          "✔ loguin → Ahora revisamos login en el sistema."
+        ]
+      },
+      "dashboard": {
+        "say": "dáshbord",
+        "heard": true,
+        "tried": [
+          "✘ dashboard → Ahora revisamos las guardas del sistema.",
+          "✔ dáshbord → Ahora revisamos Dashboard en el sistema.",
+          "✔ dash bord → Ahora revisamos Dashboard en el sistema."
+        ]
+      },
+      "endpoint": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ endpoint → Ahora revisamos en Boint en el sistema.",
+          "✘ éndpoint → Ahora revisamos en bumpint en el sistema.",
+          "✘ end point → Ahora revisamos en point en el sistema."
+        ]
+      },
+      "webhook": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ webhook → Ahora revisamos huevo que en el sistema.",
+          "✘ uébjuk → Y ahora revisamos evhuc en el sistema.",
+          "✘ web juk → Ahora revisamos web en el sistema."
+        ]
+      },
+      "backend": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ backend → Ahora revisamos backend en el sistema.",
+          "✔ bákend → Ahora revisamos Backend en el sistema.",
+          "✔ back end → Ahora revisamos Backend en el sistema."
+        ]
+      },
+      "frontend": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ frontend → Ahora revisamos frontend en el sistema.",
+          "✔ fróntend → Ahora revisamos Frontend en el sistema.",
+          "✘ front end → Ahora revisamos fronte en el sistema."
+        ]
+      },
+      "software": {
+        "say": "sóftuer",
+        "heard": true,
+        "tried": [
+          "✘ software → Ahora revisamos optuare en el sistema.",
+          "✔ sóftuer → Ahora revisamos software en el sistema."
+        ]
+      },
+      "WhatsApp": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ WhatsApp → Ahora revisamos WhatsApp en el sistema.",
+          "✔ guatsap → Ahora revisamos WhatsApp en el sistema.",
+          "✔ uatsap → Ahora revisamos whatsapp en el sistema."
+        ]
+      },
+      "Google": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Google → Ahora revisamos Google en el sistema.",
+          "✔ gúgol → Ahora revisamos Google en el sistema."
+        ]
+      },
+      "YouTube": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ YouTube → Ahora revisamos YouTube en el sistema.",
+          "✔ iutiub → Ahora revisamos YouTube en el sistema."
+        ]
+      },
+      "Wi-Fi": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Wi-Fi → Ahora revisamos Wifi en el sistema.",
+          "✔ uaifai → Ahora revisamos Wi-Fi en el sistema."
+        ]
+      },
+      "Ctrl": {
+        "say": "control",
+        "heard": true,
+        "tried": [
+          "✘ Ctrl → Ahora revisamos Krill en el sistema.",
+          "✔ control → Ahora revisamos control en el sistema."
+        ]
+      },
+      "iPhone": {
+        "say": "aifon",
+        "heard": true,
+        "tried": [
+          "✘ iPhone → Ahora revisamos y pone en el sistema.",
+          "✔ aifon → Ahora revisamos iPhone en el sistema."
+        ]
+      },
+      "streaming": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ streaming → Ahora revisamos TREAMING en el sistema.",
+          "✔ estrímin → Ahora revisamos streaming en el sistema."
+        ]
+      },
+      "cookies": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ cookies → Ahora revisamos co-okies en el sistema.",
+          "✔ cúquis → Ahora revisamos cookies en el sistema."
+        ]
+      },
+      "feedback": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ feedback → Ahora revisamos feedback en el sistema.",
+          "✔ fídbak → Ahora revisamos feedback en el sistema."
+        ]
+      },
+      "checkout": {
+        "say": "chékaut",
+        "heard": true,
+        "tried": [
+          "✘ checkout → Ahora revisamos CheckCode en el sistema.",
+          "✔ chékaut → Ahora revisamos Checkout en el sistema."
+        ]
+      },
+      "Slack": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Slack → Ahora revisamos Slack en el sistema.",
+          "✔ eslak → Ahora revisamos Slack en el sistema.",
+          "✔ eslák → Ahora revisamos Slack en el sistema."
+        ]
+      },
+      "Teams": {
+        "say": "tims",
+        "heard": true,
+        "tried": [
+          "✘ Teams → Ahora revisamos TAMS en el sistema.",
+          "✔ tims → Ahora, revisamos Teams en el sistema."
+        ]
+      },
+      "Microsoft": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Microsoft → Ahora revisamos Microsoft en el sistema.",
+          "✔ máicrosoft → Ahora revisamos Microsoft en el sistema."
+        ]
+      },
+      "logs": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ logs → Ahora revisamos logs en el sistema.",
+          "✔ logues → Ahora revisamos logs en el sistema.",
+          "✘ log → Ahora revisamos Log en el sistema."
+        ]
+      },
+      "link": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ link → Ahora revisamos link en el sistema.",
+          "✘ link → Ahora revisamos NINC en el sistema.",
+          "✔ linc → Ahora revisamos Link en el sistema."
+        ]
+      },
+      "app": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✘ app → Ahora revisamos apenas el sistema.",
+          "✘ ap → Ahora revisamos apenas el sistema.",
+          "✔ aplicación → Ahora revisamos aplicación en el sistema."
+        ]
+      }
+    },
+    "piper": {
+      "API": {
+        "say": "ei pi ai",
+        "heard": true,
+        "tried": [
+          "✘ API → Ahora revisamos Faperi en el sistema.",
+          "✘ a pe i → Ahora revisamos a P y en el sistema.",
+          "✘ a, pe, i → Ahora revisamos a, p y en el sistema.",
+          "✔ ei pi ai → Ahora revisamos AP ID en el sistema."
+        ]
+      },
+      "API key": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ API key → Ahora revisamos Papelikade en el sistema.",
+          "✘ a pe i ki → Ahora revisamos a P y Key en el sistema.",
+          "✘ a pe i kei → Ahora revisamos AP y K en el sistema.",
+          "✘ a pe i, ki → Ahora revisamos a P y Key en el sistema."
+        ]
+      },
+      "APIs": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ APIs → Ahora revisamos PAPIS en el sistema.",
+          "✔ a pe is → Ahora revisamos AP-IS en el sistema."
+        ]
+      },
+      "JSON": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ JSON → Ahora revisamos json en el sistema.",
+          "✔ yei son → Ahora revisamos JSON en el sistema.",
+          "✔ yéison → Ahora revisamos Jason en el sistema.",
+          "✘ jeison → Ahora revisamos Heison en el sistema."
+        ]
+      },
+      "CSV": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ CSV → Ahora bebizamos CSV en el sistema.",
+          "✘ ce ese ve → Ahora revisamos C-SB en el sistema.",
+          "✔ ce ese uve → Ahora revisamos C, S, V en el sistema."
+        ]
+      },
+      "PDF": {
+        "say": "pe de efe",
+        "heard": true,
+        "tried": [
+          "✘ PDF → Ahora, predizamos BDF en el sistema.",
+          "✔ pe de efe → Ahora, revisamos PDF en el sistema."
+        ]
+      },
+      "URL": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ URL → Ahora bebizamos URL en el sistema.",
+          "✔ u erre ele → Ahora revisamos URL en el sistema."
+        ]
+      },
+      "HTTP": {
+        "say": "hache te te pe",
+        "heard": true,
+        "tried": [
+          "✘ HTTP → Ahora revisamos fachetetep en el sistema.",
+          "✔ hache te te pe → Ahora revisamos Http en el sistema."
+        ]
+      },
+      "HTTPS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ HTTPS → Ahora revisamos HTTPS en el sistema.",
+          "✔ hache te te pe ese → Ahora revisamos HTTPS en el sistema."
+        ]
+      },
+      "HTML": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ HTML → Ahora previsamos FACHETNL en el sistema.",
+          "✘ hache te eme ele → Ahora revisamos HTMNL en el sistema."
+        ]
+      },
+      "CSS": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ CSS → Ahora revisamos SSEC en el sistema.",
+          "✘ ce ese ese → Ahora revisamos C, S, Y, C en el sistema."
+        ]
+      },
+      "SQL": {
+        "say": "ese cu ele",
+        "heard": true,
+        "tried": [
+          "✘ SQL → Ahora revisamos de secuel en el sistema.",
+          "✔ ese cu ele → Ahora revisamos SQL en el sistema."
+        ]
+      },
+      "XML": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ XML → Ahora revisamos XML en el sistema.",
+          "✘ equis eme ele → Ahora revisamos XMDL en el sistema."
+        ]
+      },
+      "SDK": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ SDK → Ahora revisamos SDK en el sistema.",
+          "✔ ese de ca → Ahora revisamos SDK en el sistema."
+        ]
+      },
+      "CRM": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ CRM → Ahora paedizamos CRM en el sistema.",
+          "✔ ce erre eme → Ahora revisamos C, R, M en el sistema."
+        ]
+      },
+      "ERP": {
+        "say": "e erre pe",
+        "heard": true,
+        "tried": [
+          "✘ ERP → Ahora revisamos RP en el sistema.",
+          "✔ e erre pe → Ahora revisamos ERP en el sistema.",
+          "✔ e, erre, pe → Ahora revisamos E, R, P en el sistema."
+        ]
+      },
+      "SaaS": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ SaaS → Ahora revisamos AS en el sistema.",
+          "✘ sas → Ahora revisamos SAS en el sistema.",
+          "✘ saas → Ahora revisamos SAS en el sistema."
+        ]
+      },
+      "UI": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ UI → Ahora revisamos Ui en el sistema.",
+          "✘ u i → Ahora revisamos Ubi en el sistema."
+        ]
+      },
+      "UX": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ UX → Ahora revisamos UX en el sistema.",
+          "✘ u equis → Ahora revisamos X en el sistema."
+        ]
+      },
+      "ID": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ ID → Ahora revisamos ID en el sistema.",
+          "✔ i de → Ahora revisamos ID en el sistema."
+        ]
+      },
+      "QR": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ QR → Ahora revisamos QR en el sistema.",
+          "✔ cu erre → Ahora revisamos QR en el sistema.",
+          "✘ ku erre → Ahora revisamos QDR en el sistema."
+        ]
+      },
+      "SMS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ SMS → Ahora previsamos SMS en el sistema.",
+          "✘ ese eme ese → Ahora previzamos SGM-S en el sistema."
+        ]
+      },
+      "OTP": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ OTP → Ahora revisamos OTP en el sistema.",
+          "✔ o te pe → Ahora revisamos OTP en el sistema."
+        ]
+      },
+      "IA": {
+        "say": "i a",
+        "heard": true,
+        "tried": [
+          "✘ IA → Ahora revisamos ya en el sistema.",
+          "✔ i a → Ahora revisamos IA en el sistema."
+        ]
+      },
+      "USB": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ USB → Ahora revisamos USB en el sistema.",
+          "✔ u ese be → Ahora revisamos USB en el sistema."
+        ]
+      },
+      "GPS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ GPS → Ahora paebizamos GPS en el sistema.",
+          "✔ ge pe ese → Ahora te avisamos gps en el sistema."
+        ]
+      },
+      "CPU": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ CPU → Ahora bebizamos CPU en el sistema.",
+          "✘ ce pe u → Ahora revisamos Cp o en el sistema.",
+          "✘ ce, pe, u → Ahora revisamos C, P o en el sistema."
+        ]
+      },
+      "RAM": {
+        "say": "ram",
+        "heard": true,
+        "tried": [
+          "✘ RAM → Ahora predizamos RLM en el sistema.",
+          "✔ ram → Ahora revisamos RAM en el sistema."
+        ]
+      },
+      "VPN": {
+        "say": "uve pe ene",
+        "heard": true,
+        "tried": [
+          "✘ VPN → Ahora previsamos BPN en el sistema.",
+          "✘ ve pe ene → Ahora revisamos BP-N en el sistema.",
+          "✔ uve pe ene → Ahora revisamos UVP-N en el sistema."
+        ]
+      },
+      "DNS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ DNS → Ahora, revisamos DNS en el sistema.",
+          "✘ de ene ese → Ahora revisamos el NS en el sistema."
+        ]
+      },
+      "SSL": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ SSL → Ahora revisamos DCL en el sistema.",
+          "✘ ese ese ele → Ahora revisamos SDS-GL en el sistema."
+        ]
+      },
+      "2FA": {
+        "say": "doble factor",
+        "heard": true,
+        "tried": [
+          "✘ 2FA → Ahora, previsamos 2 DFA en el sistema.",
+          "✔ doble factor → Ahora, revisamos doble factor en el sistema.",
+          "✘ dos efe a → Ahora, revisamos 2F en el sistema."
+        ]
+      },
+      "REST": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ REST → Ahora revisamos rest en el sistema.",
+          "✔ rest → Ahora revisamos REST en el sistema.",
+          "✘ res → Ahora revisamos res en el sistema."
+        ]
+      },
+      "iOS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ iOS → Ahora revisamos iOS en el sistema.",
+          "✘ ai o ese → Ahora revisamos AOS en el sistema."
+        ]
+      },
+      "npm": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ npm → Ahora, previsamos NPM en el sistema.",
+          "✔ ene pe eme → Ahora revisamos NP-M en el sistema."
+        ]
+      },
+      "JavaScript": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ JavaScript → Ahora revisamos Javascript en el sistema.",
+          "✘ yavascript → Ahora revisamos Yavascript en el sistema.",
+          "✔ yava script → Ahora revisamos JavaScript en el sistema."
+        ]
+      },
+      "TypeScript": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ TypeScript → Ahora revisamos TypeScript en el sistema.",
+          "✘ taipscript → Ahora revisamos TechScript en el sistema.",
+          "✔ taip script → Ahora revisamos TypeScript en el sistema."
+        ]
+      },
+      "Python": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Python → Ahora revisamos Python en el sistema.",
+          "✔ páiton → Ahora revisamos Python en el sistema.",
+          "✔ paiton → Ahora revisamos Python en el sistema."
+        ]
+      },
+      "curl": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ curl → Ahora revisamos Curl en el sistema.",
+          "✔ kerl → Ahora revisamos Kerl en el sistema.",
+          "✔ cúrl → Ahora revisamos Curl en el sistema."
+        ]
+      },
+      "Postman": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Postman → Ahora revisamos Postman en el sistema.",
+          "✔ póstman → Ahora revisamos Postman en el sistema."
+        ]
+      },
+      "GitHub": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ GitHub → Ahora previsamos Hit-UV en el sistema.",
+          "✘ guit jab → Ahora revisamos BitCave en el sistema.",
+          "✘ git hab → Ahora revisamos Hit AVE en el sistema."
+        ]
+      },
+      "Docker": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Docker → Ahora revisamos Docker en el sistema.",
+          "✔ dóquer → Ahora revisamos Docker en el sistema."
+        ]
+      },
+      "Excel": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Excel → Ahora revisamos Excel en el sistema.",
+          "✔ éxcel → Ahora revisamos Excel en el sistema."
+        ]
+      },
+      "email": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ email → Ahora revisamos el mail en el sistema.",
+          "✔ imeil → Ahora revisamos e-mail en el sistema.",
+          "✔ i meil → Ahora revisamos e-mail en el sistema."
+        ]
+      },
+      "login": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ login → Ahora revisamos Login en el sistema.",
+          "✘ loguin → Ahora revisamos Lovin en el sistema."
+        ]
+      },
+      "dashboard": {
+        "say": "dáshbord",
+        "heard": true,
+        "tried": [
+          "✘ dashboard → Ahora revisamos las bordes en el sistema.",
+          "✔ dáshbord → Ahora revisamos Dashboard en el sistema.",
+          "✔ dash bord → Ahora revisamos Dashboard en el sistema."
+        ]
+      },
+      "endpoint": {
+        "say": "end point",
+        "heard": true,
+        "tried": [
+          "✘ endpoint → Ahora revisamos en Point en el sistema.",
+          "✘ éndpoint → Ahora revisamos en puente en el sistema.",
+          "✔ end point → Ahora revisamos Endpoint en el sistema."
+        ]
+      },
+      "webhook": {
+        "say": "uébjuk",
+        "heard": true,
+        "tried": [
+          "✘ webhook → Ahora revisamos Weboc en el sistema.",
+          "✔ uébjuk → Ahora revisamos Webhook en el sistema.",
+          "✘ web juk → Ahora bebizamos Web Hub en el sistema."
+        ]
+      },
+      "backend": {
+        "say": "bákend",
+        "heard": true,
+        "tried": [
+          "✘ backend → Ahora revisamos vaquende en el sistema.",
+          "✔ bákend → Ahora revisamos Backend en el sistema.",
+          "✔ back end → Ahora revisamos Backend en el sistema."
+        ]
+      },
+      "frontend": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ frontend → Ahora, previsamos front-end en el sistema.",
+          "✔ fróntend → Ahora previsamos frontend en el sistema.",
+          "✔ front end → Ahora previsamos front-end en el sistema."
+        ]
+      },
+      "software": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ software → Ahora revisamos Sospuera en el sistema.",
+          "✘ sóftuer → Ahora revisamos sus puros en el sistema."
+        ]
+      },
+      "WhatsApp": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ WhatsApp → Ahora revisamos WhatsApp en el sistema.",
+          "✔ guatsap → Ahora revisamos WhatsApp en el sistema.",
+          "✔ uatsap → Ahora revisamos whatsapp en el sistema."
+        ]
+      },
+      "Google": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Google → Ahora revisamos Google Denel Sistema.",
+          "✔ gúgol → Ahora revisamos Google en el sistema."
+        ]
+      },
+      "YouTube": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ YouTube → Ahora revisamos YouTube en el sistema.",
+          "✔ iutiub → Ahora revisamos YouTube en el sistema."
+        ]
+      },
+      "Wi-Fi": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Wi-Fi → Ahora revisamos Wifi en el sistema.",
+          "✔ uaifai → Ahora bebizamos Wi-Fi en el sistema."
+        ]
+      },
+      "Ctrl": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Ctrl → Ahora revisamos CTRL en el sistema.",
+          "✔ control → Ahora revisamos control en el sistema."
+        ]
+      },
+      "iPhone": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ iPhone → Ahora previsamos iPhone en el sistema.",
+          "✔ aifon → Ahora, previsamos iPhone en el sistema."
+        ]
+      },
+      "streaming": {
+        "say": "estrímin",
+        "heard": true,
+        "tried": [
+          "✘ streaming → Ahora revisamos Tramin en el sistema.",
+          "✔ estrímin → Ahora revisamos streaming en el sistema."
+        ]
+      },
+      "cookies": {
+        "say": "cúquis",
+        "heard": true,
+        "tried": [
+          "✘ cookies → Ahora revisamos cópies en el sistema.",
+          "✔ cúquis → Ahora revisamos cookies en el sistema."
+        ]
+      },
+      "feedback": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ feedback → Ahora bebizamos feedback en el sistema.",
+          "✔ fídbak → Ahora revisamos feedback en el sistema."
+        ]
+      },
+      "checkout": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ checkout → Ahora revisamos Checkout en el sistema.",
+          "✔ chékaut → Ahora revisamos Checkout en el sistema."
+        ]
+      },
+      "Slack": {
+        "say": "eslak",
+        "heard": true,
+        "tried": [
+          "✘ Slack → Ahora revisamos LAC en el sistema.",
+          "✔ eslak → Ahora revisamos Slack en el sistema.",
+          "✔ eslák → Ahora revisamos Slack en el sistema."
+        ]
+      },
+      "Teams": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ Teams → Ahora revisamos Theans en el sistema.",
+          "✘ tims → Ahora revisamos Tins en el sistema."
+        ]
+      },
+      "Microsoft": {
+        "say": "máicrosoft",
+        "heard": true,
+        "tried": [
+          "✘ Microsoft → Ahora revisamos Microsos en el sistema.",
+          "✔ máicrosoft → Ahora revisamos Microsoft en el sistema."
+        ]
+      },
+      "logs": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ logs → Ahora revisamos blogs en el sistema.",
+          "✘ logues → Ahora revisamos lobes en el sistema.",
+          "✘ log → Ahora revisamos Log en el sistema."
+        ]
+      },
+      "link": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ link → Ahora revisamos Link en el sistema.",
+          "✔ link → Ahora revisamos Blink en el sistema.",
+          "✔ linc → Ahora revisamos Link en el sistema."
+        ]
+      },
+      "app": {
+        "say": "ap",
+        "heard": true,
+        "tried": [
+          "✘ app → Ahora revisamos PAP en el sistema.",
+          "✔ ap → Ahora redizamos App en el sistema.",
+          "✔ aplicación → Ahora revisamos aplicación en el sistema."
+        ]
+      }
+    }
+  },
+  "en": {
+    "edge": {
+      "JSON": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ JSON → Now we check JSON in the system.",
+          "✔ jay-son → Now we check JSON in the system.",
+          "✔ jason → Now we check JSON in the system."
+        ]
+      },
+      "SaaS": {
+        "say": null,
+        "heard": false,
+        "tried": [
+          "✘ SaaS → Now we check SAS in the system.",
+          "✘ sass → Now we check SAS in the system."
+        ]
+      },
+      "GUI": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ GUI → Now we check GUI in the system.",
+          "✔ gooey → Now we check GUI in the system."
+        ]
+      },
+      "SQL": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ SQL → Now we check SQL in the system.",
+          "✔ sequel → Now we check SQL in the system.",
+          "✔ S Q L → Now we check SQL in the system."
+        ]
+      },
+      "CLI": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ CLI → Now we check CLI in the system.",
+          "✔ C L I → Now we check CLI in the system."
+        ]
+      },
+      "2FA": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ 2FA → Now we check 2FA in the system.",
+          "✔ two-factor → Now we check two factor in the system.",
+          "✔ two F A → Now we check 2FA in the system."
+        ]
+      },
+      "iOS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ iOS → Now we check iOS in the system.",
+          "✔ eye O S → Now we check iOS in the system."
+        ]
+      },
+      "npm": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ npm → Now we check NPM in the system.",
+          "✔ N P M → Now we check NPM in the system."
+        ]
+      },
+      "nginx": {
+        "say": "engine X",
+        "heard": true,
+        "tried": [
+          "✘ nginx → Now we check Jinx in the system.",
+          "✔ engine X → Now we check engine X in the system."
+        ]
+      },
+      "Ctrl": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ Ctrl → Now we check control in the system.",
+          "✔ control → Now we check control in the system."
+        ]
+      },
+      "curl": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ curl → Now we check curl in the system.",
+          "✘ kurl → Now we check call in the system."
+        ]
+      },
+      "CSV": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ CSV → Now we check CSV in the system.",
+          "✔ C S V → Now we check CSV in the system."
+        ]
+      },
+      "PDF": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ PDF → Now we check PDF in the system.",
+          "✔ P D F → Now we check PDF in the system."
+        ]
+      },
+      "API": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ API → Now we check API in the system.",
+          "✔ A P I → Now we check API in the system."
+        ]
+      },
+      "API key": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ API key → Now we check API key in the system.",
+          "✔ A P I key → Now we check API key in the system."
+        ]
+      },
+      "URL": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ URL → Now we check URL in the system.",
+          "✘ U R L → Now we check you are L in the system."
+        ]
+      },
+      "OAuth": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ OAuth → Now we check Oauth in the system.",
+          "✘ oh auth → Now we check go off in the system."
+        ]
+      },
+      "YAML": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ YAML → Now we check YAML in the system.",
+          "✘ yammel → Now we check Yam-Mell in the system."
+        ]
+      },
+      "webhook": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "✔ webhook → Now we check webhook in the system.",
+          "✔ web hook → Now we check webhook in the system."
+        ]
+      }
+    }
+  }
+}
