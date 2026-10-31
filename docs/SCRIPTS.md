@@ -14,6 +14,28 @@ Scripts are YAML or JSON (data: what the API, MCP and agents use) or JavaScript 
 need loops, conditions or custom logic). The JSON Schema is at `schema/script.schema.json`
 (`tourwright schema`).
 
+## Start from your site
+
+You don't have to find selectors by hand. Point Tourwright at the site and it writes the first script:
+
+```bash
+tourwright explore https://app.example.com/login --draft app.yaml
+tourwright render app.yaml --dry-run    # every step in seconds: checks the targets
+tourwright render app.yaml              # the video, with narration
+```
+
+`explore` opens the page. If it is a login, it finds the form, asks for the user and the password (they are
+not shown while you type and are saved for the next renders, see [Secrets](#secrets)) and logs in off camera.
+Then it visits every section of the site's menu and, for each page, prints its title, the sentence that says
+what the page is for and the targets you can paste into a script (`{ role: button, name: Export }`). It saves
+a screenshot of each page in `videos/<name>/explore/`, with table rows blurred.
+
+`--draft app.yaml` writes all of it as a working script: the login in `setup`, `blur` for the tables, `dismiss`
+for the app's own product tour if it has one, and one narrated stop per section, taken from what each page says
+about itself, and a `focus` (a bubble, a numbered badge, a gentle zoom) on the key controls of each page: its
+filters, tabs and main buttons. The other targets of each page are listed under it as comments: rewrite the
+narration in your own words and point at whatever else matters. `tourwright explore app.yaml` later shows the targets again, logged in.
+
 ## Browser walkthrough
 
 ```yaml
@@ -35,6 +57,7 @@ setup:
   - click: { role: button, name: Sign in }
   - wait: { url: /dashboard }
 warmup: [/invoices/new]                   # opened before recording so they load fast on camera
+dismiss: [{ role: button, name: Skip tour }]   # the app's own tour, a cookie banner…: closed off camera
 
 steps:
   - goto: /invoices/new
@@ -178,6 +201,15 @@ steps:
 
 `if` checks once by default; with `timeout` it waits up to that long, off camera. Inside `try` each step waits
 at most `timeout` ms (default 3000) instead of 30 s, and the first one that fails ends the `try`.
+
+For what the app opens on its own (its product tour, a cookie banner, a chat bubble) use `dismiss` instead: it
+is closed whenever it shows up, on any page, off camera. On each new page the recording waits a moment for it.
+
+```yaml
+dismiss:
+  - { role: button, name: Skip the tour }
+  - { text: Accept cookies }
+```
 
 ### Secrets
 
@@ -378,6 +410,7 @@ A server may load plugins that add actions (and voices). They appear in `tourwri
 ```bash
 tourwright validate video.yaml          # the format, without running it (blocks and variables expanded)
 tourwright render video.yaml --dry-run  # runs every step fast, no voice or video: tests the selectors
+tourwright explore video.yaml           # logs in like the script and lists each page's targets
 ```
 
 When a step fails, Tourwright saves a screenshot of the page (`failure-<name>.png`) next to the output.

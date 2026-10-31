@@ -4,7 +4,7 @@ import { chmodSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, writeF
 import { join } from 'node:path'
 import { log, UserError } from '../util.js'
 import { setupNetwork } from './network.js'
-import { plainHelpers, runSteps } from './steps.js'
+import { dismissing, plainHelpers, runSteps } from './steps.js'
 import { safePath } from './theme.js'
 
 // Local renders keep their sessions in `local`; each API token has its own folder
@@ -22,6 +22,7 @@ export const prepare = async ({ browser, common, script, loaded, network, resolv
   await setupNetwork(pre, network)
   const page = await pre.newPage()
   page.setDefaultTimeout(30_000)
+  await dismissing(page, script.dismiss)
   let valid = false
   if (saved && script.sessionCheck) {
     await page.goto(resolveUrl(script.sessionCheck.goto), { waitUntil: 'networkidle', timeout: 60_000 }).catch(() => {})

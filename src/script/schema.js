@@ -166,6 +166,8 @@ const browser = z.object({
   warmup: z.array(z.string()).optional().describe('Pages opened before recording so they load fast on camera'),
   hosts: z.record(z.string(), z.string().url()).optional().describe('Serve a hostname from another origin: { "app.example.com": "http://localhost:3000" }'),
   blur: z.array(target).optional().describe('Selectors blurred during the whole video'),
+  dismiss: z.array(target).optional()
+    .describe('Things the app puts in the way (its own product tour, a cookie banner, a chat bubble): clicked off camera whenever they show up, like { role: button, name: Skip }'),
   blocks: z.record(z.string().regex(/^[\w-]+$/), z.array(step)).optional().describe('Reusable groups of steps, inserted with `use`'),
   steps: z.array(step).min(1),
 }).strict()

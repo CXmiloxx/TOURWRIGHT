@@ -26,6 +26,11 @@ Usage:
       --timeout <s>                           maximum seconds
       --var name=value                        set a script variable ({{name}}); repeatable
       --json                                  print the manifest as JSON on stdout
+  tourwright explore <url|script> [options]   the sections of a site and the targets to write a script
+      --draft <file.yaml>                     write a first script that goes through every section
+      --pages /a,/b                           these pages instead of the site's navigation
+      --fresh                                 log in again instead of reusing the saved session
+      --json                                  the report as JSON on stdout
   tourwright validate <script> [--var n=v]    check a script without running it (and its secrets)
   tourwright voices [--json]                  voices and engines available on this server
   tourwright say "<text>" [--voice v] [--out file.wav]
@@ -130,6 +135,8 @@ export const main = async argv => {
       'no-edge': { type: 'boolean' },
       'no-chromium': { type: 'boolean' },
       fresh: { type: 'boolean' },
+      draft: { type: 'string' },
+      pages: { type: 'string' },
     },
   })
   if (values.help) return void process.stdout.write(HELP)
@@ -160,6 +167,14 @@ export const main = async argv => {
       if (values.json) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
       else if (result.dryRun) log.info(`dry run: script ran to the end in ${result.seconds} s`)
       else log.info(`video: ${result.paths.video} · ${Math.round(result.duration)} s · ${result.chapters.length} chapters · ${result.captions.length} captions`)
+      return
+    }
+    case 'explore': {
+      if (!positionals[0]) throw new UserError('usage: tourwright explore <url|script> [--draft file.yaml]')
+      const { explore, printReport } = await import('./explore.js')
+      const report = await explore(positionals[0], { draft: values.draft, fresh: values.fresh, pages: values.pages?.split(',').map(p => p.trim()).filter(Boolean) }, config)
+      if (values.json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
+      else printReport(report)
       return
     }
     case 'validate': {

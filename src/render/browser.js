@@ -15,11 +15,31 @@ import { centerOf, createCursor } from './cursor.js'
 import { createGuard, setupNetwork } from './network.js'
 import { OVERLAY } from './overlay.js'
 import { needsPrep, prepare, saveSession, sessionPath } from './session.js'
-import { locate, runSteps } from './steps.js'
+import { dismissing, locate, runSteps } from './steps.js'
 import { resolveTheme, safePath, themeCss } from './theme.js'
 import { callout, camera, focusOff, focusOn, frame, hideTitle, setCaption, showTitle, spotlight } from './visuals.js'
 
-const launch = async ({ headless, display, width, height, locale }, config) => {
+// A local script may point baseUrl at a folder or file next to it ("./site/"): pages without a server.
+// A scheme needs two letters at least, so Windows' "C:\\" is a path.
+export const urlResolver = (script, dir, sandboxed) => {
+  const baseUrl = script.baseUrl && !sandboxed && !/^[a-z][\w+.-]+:/i.test(script.baseUrl)
+    ? pathToFileURL(resolve(dir, script.baseUrl)).href + (/[\\/]$/.test(script.baseUrl) ? '/' : '')
+    : script.baseUrl
+  const resolveUrl = path => {
+    let u
+    try {
+      u = new URL(path, baseUrl)
+    } catch {
+      throw new UserError(`cannot open "${path}": use a full URL or set baseUrl`)
+    }
+    if (sandboxed && u.protocol !== 'http:' && u.protocol !== 'https:') throw new UserError(`only http(s) URLs can be opened: ${path}`)
+    return u.href
+  }
+  const origin = baseUrl && /^https?:/.test(baseUrl) ? new URL(baseUrl).origin : undefined
+  return { resolveUrl, origin }
+}
+
+export const launch = async ({ headless, display, width, height, locale }, config) => {
   if (config.browsersPath) process.env.PLAYWRIGHT_BROWSERS_PATH ??= config.browsersPath
   return chromium.launch({
     headless,
@@ -60,22 +80,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   if (sandboxed && script.hosts && Object.keys(script.hosts).length) throw new UserError('`hosts` is not available for API jobs')
   if (!dryRun && !config.ffmpeg) throw new Error('ffmpeg not found (install ffmpeg or set TOURWRIGHT_FFMPEG)')
 
-  // A local script may point baseUrl at a folder or file next to it ("./site/"): pages without a server.
-  // A scheme needs two letters at least, so Windows' "C:\\" is a path.
-  const baseUrl = script.baseUrl && !sandboxed && !/^[a-z][\w+.-]+:/i.test(script.baseUrl)
-    ? pathToFileURL(resolve(dir, script.baseUrl)).href + (/[\\/]$/.test(script.baseUrl) ? '/' : '')
-    : script.baseUrl
-  const resolveUrl = path => {
-    let u
-    try {
-      u = new URL(path, baseUrl)
-    } catch {
-      throw new UserError(`cannot open "${path}": use a full URL or set baseUrl`)
-    }
-    if (sandboxed && u.protocol !== 'http:' && u.protocol !== 'https:') throw new UserError(`only http(s) URLs can be opened: ${path}`)
-    return u.href
-  }
-  const origin = baseUrl && /^https?:/.test(baseUrl) ? new URL(baseUrl).origin : undefined
+  const { resolveUrl, origin } = urlResolver(script, dir, sandboxed)
   const guard = sandboxed ? createGuard(config.network) : null
   const uploads = new Map()
   const sessionFile = script.session ? sessionPath(config, script.session, opts.sessionNamespace) : null
@@ -123,6 +128,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     const page = await context.newPage()
     page.setDefaultTimeout(30_000)
     page.on('pageerror', e => log.debug(`page error: ${e.message}`))
+    const blocker = await dismissing(page, script.dismiss)
 
     if (mode === 'screen') {
       // The window, sized so the content is exactly the video size with the browser bar above it
@@ -418,6 +424,23 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     // Spanish names for the helpers of JavaScript scripts
     Object.assign(v, { ir: v.goto, titulo: v.title, leyenda: (h, o) => v.say(h, o && typeof o === 'object' && 'dice' in o ? { ...o, speak: o.dice } : o),
       clic: v.click, escribir: v.type, resaltar: v.highlight, acercar: v.zoom, ocultar: v.blur, bajarHasta: v.scrollTo, fueraDeCamara: v.offCamera, subir: v.upload })
+
+    // Before each step: whatever `dismiss` names is closed off camera, so the viewer never sees it
+    // On a page it has not seen yet it also waits a moment, cut from the video: tours open just after the page.
+    if (script.dismiss?.length) {
+      let seen = ''
+      v.beforeStep = async () => {
+        let open = await blocker.pending()
+        if (!open && page.url() !== seen) {
+          seen = page.url()
+          open = await v.offCamera(() => blocker.pending(1500))
+        }
+        if (open) await v.offCamera(async () => {
+          await open.click().catch(() => {})
+          await page.waitForTimeout(400)
+        })
+      }
+    }
 
     for (const t of (script.blur ?? []).filter(t => typeof t !== 'string')) {
       page.on('load', () => v.blur(locate(page, t)).catch(() => {}))

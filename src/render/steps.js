@@ -20,12 +20,33 @@ export const locate = (page, t) => {
   return t.nth !== undefined ? l.nth(t.nth) : l
 }
 
+// `dismiss`: things the app puts in the way (its own product tour, a cookie banner, a chat bubble) are
+// closed whenever they show up. Playwright closes them before an action they block; `pending` tells
+// whether one is on screen now (or shows up within `ms`), so the recording can close it off camera.
+export const dismissing = async (page, targets = []) => {
+  const locators = targets.map(t => locate(page, t).first())
+  for (const l of locators) await page.addLocatorHandler(l, h => h.click().catch(() => {}), { noWaitAfter: true })
+  return {
+    /** @param {number} [ms] @returns {Promise<import('playwright').Locator | null>} */
+    pending: async (ms = 0) => {
+      if (!locators.length) return null
+      if (ms) {
+        const any = locators.reduce((a, l) => a.or(l)).first()
+        await any.waitFor({ state: 'visible', timeout: ms }).catch(() => {})
+      }
+      for (const l of locators) if (await l.isVisible().catch(() => false)) return l
+      return null
+    },
+  }
+}
+
 // How a line is spoken, from a step's value
 const prosodyOf = a => ({ voice: a.voice, rate: a.rate, pitch: a.pitch, volume: a.volume, style: a.style })
 
 // Runs declarative steps with the helpers `v`.
 export const runSteps = async (steps, v, page) => {
   for (const step of steps) {
+    if (v.beforeStep) await v.beforeStep()
     const [action, arg] = Object.entries(step)[0]
     const withTarget = a => (typeof a === 'object' && a && 'target' in a ? a : { target: a })
     switch (action) {

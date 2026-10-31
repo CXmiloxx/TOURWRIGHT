@@ -37,8 +37,11 @@ No MCP? Use the HTTP API ([API.md](API.md)) or the CLI (`tourwright render scrip
 ## A good loop
 
 1. `tourwright_guide` once per session.
-2. Look at the target site yourself (a browser tool, or fetch the HTML) to choose robust targets:
-   `{ role, name }`, `{ label }`, `{ placeholder }`, `{ text }` — not brittle CSS.
+2. Look at the target site to choose robust targets: `{ role, name }`, `{ label }`, `{ placeholder }`,
+   `{ text }` — not brittle CSS. With the CLI, `tourwright explore <url|script> --json` lists the sections of the
+   site and the targets of each page (logged in, when the script has a `setup`), and `--draft file.yaml`
+   writes a first script. Credentials go in `${secret:NAME}`, saved by the user with `tourwright secret set NAME`:
+   never ask for them in the chat.
 3. Write the script. Short narrated sentences; one idea per `say`; a `title` per section.
 4. `tourwright_validate`, then `tourwright_render` with `options.dryRun: true`: it runs every step in seconds and
    fails on the first selector that does not match, with the error.
