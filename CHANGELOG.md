@@ -4,6 +4,63 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.0]
+
+From a site to a video with only the script: Tourwright now explores the site, keeps the credentials out
+of the script, and speaks with natural voices that say tech words right.
+
+### Scripts
+
+- `tourwright explore <url|script>`: finds the login form (asks for the credentials without showing them),
+  logs in off camera, visits every section of the site's menu and lists each page's title, description and
+  targets, with a screenshot (table rows blurred). `--draft` writes a working script: the login in `setup`,
+  one narrated stop per section and numbered focuses on the key filters and buttons.
+- `dismiss`: things the app opens on its own (its product tour, a cookie banner) are closed off camera
+  whenever they show up. `explore` detects them and adds them to the draft.
+
+### Credentials and sessions
+
+- `tourwright secret set|list|delete`: credentials asked for without echo, kept in
+  `TOURWRIGHT_HOME/secrets.json` (owner only) and used as `${secret:NAME}`. `TOURWRIGHT_SECRET_*` still works
+  and wins. Secret values are replaced with `•••` in every log and error.
+- Missing secrets are all named at once with the command that saves each; `validate` checks them and warns
+  when one is used on camera.
+- `tourwright session list|delete`, `render --fresh` and `tourwright forget` (every secret and session). A
+  login in `setup` that does not get past the login page stops the render with a clear message.
+
+### Output
+
+- Each video in its own folder: `videos/<name>/`.
+- `export` (script) or `--export` (CLI): `video`, `audio` (.mp3) and `silent` (the video without sound).
+- `render --open` opens the video; the render ends listing every file it wrote.
+
+### Voices
+
+- Pocket TTS engine (`pocket:`): natural offline voices on the CPU, `lola` in Spanish and `alba`, `jane`,
+  `mary`, `michael`, `george` in English. `tourwright install --pocket`; the default voice once installed.
+- New Edge and Piper voices in English: `jenny`, `guy`, `sonia`, `ryan`.
+- Narration said the way people say it, in the voice's language: acronyms spelled with that language's
+  letter names, numbers in words that agree with what they count, amounts in pesos, emails dictated, long
+  ids digit by digit. Captions keep what is written.
+- Calibrated per engine (`src/voice/calibrated.json`): each term was said written several ways and Whisper
+  picked the one understood best.
+- `tourwright voices` groups voices by language; a sample of each voice comes in `docs/voices/es` and
+  `docs/voices/en`; `voices --samples` records them again; `voices --check` (with `install --whisper`) lists
+  the words a voice gets wrong.
+
+### Install and disk
+
+- `tourwright clean`: what each part takes on disk; removes downloads and leftovers, and with
+  `--voice-cache`, `--pocket` or `--whisper` the voice cache, Pocket TTS or Whisper with their models.
+- `tourwright install` removes what it downloaded once the packages are installed.
+
+### Fixed
+
+- `--help` works on every command, and a mistyped option gives a short message instead of a stack trace.
+- The summary after `tourwright install` shows what was just installed.
+- Edge voices retry when the service returns no audio.
+- The composition test reads ffprobe's output on Windows (`\r\n` line endings).
+
 ## [1.0.0]
 
 First release.
