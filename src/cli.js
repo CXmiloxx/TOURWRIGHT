@@ -74,6 +74,12 @@ Credentials and sessions (kept in TOURWRIGHT_HOME, readable only by you):
   tourwright session delete <name>
   tourwright forget                           delete every saved credential and session
 
+Disk:
+  tourwright clean [options]                  what each part takes, and removes downloads and leftovers
+      --voice-cache                           also the sentences already said (made again when needed)
+      --pocket                                also Pocket TTS and its models (the default voice goes back to Piper)
+      --whisper                               also Whisper and its models (only used by voices --check)
+
 Configuration: environment variables TOURWRIGHT_* or tourwright.config.json (see docs/CONFIGURATION.md).
 `
 
@@ -151,6 +157,7 @@ export const main = async argv => {
       voices: { type: 'string' },
       'no-edge': { type: 'boolean' },
       'no-chromium': { type: 'boolean' },
+      'voice-cache': { type: 'boolean' },
       pocket: { type: 'boolean' },
       whisper: { type: 'boolean' },
       check: { type: 'boolean' },
@@ -250,6 +257,23 @@ export const main = async argv => {
         if (!name) throw new UserError('usage: tourwright session delete <name>')
         log.info(deleteSession(config, name) ? `session ${name} deleted: the next render logs in again` : `there is no session ${name}`)
       } else throw new UserError('usage: tourwright session list|delete [name]')
+      return
+    }
+    case 'clean': {
+      const { clean, diskUsage, human } = await import('./clean.js')
+      const show = async title => {
+        const parts = await diskUsage(config)
+        if (values.json) return parts
+        process.stdout.write(`\n${title}\n`)
+        for (const p of parts) process.stdout.write(`  ${human(p.bytes).padStart(8)}  ${p.name.padEnd(50)} ${p.remove && p.remove !== 'always' ? `${p.remove}: ` : ''}${p.note ?? ''}\n`)
+        return parts
+      }
+      const before = await show('Tourwright on this disk:')
+      const removed = await clean(reloadConfig(), { voiceCache: values['voice-cache'], pocket: values.pocket, whisper: values.whisper })
+      const freed = removed.reduce((a, r) => a + r.bytes, 0)
+      if (values.json) return void process.stdout.write(`${JSON.stringify({ before, removed, freed }, null, 2)}\n`)
+      process.stdout.write(`\n${freed ? `Removed ${human(freed)}: ${removed.map(r => `${r.name} (${human(r.bytes)})`).join(', ')}` : 'Nothing to remove'}\n`)
+      if (!values['voice-cache'] && !values.pocket && !values.whisper) process.stdout.write('More with --voice-cache, --pocket or --whisper (see the list above)\n')
       return
     }
     case 'forget': {
