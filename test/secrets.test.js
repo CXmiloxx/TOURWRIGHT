@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { Readable } from 'node:stream'
 import { test } from 'node:test'
 import { interpolate, secretsIn, secretsShown } from '../src/script/load.js'
-import { clearSecrets, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret } from '../src/secrets.js'
+import { clearSecrets, codeMarker, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret, totp, withCodes } from '../src/secrets.js'
 import { holdsSecret, redact } from '../src/util.js'
 
 const withStore = fn => () => {
@@ -73,6 +73,24 @@ test('a text that holds a secret value is recognised, to blur the field it is ty
   assert.equal(holdsSecret('ana@example.com'), true)
   assert.equal(holdsSecret('demo@example.com'), false)
   assert.equal(holdsSecret(undefined), false)
+}))
+
+test('authenticator codes follow RFC 6238, whatever the spacing or case of the key', () => {
+  // The RFC's key "12345678901234567890" in base32; its 8-digit codes end in these 6 digits
+  const key = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'
+  assert.equal(totp(key, 59_000), '287082')
+  assert.equal(totp('gezd gnbv gy3t qojq gezd gnbv gy3t qojq', 1_111_111_109_000), '081804')
+  assert.throws(() => totp('not a key!'), /not an authenticator key/)
+})
+
+test('${totp:NAME} becomes the code when it is typed, not when the script is loaded', withStore(config => {
+  setSecret(config, 'APP_TOTP', 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ')
+  const out = interpolate({ fill: { text: '${totp:APP_TOTP}' } }, { config })
+  assert.equal(out.fill.text, codeMarker('GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'))
+  assert.equal(holdsSecret(out.fill.text), true)
+  setSecret(config, 'BAD_TOTP', 'hunter2!')
+  assert.throws(() => interpolate({ a: '${totp:BAD_TOTP}' }, { config }), /BAD_TOTP is not an authenticator key/)
+  return withCodes(out.fill.text, () => 40_000).then(code => assert.equal(code, '287082'))
 }))
 
 test('every missing secret is named at once, with the command that saves it', withStore(config => {

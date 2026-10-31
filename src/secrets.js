@@ -3,9 +3,10 @@
 // sits in the script, the shell history or a terminal. A script reads it as "${secret:USER}".
 //
 // The environment wins over the file: TOURWRIGHT_SECRET_USER=… is how a server or CI passes the same secret.
+import { createHmac } from 'node:crypto'
 import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
-import { UserError } from './util.js'
+import { sleep, UserError } from './util.js'
 
 const PREFIX = 'TOURWRIGHT_SECRET_'
 
@@ -104,4 +105,41 @@ export const promptHidden = async (question, input = process.stdin, output = pro
     }
     input.on('data', onData)
   })
+}
+
+// Codes from an authenticator app (TOTP, RFC 6238): the secret is the key the site shows under its QR code
+// ("can't scan it? enter this key"), saved like any other secret and written in a script as "${totp:NAME}".
+// The code is made when it is typed, not when the script is loaded: it only lasts 30 seconds.
+const BASE32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+
+/** @param {string} key  base32, spaces and case ignored */
+export const totpKey = key => {
+  const clean = String(key).toUpperCase().replace(/[\s-]/g, '').replace(/=+$/, '')
+  if (!clean || [...clean].some(c => !BASE32.includes(c))) return null
+  let bits = ''
+  for (const c of clean) bits += BASE32.indexOf(c).toString(2).padStart(5, '0')
+  return Buffer.from(bits.match(/.{8}/g)?.map(b => Number.parseInt(b, 2)) ?? [])
+}
+
+/** @param {string} key  base32 @param {number} [now]  ms */
+export const totp = (key, now = Date.now()) => {
+  const secret = totpKey(key)
+  if (!secret?.length) throw new UserError('that secret is not an authenticator key (letters A-Z and digits 2-7)')
+  const counter = Buffer.alloc(8)
+  counter.writeBigUInt64BE(BigInt(Math.floor(now / 30_000)))
+  const mac = createHmac('sha1', secret).update(counter).digest()
+  const at = mac[mac.length - 1] & 0xf
+  return String((mac.readUInt32BE(at) & 0x7fffffff) % 1_000_000).padStart(6, '0')
+}
+
+// In a loaded script a code stands as a marker holding its key, until it is typed
+const CODE = /⟦totp:([A-Z2-7]+)⟧/g
+export const codeMarker = key => `⟦totp:${String(key).toUpperCase().replace(/[\s-]/g, '').replace(/=+$/, '')}⟧`
+
+// The text with fresh codes. One about to expire is not typed: it waits for the next one.
+export const withCodes = async (text, now = Date.now) => {
+  if (typeof text !== 'string' || !text.includes('⟦totp:')) return text
+  const left = 30_000 - (now() % 30_000)
+  if (left < 4_000) await sleep(left + 200)
+  return text.replace(CODE, (_, key) => totp(key, now()))
 }

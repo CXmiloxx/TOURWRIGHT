@@ -8,7 +8,7 @@ import { basename, dirname, extname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import YAML from 'yaml'
 import { loadConfig } from '../config.js'
-import { getSecret, secretName } from '../secrets.js'
+import { codeMarker, getSecret, secretName, totpKey } from '../secrets.js'
 import { hideSecret, UserError } from '../util.js'
 import { expandScript } from './expand.js'
 import { validateScript } from './schema.js'
@@ -67,8 +67,9 @@ export const loadFile = async (file, { allowJs = true, vars = undefined } = {}) 
 
 // Secrets in declarative scripts: "${secret:PASSWORD}" (saved with `tourwright secret set PASSWORD`, or the
 // TOURWRIGHT_SECRET_PASSWORD variable) and the older "${env:TOURWRIGHT_SECRET_PASSWORD}". Nothing else can be
-// read, so a script sent through the API cannot read the worker's other variables.
-const SECRET = /\$\{(secret|env):([A-Za-z0-9_]+)\}/g
+// read, so a script sent through the API cannot read the worker's other variables. "${totp:NAME}" is the
+// current code of the authenticator key saved as NAME, made when it is typed.
+const SECRET = /\$\{(secret|env|totp):([A-Za-z0-9_]+)\}/g
 
 const nameOf = (kind, name) => {
   if (kind === 'env' && !name.startsWith('TOURWRIGHT_SECRET_')) throw new UserError(`\${env:${name}}: only TOURWRIGHT_SECRET_* variables can be used in scripts`)
@@ -122,5 +123,10 @@ export const interpolate = (value, { allowed = true, config = loadConfig() } = {
   const missing = names.filter(n => values[n] === undefined)
   if (missing.length) throw new UserError(missingSecretsMessage(missing))
   for (const v of Object.values(values)) hideSecret(v)
-  return mapStrings(value, s => s.replace(SECRET, (_, kind, name) => values[nameOf(kind, name)]))
+  for (const [, kind, name] of JSON.stringify(value).matchAll(SECRET)) {
+    if (kind !== 'totp') continue
+    if (!totpKey(values[nameOf(kind, name)])) throw new UserError(`\${totp:${name}}: ${nameOf(kind, name)} is not an authenticator key (the letters and digits the site shows under its QR code)`)
+    hideSecret(codeMarker(values[nameOf(kind, name)]))
+  }
+  return mapStrings(value, s => s.replace(SECRET, (_, kind, name) => (kind === 'totp' ? codeMarker(values[nameOf(kind, name)]) : values[nameOf(kind, name)])))
 }
