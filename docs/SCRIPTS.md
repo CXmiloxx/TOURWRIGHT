@@ -30,8 +30,8 @@ session: demo-user
 sessionCheck: { goto: /, notUrl: /login }
 setup:
   - goto: /login
-  - fill: { target: { label: Email }, text: "${env:TOURWRIGHT_SECRET_EMAIL}" }
-  - fill: { target: { label: Password }, text: "${env:TOURWRIGHT_SECRET_PASSWORD}" }
+  - fill: { target: { label: Email }, text: "${secret:APP_USER}" }        # tourwright secret set APP_USER
+  - fill: { target: { label: Password }, text: "${secret:APP_PASSWORD}" }
   - click: { role: button, name: Sign in }
   - wait: { url: /dashboard }
 warmup: [/invoices/new]                   # opened before recording so they load fast on camera
@@ -181,9 +181,36 @@ at most `timeout` ms (default 3000) instead of 30 s, and the first one that fail
 
 ### Secrets
 
-`${env:TOURWRIGHT_SECRET_NAME}` inside any string is replaced with that environment variable of the worker.
-Only `TOURWRIGHT_SECRET_*` variables can be read, and API jobs can use them only with `TOURWRIGHT_ALLOW_SECRETS=true`.
-What is typed on camera is visible: blur it, or `fill` it inside `setup`.
+Passwords and keys never go in the script. Save them once:
+
+```bash
+tourwright secret set APP_USER          # asks for the value; nothing is shown while you type
+tourwright secret set APP_PASSWORD
+tourwright secret list                  # the names saved (never the values)
+```
+
+and write `"${secret:APP_PASSWORD}"` where the value goes. They are kept in `TOURWRIGHT_HOME/secrets.json`,
+readable only by you; `tourwright secret delete APP_PASSWORD` removes one. A value can also be piped
+(`… | tourwright secret set APP_PASSWORD`) or come from the environment as `TOURWRIGHT_SECRET_APP_PASSWORD`,
+which wins over the saved one: that is how a server or CI passes them. The older `${env:TOURWRIGHT_SECRET_NAME}`
+still works and means the same.
+
+- A secret's value is replaced with `•••` in every log line and error, a failing `fill` included.
+- Missing secrets are all named at once, with the command that saves each one; `tourwright validate` checks them too.
+- What is typed on camera is visible: use secrets in `setup` (off camera). Tourwright warns when one is in `steps`.
+- API jobs can use secrets only with `TOURWRIGHT_ALLOW_SECRETS=true`.
+
+### Sessions
+
+With `session: name`, the login of `setup` is saved after the first render and reused: the next renders skip it
+while `sessionCheck` says it is still valid. If the login fails, the render stops right there and says so.
+
+```bash
+tourwright render app.yaml --fresh      # log in again, ignoring the saved session
+tourwright session list                 # saved logins
+tourwright session delete app           # forget one
+tourwright forget                       # delete every saved secret and session at once
+```
 
 ### Serving a site from another origin
 

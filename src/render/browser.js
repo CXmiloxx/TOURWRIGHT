@@ -1,12 +1,12 @@
 // Browser walkthroughs: a real Chromium follows the script while it is filmed; the narration, captions,
 // chapters and cuts are assembled afterwards by compose().
-import { existsSync } from 'node:fs'
+import { existsSync, rmSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { chromium } from 'playwright'
 import { compose, QUALITIES } from '../compose.js'
 import { loadConfig } from '../config.js'
-import { interpolate } from '../script/load.js'
+import { interpolate, secretsIn } from '../script/load.js'
 import { hash, log, plainText, UserError } from '../util.js'
 import { builtInSound, typingSound } from '../voice/effects.js'
 import { durationOf, markedLine, narrate, parseVoice, stripMarks, withProsody } from '../voice/index.js'
@@ -14,7 +14,7 @@ import { CHROME_MAX, openDisplay, pickCapture, recordScreen, recordScreencast } 
 import { centerOf, createCursor } from './cursor.js'
 import { createGuard, setupNetwork } from './network.js'
 import { OVERLAY } from './overlay.js'
-import { needsPrep, prepare, saveSession } from './session.js'
+import { needsPrep, prepare, saveSession, sessionPath } from './session.js'
 import { locate, runSteps } from './steps.js'
 import { resolveTheme, safePath, themeCss } from './theme.js'
 import { callout, camera, focusOff, focusOn, frame, hideTitle, setCaption, showTitle, spotlight } from './visuals.js'
@@ -39,7 +39,8 @@ const launch = async ({ headless, display, width, height, locale }, config) => {
  */
 export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   const { name, dir, sandboxed } = loaded
-  const script = interpolate(loaded.script, { allowed: !sandboxed || config.api.allowSecrets })
+  if (secretsIn(loaded.script.steps).length) log.warn('a secret is used on camera (in `steps`): it can be seen in the video. Use it in `setup`, or blur the field')
+  const script = interpolate(loaded.script, { allowed: !sandboxed || config.api.allowSecrets, config })
   const progress = opts.onProgress ?? (() => {})
   const quality = QUALITIES[opts.quality ?? script.quality ?? 'hd']
   const width = opts.width ?? script.width ?? quality.width
@@ -77,8 +78,9 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   const origin = baseUrl && /^https?:/.test(baseUrl) ? new URL(baseUrl).origin : undefined
   const guard = sandboxed ? createGuard(config.network) : null
   const uploads = new Map()
-  const sessionsDir = join(config.dataDir, 'sessions', opts.sessionNamespace ?? 'local')
-  const sessionFile = script.session ? join(sessionsDir, `${script.session}.json`) : null
+  const sessionFile = script.session ? sessionPath(config, script.session, opts.sessionNamespace) : null
+  // --fresh: log in again instead of reusing the saved session
+  if (opts.fresh && sessionFile) rmSync(sessionFile, { force: true })
 
   let browser
   let display = null

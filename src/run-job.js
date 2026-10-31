@@ -10,7 +10,7 @@ import { loadConfig } from './config.js'
 import { loadPlugins } from './plugins.js'
 import { render } from './render/index.js'
 import { fromData } from './script/load.js'
-import { UserError } from './util.js'
+import { redact, UserError } from './util.js'
 
 const [input, output, rawOptions] = process.argv.slice(2)
 const options = JSON.parse(rawOptions ?? '{}')
@@ -25,7 +25,7 @@ try {
   process.exit(0)
 } catch (error) {
   // Playwright colors its call logs: plain text for API clients
-  const message = String(error.message ?? error).replace(/\u001b\[[0-9;]*m/g, '')
+  const message = redact(String(error.message ?? error).replace(/\u001b\[[0-9;]*m/g, ''))
   say({ error: message, user: error instanceof UserError })
   process.exit(error instanceof UserError ? 2 : 1)
 }

@@ -78,6 +78,18 @@ export const runWithInput = (command, args, input, { timeout = 120_000, env = un
     child.stdin.end(input)
   })
 
+// Secret values a script used: every log line and error shown to the user has them replaced, so a password
+// typed by a failing `fill` never ends up in a terminal, a job record or an API answer.
+const hidden = new Set()
+export const hideSecret = value => {
+  if (typeof value === 'string' && value.length >= 3) hidden.add(value)
+}
+export const redact = text => {
+  let s = String(text)
+  for (const value of hidden) s = s.split(value).join('•••')
+  return s
+}
+
 const LEVELS = { debug: 10, info: 20, warn: 30, error: 40, silent: 99 }
 const threshold = () => LEVELS[process.env.TOURWRIGHT_LOG_LEVEL ?? 'info'] ?? 20
 // Logs go to stderr so stdout stays clean for machine-readable output (JSON, MCP stdio).
@@ -88,10 +100,11 @@ export const log = Object.fromEntries(
       level,
       (...parts) => {
         if (value < threshold()) return
+        const msg = redact(parts.join(' '))
         if (process.env.TOURWRIGHT_LOG_FORMAT === 'json') {
-          process.stderr.write(`${JSON.stringify({ level, time: new Date().toISOString(), msg: parts.join(' ') })}\n`)
+          process.stderr.write(`${JSON.stringify({ level, time: new Date().toISOString(), msg })}\n`)
         } else {
-          process.stderr.write(`[tourwright] ${level === 'info' ? '' : `${level}: `}${parts.join(' ')}\n`)
+          process.stderr.write(`[tourwright] ${level === 'info' ? '' : `${level}: `}${msg}\n`)
         }
       },
     ])

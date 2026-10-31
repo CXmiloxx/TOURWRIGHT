@@ -6,8 +6,10 @@ import { loadConfig, reloadConfig } from './config.js'
 import { DEFAULT_VOICES, installAll, installVoice } from './install.js'
 import { loadPlugins } from './plugins.js'
 import { render } from './render/index.js'
-import { loadFile } from './script/load.js'
+import { clearSessions, deleteSession, listSessions } from './render/session.js'
+import { loadFile, missingSecretsMessage, secretsIn } from './script/load.js'
 import { jsonSchema } from './script/schema.js'
+import { clearSecrets, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret } from './secrets.js'
 import { log, UserError } from './util.js'
 import { listVoices, narrate } from './voice/index.js'
 
@@ -20,10 +22,11 @@ Usage:
       --quality sd|hd|fullhd|vertical|square
       --capture auto|screen|screencast|playwright
       --dry-run                               run the script fast, without voice or video (tests selectors)
+      --fresh                                 log in again instead of reusing the saved session
       --timeout <s>                           maximum seconds
       --var name=value                        set a script variable ({{name}}); repeatable
       --json                                  print the manifest as JSON on stdout
-  tourwright validate <script> [--var n=v]    check a script without running it
+  tourwright validate <script> [--var n=v]    check a script without running it (and its secrets)
   tourwright voices [--json]                  voices and engines available on this server
   tourwright say "<text>" [--voice v] [--out file.wav]
                                               say one text ([[1s]] = exact pause; voice?rate=+10%&pitch=+2st)
@@ -39,6 +42,15 @@ Usage:
   tourwright serve [--port 4700] [--host h]   HTTP API (+ an embedded worker with --worker)
   tourwright worker                           process queued jobs
   tourwright mcp                              MCP server over stdio, for AI agents
+
+Credentials and sessions (kept in TOURWRIGHT_HOME, readable only by you):
+  tourwright secret set <NAME>                save a credential; the value is asked for and never shown.
+                                              A script uses it as "\${secret:NAME}"
+  tourwright secret list                      the names saved (never the values)
+  tourwright secret delete <NAME>
+  tourwright session list                     logins saved by \`session:\` in scripts
+  tourwright session delete <name>
+  tourwright forget                           delete every saved credential and session
 
 Configuration: environment variables TOURWRIGHT_* or tourwright.config.json (see docs/CONFIGURATION.md).
 `
@@ -117,6 +129,7 @@ export const main = async argv => {
       voices: { type: 'string' },
       'no-edge': { type: 'boolean' },
       'no-chromium': { type: 'boolean' },
+      fresh: { type: 'boolean' },
     },
   })
   if (values.help) return void process.stdout.write(HELP)
@@ -141,6 +154,7 @@ export const main = async argv => {
         timeout: values.timeout ? Number(values.timeout) : undefined,
         width: values.width ? Number(values.width) : undefined,
         height: values.height ? Number(values.height) : undefined,
+        fresh: values.fresh,
         onProgress: p => log.info(`${p.stage}…`),
       }, config)
       if (values.json) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
@@ -152,6 +166,48 @@ export const main = async argv => {
       if (!positionals[0]) throw new UserError('usage: tourwright validate <script>')
       const loaded = await loadFile(positionals[0], { vars })
       log.info(`${positionals[0]}: valid ${loaded.kind} script${loaded.run ? ' (JavaScript)' : ''}`)
+      // Secrets are checked here too: a missing one is found before a render, not during it
+      const missing = secretsIn(loaded.script).filter(n => getSecret(config, n) === undefined)
+      if (missing.length) log.warn(missingSecretsMessage(missing))
+      if (loaded.kind === 'browser' && secretsIn(loaded.script.steps).length) log.warn('a secret is used on camera (in `steps`): use it in `setup`, or blur the field')
+      if (missing.length) process.exitCode = 2
+      return
+    }
+    case 'secret': {
+      const [action, name] = positionals
+      if (action === 'set') {
+        if (!name) throw new UserError('usage: tourwright secret set <NAME>')
+        const saved = setSecret(config, name, await promptHidden(`value of ${secretName(name)} (not shown): `))
+        log.info(`${saved} saved. In a script: "\${secret:${saved}}"`)
+      } else if (action === 'list') {
+        const all = listSecrets(config)
+        if (values.json) return void process.stdout.write(`${JSON.stringify(all, null, 2)}\n`)
+        if (!all.length) process.stdout.write('no secrets saved (tourwright secret set <NAME>)\n')
+        for (const s of all) process.stdout.write(`${s.name.padEnd(28)} ${s.source === 'saved' ? `saved ${s.savedAt.slice(0, 16).replace('T', ' ')}` : 'from the environment'}\n`)
+      } else if (action === 'delete') {
+        if (!name) throw new UserError('usage: tourwright secret delete <NAME>')
+        log.info(deleteSecret(config, name) ? `${secretName(name)} deleted` : `${secretName(name)} was not saved`)
+      } else throw new UserError('usage: tourwright secret set|list|delete [NAME]')
+      return
+    }
+    case 'session': {
+      const [action, name] = positionals
+      if (action === 'list') {
+        const all = listSessions(config)
+        if (values.json) return void process.stdout.write(`${JSON.stringify(all, null, 2)}\n`)
+        if (!all.length) process.stdout.write('no sessions saved\n')
+        for (const s of all) process.stdout.write(`${s.name.padEnd(36)} saved ${s.savedAt.slice(0, 16).replace('T', ' ')}\n`)
+      } else if (action === 'delete') {
+        if (!name) throw new UserError('usage: tourwright session delete <name>')
+        log.info(deleteSession(config, name) ? `session ${name} deleted: the next render logs in again` : `there is no session ${name}`)
+      } else throw new UserError('usage: tourwright session list|delete [name]')
+      return
+    }
+    case 'forget': {
+      const secrets = clearSecrets(config)
+      const sessions = clearSessions(config)
+      log.info(`deleted ${secrets} secret${secrets === 1 ? '' : 's'} and ${sessions} session${sessions === 1 ? '' : 's'}`)
+      if (listSecrets(config).length) log.warn('TOURWRIGHT_SECRET_* variables are still set in the environment: remove them where they were set')
       return
     }
     case 'voices': {

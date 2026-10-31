@@ -7,7 +7,9 @@ import { readFileSync } from 'node:fs'
 import { basename, dirname, extname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import YAML from 'yaml'
-import { UserError } from '../util.js'
+import { loadConfig } from '../config.js'
+import { getSecret, secretName } from '../secrets.js'
+import { hideSecret, UserError } from '../util.js'
 import { expandScript } from './expand.js'
 import { validateScript } from './schema.js'
 
@@ -63,25 +65,52 @@ export const loadFile = async (file, { allowJs = true, vars = undefined } = {}) 
   return fromData(parseText(text, ext === '.json' ? 'json' : 'yaml'), { name, dir: dirname(path), vars })
 }
 
-// Secrets in declarative scripts: "${env:TOURWRIGHT_SECRET_PASSWORD}". Only variables that start with
-// TOURWRIGHT_SECRET_ can be read, so a script sent through the API cannot read the worker's other variables.
-/**
- * Same shape in, same shape out.
- * @template T @param {T} value @param {{ allowed?: boolean }} [options] @returns {T}
- */
-export const interpolate = (value, options = {}) => replaceSecrets(value, options)
+// Secrets in declarative scripts: "${secret:PASSWORD}" (saved with `tourwright secret set PASSWORD`, or the
+// TOURWRIGHT_SECRET_PASSWORD variable) and the older "${env:TOURWRIGHT_SECRET_PASSWORD}". Nothing else can be
+// read, so a script sent through the API cannot read the worker's other variables.
+const SECRET = /\$\{(secret|env):([A-Za-z0-9_]+)\}/g
 
-const replaceSecrets = (value, { allowed = true } = {}) => {
-  if (typeof value === 'string') {
-    return value.replace(/\$\{env:([A-Z0-9_]+)\}/g, (_, name) => {
-      if (!allowed) throw new UserError(`\${env:${name}}: secrets are disabled for this job (TOURWRIGHT_ALLOW_SECRETS=true)`)
-      if (!name.startsWith('TOURWRIGHT_SECRET_')) throw new UserError(`\${env:${name}}: only TOURWRIGHT_SECRET_* variables can be used in scripts`)
-      const v = process.env[name]
-      if (v === undefined) throw new UserError(`\${env:${name}} is not set`)
-      return v
-    })
-  }
-  if (Array.isArray(value)) return value.map(v => replaceSecrets(v, { allowed }))
-  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, replaceSecrets(v, { allowed })]))
+const nameOf = (kind, name) => {
+  if (kind === 'env' && !name.startsWith('TOURWRIGHT_SECRET_')) throw new UserError(`\${env:${name}}: only TOURWRIGHT_SECRET_* variables can be used in scripts`)
+  return secretName(name)
+}
+
+const mapStrings = (value, fn) => {
+  if (typeof value === 'string') return fn(value)
+  if (Array.isArray(value)) return value.map(v => mapStrings(v, fn))
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, mapStrings(v, fn)]))
   return value
+}
+
+// The names of the secrets a script (or a part of it) uses
+/** @param {unknown} value @returns {string[]} */
+export const secretsIn = value => {
+  const names = new Set()
+  mapStrings(value, s => {
+    for (const [, kind, name] of s.matchAll(SECRET)) names.add(nameOf(kind, name))
+    return s
+  })
+  return [...names]
+}
+
+// Every missing secret at once, with the command that saves it: not one error per render attempt
+export const missingSecretsMessage = missing =>
+  `missing secret${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}\n` +
+  `  save ${missing.length > 1 ? 'each one' : 'it'} (the value is asked for and never shown):\n` +
+  missing.map(n => `    tourwright secret set ${n}\n`).join('') +
+  `  or set ${missing.map(n => `TOURWRIGHT_SECRET_${n}`).join(', ')} in the environment`
+
+/**
+ * Same shape in, same shape out. The values used are hidden from every log and error from now on.
+ * @template T @param {T} value @param {{ allowed?: boolean, config?: any }} [options] @returns {T}
+ */
+export const interpolate = (value, { allowed = true, config = loadConfig() } = {}) => {
+  const names = secretsIn(value)
+  if (!names.length) return value
+  if (!allowed) throw new UserError(`secrets are disabled for this job (TOURWRIGHT_ALLOW_SECRETS=true): ${names.join(', ')}`)
+  const values = Object.fromEntries(names.map(n => [n, getSecret(config, n)]))
+  const missing = names.filter(n => values[n] === undefined)
+  if (missing.length) throw new UserError(missingSecretsMessage(missing))
+  for (const v of Object.values(values)) hideSecret(v)
+  return mapStrings(value, s => s.replace(SECRET, (_, kind, name) => values[nameOf(kind, name)]))
 }

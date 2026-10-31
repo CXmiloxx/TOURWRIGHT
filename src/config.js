@@ -55,6 +55,8 @@ export const loadConfig = (overrides = {}) => {
     // Rendered jobs (queue, outputs) and the shared voice cache
     dataDir: resolve(env.TOURWRIGHT_DATA_DIR ?? file.dataDir ?? join(home, 'data')),
     cacheDir: resolve(env.TOURWRIGHT_CACHE_DIR ?? file.cacheDir ?? join(home, 'cache')),
+    // Credentials saved with `tourwright secret set` (see src/secrets.js)
+    secretsFile: resolve(env.TOURWRIGHT_SECRETS_FILE ?? file.secretsFile ?? join(home, 'secrets.json')),
     // Temporary work files. /dev/shm (RAM) is faster than disk when it exists.
     tmpDir: env.TOURWRIGHT_TMP_DIR ?? file.tmpDir ?? (existsSync('/dev/shm') ? '/dev/shm' : undefined),
 
