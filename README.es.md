@@ -76,6 +76,7 @@ npm install -g tourwright
 tourwright install                    # ffmpeg, Piper y voces, edge-tts, Chromium (sin root)
 tourwright install --plan             # solo muestra qué usaría del PC y qué descargaría
 tourwright config set quality fullhd  # tus valores por defecto: calidad, voz, fps… (tourwright config los lista)
+tourwright record https://app.example.com --out tour.yaml   # haces el recorrido a mano y escribe el guion
 tourwright check videos/*.yaml        # qué videos se rompieron tras un despliegue, en qué paso, y el arreglo
 tourwright fix tour.yaml --write      # pone los objetivos nuevos en el guion
 tourwright render tour.yaml --step 7  # graba un solo paso con su voz, sin el video completo

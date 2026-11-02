@@ -930,6 +930,22 @@
         },
         {
           "type": "object",
+          "description": "Starts a chapter here, with nothing on screen: in the chapters of the video and as a section of the guide",
+          "properties": {
+            "chapter": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "description": "Starts a chapter here, with nothing on screen: in the chapters of the video and as a section of the guide"
+            }
+          },
+          "required": [
+            "chapter"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
           "description": "Caption at the bottom, narrated aloud. `speak` is said instead of the caption when it must explain more; voice, rate, pitch, volume and style change how. null clears it",
           "properties": {
             "say": {

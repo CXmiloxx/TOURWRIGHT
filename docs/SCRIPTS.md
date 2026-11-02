@@ -93,6 +93,7 @@ Each step is an object with **exactly one** action.
 | `title` | text, or `{ text, subtitle?, kicker?, animation?, background?, ms?, say? }` | Full-screen title card, animated (3.5 s by default). Starts a chapter. See [Title cards](#title-cards) |
 | `say` | text, `{ caption?, speak?, ms? }` or `null` | Caption at the bottom, **narrated aloud**. `speak` is said instead of the caption when it must explain more. `null` clears it |
 | `caption` | text or `null` | Caption without narration |
+| `chapter` | text | Starts a chapter here with nothing on screen: in the chapters of the video and as a section of the guide |
 | `click` | target | Moves the cursor smoothly to the element and clicks |
 | `dblclick` | target | Same, with a double click |
 | `rightClick` | target | Same, with the right button |
@@ -606,6 +607,34 @@ tourwright render video.yaml --step 7-9
 
 The preview is saved as `<name>-step7.mp4`, next to the full video, which it never replaces.
 
+### Writing a script by doing the tour
+
+```bash
+tourwright record https://app.example.com/login --out tour.yaml
+```
+
+A browser window opens: do the tour by hand and close it. No programming: each click, field and choice becomes
+a step with a stable target (role and name, label, placeholder — what a screen reader says about it) and a
+first narration that knows where the element is:
+
+```yaml
+  - chapter: Iniciar sesión
+  - focus: { target: { placeholder: Tu usuario o tu correo }, say: "Escribe tu {usuario o tu correo}." }
+  - type: { target: { placeholder: Tu usuario o tu correo }, text: "${secret:ACME_USER}" }
+  - focus: { target: { label: Código de verificación }, say: "Escribe el {código} de tu aplicación de autenticación." }
+  - type: { target: { label: Código de verificación }, text: "${totp:ACME_TOTP}" }
+  - chapter: Clientes
+  - focus: { target: { role: link, name: Facturas }, say: "Abre {Facturas} en el menú.", click: true }
+  - focus: { target: { placeholder: Documento o celular }, say: "Para buscar, escribe en {documento o celular}." }
+```
+
+- A menu link is "opened in the menu", a search field "searched in", a Save or Upload button "pressed when
+  everything is ready", a tab "switched to". `--language en` writes it in English.
+- Each screen starts a `chapter`: the video gets its chapters, and the guide its sections.
+- The user and the password of a login become `${secret:…}`, a 2FA code `${totp:…}`: nobody's account is in
+  the script, and it works for whoever has the secrets saved.
+
+The narration is correct but plain: rewrite it in your own words, or let an agent do it (MCP).
 ### The review of every video
 
 While a video is filmed and once it is finished, Tourwright looks for what a viewer would notice: a JavaScript
