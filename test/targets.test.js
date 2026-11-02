@@ -3,7 +3,36 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
+import YAML from 'yaml'
 import { acquireLock } from '../src/lock.js'
+import { asTarget, describeTarget, isMissingElement, targetsOf } from '../src/render/targets.js'
+import { validateScript } from '../src/script/schema.js'
+
+test('a value split by an unquoted comma says how to write it', () => {
+  const data = YAML.parse('title: x\nsteps:\n  - type: { target: { placeholder: Nombres, apellidos o celular }, text: ana }\n')
+  const r = validateScript(data)
+  assert.equal(r.ok, false)
+  assert.match(r.errors.join('\n'), /write placeholder: "Nombres, apellidos o celular"/)
+})
+
+test('targets are written the way a script writes them, quoted only when YAML needs it', () => {
+  assert.equal(asTarget({ placeholder: 'Tu usuario o tu correo' }), '{ placeholder: Tu usuario o tu correo }')
+  assert.equal(asTarget({ placeholder: 'Nombres, apellidos o celular' }), '{ placeholder: "Nombres, apellidos o celular" }')
+  assert.equal(asTarget({ role: 'button', name: 'Ingresar' }), '{ role: button, name: Ingresar }')
+  assert.equal(describeTarget({ label: 'Usuario o correo' }), 'the field labelled "Usuario o correo"')
+  assert.equal(describeTarget({ role: 'button', name: 'Entrar', nth: 1 }), 'the button named "Entrar" (number 2)')
+})
+
+test('the targets of a step and the errors that mean "not there"', () => {
+  assert.deepEqual(targetsOf('click', { role: 'button', name: 'A' }), [{ role: 'button', name: 'A' }])
+  assert.deepEqual(targetsOf('type', { target: { label: 'B' }, text: 'x' }), [{ label: 'B' }])
+  assert.deepEqual(targetsOf('drag', { from: '#a', to: '#b' }), ['#a', '#b'])
+  assert.deepEqual(targetsOf('say', 'hello'), [])
+  assert.equal(isMissingElement(Object.assign(new Error('x'), { name: 'TimeoutError' })), true)
+  assert.equal(isMissingElement(new Error('locator.evaluate: Timeout 30000ms exceeded.')), true)
+  assert.equal(isMissingElement(new Error('net::ERR_NAME_NOT_RESOLVED')), false)
+})
+
 test('the browser lock lets one holder in at a time', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'tw-lock-'))
   try {

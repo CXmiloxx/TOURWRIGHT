@@ -222,8 +222,26 @@ export const validateScript = data => {
   if (r.success) return { ok: true, script: r.data }
   return {
     ok: false,
-    errors: r.error.issues.map(i => `${i.path.length ? i.path.join('.') : '(root)'}: ${i.message}`),
+    errors: r.error.issues.map(i => `${i.path.length ? i.path.join('.') : '(root)'}: ${i.message}${quotesHint(data, i)}`),
   }
+}
+
+// `{ placeholder: Nombres, apellidos o celular }` is split by YAML at the comma: "apellidos o celular" becomes a
+// key without a value. Say which value lost its quotes, written the way it should be.
+const quotesHint = (data, issue) => {
+  if (issue.code !== 'unrecognized_keys') return ''
+  const obj = issue.path.reduce((o, k) => o?.[k], data)
+  if (!obj || typeof obj !== 'object') return ''
+  const keys = Object.keys(obj)
+  for (const key of issue.keys ?? []) {
+    if (obj[key] !== null) continue
+    const before = keys[keys.indexOf(key) - 1]
+    if (before && typeof obj[before] === 'string') {
+      return ` — a comma or a colon splits an unquoted value: write ${before}: "${obj[before]}, ${key}"`
+    }
+    return ' — missing quotes around a value with a comma or a colon?'
+  }
+  return ''
 }
 
 // JSON Schema for editors and agents. Steps are spelled out as "one of these single-key objects",

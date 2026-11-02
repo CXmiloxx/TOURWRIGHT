@@ -139,6 +139,11 @@ click: { testId: checkout }             # data-testid
 click: { css: .card, nth: 2 }           # the third match
 ```
 
+A field whose `<label>` is not linked to it (apps that wrap the input to add an icon) is still found by
+`{ label: … }`: Tourwright tries the placeholder, the accessible name and the first field after that visible
+text, and warns with the target that matches it directly. A value with a comma or a colon goes in quotes:
+`{ placeholder: "Nombres, apellidos o celular" }`.
+
 ### Rhythm and timing
 
 - A new `say`, a `title` or an off-camera wait **waits for the previous narration to finish**: write
@@ -542,4 +547,15 @@ tourwright render video.yaml --dry-run  # runs every step fast, no voice or vide
 tourwright explore video.yaml           # logs in like the script and lists each page's targets
 ```
 
-When a step fails, Tourwright saves a screenshot of the page (`failure-<name>.png`) next to the output.
+When a step fails, Tourwright saves a screenshot of the page (`failure-<name>.png`) next to the output, and the
+error names the element it looked for and what the page offers instead, as targets to paste:
+
+```text
+step 3 (type): cannot find the field labelled "Clave"
+    on this page (https://app.example.com/login): { placeholder: Tu usuario o tu correo } · { label: Contraseña } · { role: button, name: Ingresar }
+```
+
+A dry run waits 5 s for each element (a recording waits 30 s) and does not stop at the first missing one: it
+goes to the end and lists every step that failed. The screenshot marks every field, button and link the page
+has, each with the target that finds it.
+
