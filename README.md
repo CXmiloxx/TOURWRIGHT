@@ -77,6 +77,7 @@ tourwright install                    # ffmpeg, Piper + voices, edge-tts, Chromi
 tourwright install --plan             # only show what it would use from this PC and what it would download
 tourwright config set quality fullhd  # your own defaults: quality, voice, fps… (tourwright config lists them)
 tourwright record https://app.example.com --out tour.yaml   # do the tour by hand: it writes the script
+tourwright guide tour.yaml --open     # the same tour as a step-by-step guide with screenshots (HTML, PDF, Markdown)
 tourwright check videos/*.yaml        # which videos broke after a deploy, at which step, and the fix
 tourwright fix tour.yaml --write      # puts the new targets in the script
 tourwright render tour.yaml --step 7  # film one step with its voice, without the whole video

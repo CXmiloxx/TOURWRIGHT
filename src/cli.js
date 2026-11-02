@@ -53,6 +53,8 @@ Usage:
   tourwright record <url> [--out f.yaml]      do the tour by hand in a browser window: each click and field
                                               becomes a step with a first narration (--language es|en)
   tourwright validate <script> [--var n=v]    check a script without running it (and its secrets)
+  tourwright guide <script> [--out d] [--open] the script as a step-by-step guide with screenshots: one HTML file
+                                              to send or print as PDF, and Markdown with its images
   tourwright check <script…> [--json]         dry-run each one: every broken step, with the likely fix; exit 1
       --report <file.md>                      if one broke (CI). In GitHub Actions it also fills the job summary
   tourwright fix <script> [--write]           propose the new target for each broken step; --write saves them
@@ -426,6 +428,13 @@ export const main = async argv => {
       const out = values.out ?? 'recorded.yaml'
       if (existsSync(out) && !values.yes) throw new UserError(`${out} already exists: choose another --out (or --yes to replace it)`)
       await record(positionals[0], { out, language: values.language ?? 'es' }, config)
+      return
+    }
+    case 'guide': {
+      if (!positionals[0]) throw new UserError('usage: tourwright guide <script> [--out dir] [--open]')
+      const result = await render(await loadFile(positionals[0], { vars }), { out: values.out, guide: true }, config)
+      log.info(`guide: ${result.guide.steps} steps → ${result.guide.html} (and .md, with its images)`)
+      if (values.open) openPath(result.guide.html)
       return
     }
     case 'check': {
