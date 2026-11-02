@@ -22,6 +22,12 @@ export const venvBin = (home, name) => (isWindows ? join(home, 'venv', 'Scripts'
 const pocketPython = (home, file) =>
   env.TOURWRIGHT_POCKET_PYTHON ?? file.tts?.pocket?.python ?? (findBinary(venvBin(home, 'pocket-tts')) ? findBinary(venvBin(home, 'python')) : null)
 
+// piper-tts 1.8 in that environment: Piper kept loaded during a render (src/voice/piper_voice.py). Not when a piper
+// command was set on purpose.
+const piperPython = (home, file) =>
+  env.TOURWRIGHT_PIPER_PYTHON ?? file.tts?.piper?.python ??
+  (!env.TOURWRIGHT_PIPER_BIN && !file.tts?.piper?.bin && findBinary(venvBin(home, 'piper')) ? findBinary(venvBin(home, 'python')) : null)
+
 const readConfigFile = () => {
   const file = env.TOURWRIGHT_CONFIG ?? (existsSync('tourwright.config.json') ? 'tourwright.config.json' : null)
   if (!file) return {}
@@ -82,6 +88,7 @@ export const loadConfig = (overrides = {}) => {
       defaultVoice: env.TOURWRIGHT_VOICE ?? file.tts?.defaultVoice ?? (pocket ? 'pocket:lola' : 'piper:es_MX-claude-high'),
       pocket: { python: pocket },
       piper: {
+        python: piperPython(home, file),
         bin: findBinary(env.TOURWRIGHT_PIPER_BIN, file.tts?.piper?.bin, 'piper', join(home, 'piper', 'piper'), venvBin(home, 'piper')),
         voicesDir: resolve(env.TOURWRIGHT_PIPER_VOICES ?? file.tts?.piper?.voicesDir ?? join(home, 'voices')),
       },

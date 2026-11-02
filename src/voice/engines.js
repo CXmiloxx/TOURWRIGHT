@@ -4,7 +4,7 @@
 import { spawn } from 'node:child_process'
 import { existsSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { run, runWithInput, sleep, UserError } from '../util.js'
+import { log, run, runWithInput, sleep, UserError } from '../util.js'
 import { pythonProcess } from './python.js'
 
 // "+10%" / "-4.5%" → "+10%" / "-5%" (edge-tts takes whole signed numbers only)
@@ -15,19 +15,36 @@ const signed = (value, unit) => {
   return `${n < 0 ? '-' : '+'}${Math.abs(n)}${unit}`
 }
 
+const brokenPython = new Set()
+
 const piper = {
   native: ['rate'],
   available: async config => {
-    if (!config.tts.piper.bin) return { ok: false, reason: 'piper binary not found (tourwright install, or TOURWRIGHT_PIPER_BIN)' }
-    return { ok: true, bin: config.tts.piper.bin, voicesDir: config.tts.piper.voicesDir }
+    const { bin, python, voicesDir } = config.tts.piper
+    if (python) return { ok: true, python, voicesDir, note: 'kept loaded (piper-tts)' }
+    if (!bin) return { ok: false, reason: 'piper not found (tourwright install, or TOURWRIGHT_PIPER_BIN)' }
+    return { ok: true, bin, voicesDir }
   },
   synthesize: async ({ text, voice, out, config }) => {
-    if (!config.tts.piper.bin) throw new Error('piper not installed (run `tourwright install` or set TOURWRIGHT_PIPER_BIN)')
+    const { bin, python } = config.tts.piper
+    if (!bin && !python) throw new Error('piper not installed (run `tourwright install` or set TOURWRIGHT_PIPER_BIN)')
     const model = join(config.tts.piper.voicesDir, `${voice.id}.onnx`)
     if (!existsSync(model)) throw new UserError(`piper voice ${voice.id} not installed: tourwright install-voice ${voice.id}`)
-    const args = ['--model', model, '--output_file', out]
     // length_scale > 1 speaks slower; a "rate" like edge's (-10%) is translated
     const rate = voice.options.rate ? 1 / (1 + Number.parseFloat(voice.options.rate) / 100) : voice.options.lengthScale
+    // piper-tts 1.8 keeps the voice loaded for the whole render: about 5× faster per sentence than the command
+    if (python && !brokenPython.has(python)) {
+      const lengthScale = rate ? Number(rate) : undefined
+      try {
+        return void (await pythonProcess(python, 'piper_voice.py', [model]).send({ text, out, lengthScale, speaker: voice.options.speaker }))
+      } catch (error) {
+        // An older piper-tts cannot be kept loaded: its `piper` command still works
+        if (!bin || !/piper_voice\.py (stopped|did not start)/.test(error.message)) throw error
+        brokenPython.add(python)
+        log.warn(`piper-tts cannot stay loaded (${error.message.split('\n')[0]}); using the slower piper command`)
+      }
+    }
+    const args = ['--model', model, '--output_file', out]
     if (rate) args.push('--length_scale', String(rate))
     if (voice.options.speaker) args.push('--speaker', voice.options.speaker)
     await runWithInput(config.tts.piper.bin, args, text, { timeout: 120_000 })
