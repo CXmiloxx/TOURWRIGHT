@@ -559,3 +559,23 @@ A dry run waits 5 s for each element (a recording waits 30 s) and does not stop 
 goes to the end and lists every step that failed. The screenshot marks every field, button and link the page
 has, each with the target that finds it.
 
+### When the site changed: check and fix
+
+```bash
+tourwright check videos/*.yaml                # every script, in seconds: what broke and the likely fix
+tourwright check videos/*.yaml --report r.md  # the same as Markdown (exit code 1 when one broke)
+tourwright fix videos/login.yaml              # the new target for each broken step
+tourwright fix videos/login.yaml --write      # …and saves them in the file, keeping its comments
+```
+
+`fix` proposes the element of the same kind whose text is closest to the old one (accents, case and filler
+words aside), or the only one of its kind on the page ("Entrar" became "Ingresar"). It writes the new target
+wherever the old one is written, also inside `blocks`. In GitHub Actions, `check` also fills the job summary,
+so a deploy that breaks a video says which one and at which step:
+
+```yaml
+- run: npx tourwright check videos/*.yaml
+```
+
+Agents get the same with the MCP tool `tourwright_check`, which also returns the fixed script.
+

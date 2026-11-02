@@ -30,6 +30,7 @@ No MCP? Use the HTTP API ([API.md](API.md)) or the CLI (`tourwright render scrip
 | `tourwright_guide` | The full script format. Call it first |
 | `tourwright_voices` | Voices that work on the server |
 | `tourwright_validate` | Check a script; returns precise errors (`steps.3.click: …`) |
+| `tourwright_check` | Run a script fast against the real site: every broken step, the targets its page offers, the likely fix and the fixed script (local server only) |
 | `tourwright_render` | Render; waits by default and returns links, local paths, duration, chapters, captions |
 | `tourwright_job` | Status of a job started with `wait: false` |
 | `tourwright_render_file` | Render a file from disk (only with `TOURWRIGHT_MCP_ALLOW_FILES=true`) |
@@ -46,6 +47,8 @@ No MCP? Use the HTTP API ([API.md](API.md)) or the CLI (`tourwright render scrip
 4. `tourwright_validate`, then `tourwright_render` with `options.dryRun: true`: it runs every step in seconds and
    fails on the first selector that does not match, with the error.
 5. Fix, then render for real. Return the `links.video` to the user.
+6. When a video that used to work breaks (the site changed), call `tourwright_check`: it says which step and
+   proposes the new target; check the `fixed` script, then render again.
 
 For slides, send images as `assets` (base64) and refer to them by name. To make the same video for several
 customers or products, write `{{variables}}` in the script and pass `vars` to `tourwright_render`.

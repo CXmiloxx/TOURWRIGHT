@@ -12,6 +12,7 @@ import { linkSigner } from './jobs/links.js'
 import { createJob, resultWithLinks } from './jobs/service.js'
 import { createBackend, publicJob } from './jobs/store.js'
 import { loadPlugins } from './plugins.js'
+import { applyFixes, checkScript } from './repair.js'
 import { outputBase, render } from './render/index.js'
 import { loadFile, fromData, parseText } from './script/load.js'
 import { log, sleep, UserError } from './util.js'
@@ -137,6 +138,21 @@ export const startMcp = async config => {
     description: 'Status, progress and (when done) the result of a render job.',
     inputSchema: { id: z.string() },
   }, safe(async ({ id }) => text(await client.job(id))))
+
+  // Runs a script as a dry run in this process: every broken step, the elements on its page and a proposed fix
+  if (!remote) {
+    server.registerTool('tourwright_check', {
+      title: 'Check a script and propose fixes',
+      description: 'Run a script fast, without voice or video, against the real site. Returns every step that failed (the target it looked for, the page, the targets that page offers) and, when it can tell, the new target for it. For a YAML script given as text it also returns `fixed`: the same text with those targets replaced (comments kept). Use it after the site changed, then validate and render.',
+      inputSchema: { script: scriptInput, vars: varsInput },
+    }, safe(async ({ script, vars }) => {
+      const loaded = fromData(typeof script === 'string' ? parseText(script) : script, { sandboxed: true, vars })
+      const result = await checkScript(loaded, {}, config)
+      const fixes = result.failures.map(f => f.fix).filter(Boolean)
+      const fixed = typeof script === 'string' && fixes.length ? applyFixes(script, fixes).text : undefined
+      return text({ ...result, failures: result.failures.map(({ fix, ...f }) => ({ ...f, fix: fix && { from: fix.from, to: fix.to, confidence: fix.score } })), fixed })
+    }))
+  }
 
   // Scripts on this machine's disk, with local images and JavaScript. Trusted: off unless enabled.
   if (!remote && process.env.TOURWRIGHT_MCP_ALLOW_FILES === 'true') {
