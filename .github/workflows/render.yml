@@ -1,0 +1,41 @@
+# A real install and real videos on one system: `tourwright install` + slides + a browser walkthrough + the demo app.
+# Called by ci.yml (Linux and Windows, on every change) and macos.yml (macOS, daily and for each release).
+name: render
+on:
+  workflow_call:
+    inputs:
+      os: { type: string, required: true }
+      capture: { type: string, required: true }
+jobs:
+  render:
+    runs-on: ${{ inputs.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm }
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+      # No static ffmpeg build for macOS: Homebrew's, as the installer tells users
+      - if: runner.os == 'macOS'
+        run: brew install ffmpeg
+      - run: npm ci
+      - run: node bin/tourwright.js install --voices es_MX-claude-high,en_US-lessac-medium --no-edge
+      - if: runner.os == 'Linux'
+        run: sudo npx playwright install-deps chromium
+      - run: node bin/tourwright.js render examples/slides.yaml --out out/
+      - run: node bin/tourwright.js render examples/example-com.yaml --voice lessac --capture ${{ inputs.capture }} --out out/
+      # A real app, served here: login with a 2FA code, masked data, an upload, a long process, a live notice.
+      # `check` fails the job naming the broken step (and fills the job summary); then the video is made.
+      - name: Demo app, end to end
+        shell: bash
+        env:
+          TOURWRIGHT_SECRET_ACME_USER: demo@acme.test
+          TOURWRIGHT_SECRET_ACME_PASSWORD: demo123
+          TOURWRIGHT_SECRET_ACME_TOTP: JBSWY3DPEHPK3PXP
+        run: |
+          node examples/app/server.js &
+          sleep 1
+          node bin/tourwright.js check examples/app.yaml examples/example-com.yaml examples/features.yaml
+          node bin/tourwright.js render examples/app.yaml --capture ${{ inputs.capture }} --out out/
+      - uses: actions/upload-artifact@v7
+        with: { name: "videos-${{ inputs.os }}", path: out/ }

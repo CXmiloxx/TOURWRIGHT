@@ -1,0 +1,14 @@
+# The real render on macOS. GitHub's macOS runners are scarce: on every push the job often waited 15 minutes and
+# was cancelled, turning CI red with nothing broken. It runs once a day on main, for each published release, and
+# by hand (Actions → macos → Run workflow); GitHub emails when it fails.
+name: macos
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  release:
+    types: [published]
+  workflow_dispatch:
+jobs:
+  render:
+    uses: ./.github/workflows/render.yml
+    with: { os: macos-latest, capture: screencast }
