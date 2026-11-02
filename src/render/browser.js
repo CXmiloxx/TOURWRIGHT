@@ -1,6 +1,6 @@
 // Browser walkthroughs: a real Chromium follows the script while it is filmed; the narration, captions,
 // chapters and cuts are assembled afterwards by compose().
-import { existsSync, rmSync } from 'node:fs'
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { compose, qualityOf } from '../compose.js'
@@ -17,6 +17,7 @@ import { OVERLAY } from './overlay.js'
 import { needsPrep, prepare, saveSession, sessionPath } from './session.js'
 import { dismissing, hideTyped, locate, plainHelpers, runSteps, setStepTimeout } from './steps.js'
 import { maskInPage } from './mask.js'
+import { clickWithEffect, reportFindings, reviewVideo, watchPage } from './review.js'
 import { markOffered } from './targets.js'
 import { resolveTheme, safePath, themeCss, titleHtml } from './theme.js'
 import { callout, camera, focusOff, focusOn, frame, hideTitle, setCaption, showTitle, spotlight } from './visuals.js'
@@ -136,6 +137,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     setStepTimeout(page, dryRun ? DRY_RUN_TIMEOUT : 30_000)
     page.on('pageerror', e => log.debug(`page error: ${e.message}`))
     const blocker = await dismissing(page, script.dismiss)
+    // What goes wrong on the page while it is filmed, for the review at the end
+    const watcher = watchPage(page, () => v.step)
 
     if (mode === 'screen') {
       // The window, sized so the content is exactly the video size with the browser bar above it
@@ -267,8 +270,11 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         await moveTo(x, y)
         await wait(250)
         if (clickSound) effect(clickSound)
-        await locator.click(options)
-        await wait(400)
+        const changed = await clickWithEffect(page, locator, async () => {
+          await locator.click(options)
+          await wait(400)
+        })
+        if (changed === false) watcher.add({ kind: 'no-effect', message: `the click on ${locator} changed nothing on the page (wrong element, or it needs a wait?)` })
       },
       check: async (locator, on = true) => {
         locator = locator.first()
@@ -503,7 +509,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       closeStreams()
       if (sessionFile) saveSession(sessionFile, await context.storageState())
       await context.close()
-      return { dryRun: true, title: script.title ?? name, seconds: Number(end.toFixed(1)), chapters: marks.length, captions: captions.length }
+      reportFindings(watcher.findings)
+      return { dryRun: true, title: script.title ?? name, seconds: Number(end.toFixed(1)), chapters: marks.length, captions: captions.length, review: watcher.findings }
     }
 
     let source = rawFile
@@ -520,7 +527,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
 
     progress({ stage: 'encoding' })
     const music = typeof script.music === 'string' ? { file: script.music } : script.music
-    return await compose({
+    const result = await compose({
       video: source,
       fps,
       end,
@@ -538,6 +545,11 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       workDir: work,
       voice,
     }, config)
+    // The finished video is looked at too; the findings go into its manifest
+    const review = [...watcher.findings, ...(await reviewVideo(result.paths.video, config))]
+    reportFindings(review)
+    writeFileSync(result.paths.manifest, JSON.stringify({ ...JSON.parse(readFileSync(result.paths.manifest, 'utf8')), review }, null, 2))
+    return { ...result, review }
   } finally {
     await cleanup()
   }
