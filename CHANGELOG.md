@@ -4,6 +4,79 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [2.0.0]
+
+A script written by doing the tour, a guide from the same script, narration by your own AI, nothing
+downloaded twice, and videos that keep pace with what happens on screen.
+
+### Breaking
+
+- Node.js 22 or newer (Node 20 reached its end of life in April 2026). The install scripts stop on older
+  versions with "Tourwright needs Node.js 22 or newer".
+
+### Installing
+
+- `tourwright install` uses what the PC already has before downloading anything: Chrome, Edge or Chromium
+  (also a build left by another Playwright or Puppeteer version, and `CHROME_PATH`, `CHROME_BIN`,
+  `PUPPETEER_EXECUTABLE_PATH`), ffmpeg from winget, scoop, Chocolatey, Homebrew, MacPorts or Nix, Piper and
+  edge-tts installed with pip, pipx, conda or pyenv, Piper voices in the Hugging Face cache or in
+  `TOURWRIGHT_PIPER_VOICE_DIRS`, and the system's Python 3.10–3.13. Snap and Flatpak browsers are skipped.
+- It shows what it will use and what it will download, with sizes, and asks first in a terminal
+  (`--yes` skips the question, `--plan` only shows it). At the end it prints one line; `doctor` has the list.
+- Its own Chromium goes into `TOURWRIGHT_HOME/browsers`: a folder other tools share
+  (`PLAYWRIGHT_BROWSERS_PATH`, `/opt/ms-playwright`) is only read, never written to.
+- Piper is now `piper-tts` 1.8 (OHF-Voice/piper1-gpl; rhasspy/piper is archived), kept loaded during a
+  render: about 5× faster per sentence. The standalone build remains for 32-bit ARM and Windows on ARM.
+- ffmpeg comes from a release series (9.0) instead of the development branch; the Linux build moved to
+  BtbN (johnvansickle.com answered with a web page). A download that returns a web page says so.
+
+### Recording
+
+- `--lock <file>` (`TOURWRIGHT_BROWSER_LOCK`): one browser at a time on the machine. On Linux it is the same
+  lock as `flock <file>`, so other tools take turns with Tourwright.
+- A browser that does not start in time is started again twice (after 10 s and 30 s).
+- Your own defaults: `tourwright config set quality fullhd` (also `voice`, `fps`, `capture`, `pause`, `polish`,
+  `preset`…) for every project on the machine, checked before they are saved; `tourwright config` shows each
+  value and where it comes from. `TOURWRIGHT_QUALITY`, `TOURWRIGHT_FPS` and `TOURWRIGHT_CAPTURE` do the same.
+  The built-in default stays 720p. An unknown `--quality` now says which ones exist.
+- Narration and actions keep pace: a `focus` acts as the voice stops (no extra 2 s), its voice starts while
+  the cursor travels, and an element already on screen is not waited for. A login on camera went from 22 s
+  to 13 s with the same narration.
+
+### Writing and keeping scripts
+
+- `tourwright record <url>`: do the tour by hand in a browser window; each click, field and choice becomes a step
+  with a stable target and a first narration that says where the element is ("Abre Clientes en el menú",
+  "Para buscar, escribe en…"), a `chapter` per screen, and the user, password and 2FA code of a login as
+  `${secret:…}` and `${totp:…}`.
+- `tourwright guide <script>`: the same script as a step-by-step guide with a marked screenshot per step — one
+  HTML file to send or print, and Markdown with its pictures. Secrets and codes never show.
+- `tourwright narrate <script> [--write]`: the narration rewritten from what each screen shows, by the AI the user
+  brings — Claude (official SDK, optional), any OpenAI-compatible server, or Ollama on the same PC. Every line is
+  checked (the focus word stays, no secrets) and the old script is kept when it is saved.
+- `chapter: Name` starts a chapter of the video (and a section of the guide) with nothing on screen.
+- `tourwright check <scripts…>`: every script as a dry run, every broken step and its likely fix; exit code 1
+  when one broke, `--report` writes Markdown and GitHub Actions gets a job summary.
+- `tourwright fix <script> [--write]`: the new target for each broken step (the closest element of the same
+  kind, or the only one), written into the YAML keeping its comments. The MCP tool `tourwright_check` does the
+  same for agents and returns the fixed script.
+- `render --step 7` (or `7-9`): film only those steps with their voice; the steps before run fast off camera.
+- `mask`: emails, phones, ID numbers, names or any pattern on screen replaced by invented data, the same for the
+  same value. Only what is drawn changes; an editable field keeps its real value.
+- Every video is reviewed: page errors, 5xx answers, clicks that changed nothing and blank or black screens are
+  printed with their step and saved in the manifest under `review`.
+- `examples/app`: a demo app with a 2FA login, personal data, an upload, a long process and a live notice;
+  `examples/app.yaml` films it and CI checks and renders it on Linux, macOS and Windows.
+
+### Errors
+
+- A missing element names what was looked for and lists what the page offers, as targets to paste.
+- `{ label: … }` finds a field whose label is not linked to it (an input wrapped to add an icon) by its
+  placeholder, accessible name or the text before it, and warns with the direct target.
+- A dry run waits 5 s per element, goes on to the end and lists every step that failed. The screenshot of a
+  failure marks every field, button and link on the page with the target that finds it.
+- A value split by an unquoted comma in YAML says how to quote it.
+
 ## [1.2.0]
 
 Logins of every kind on video, and title cards that move.
