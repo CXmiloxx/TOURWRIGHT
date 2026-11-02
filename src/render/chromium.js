@@ -8,7 +8,8 @@
 import { closeSync, existsSync, openSync, readdirSync, readSync, realpathSync, statSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { basename, join } from 'node:path'
-import { findBinary, isWindows, UserError } from '../util.js'
+import { acquireLock } from '../lock.js'
+import { findBinary, isWindows, log, sleep, UserError } from '../util.js'
 
 const isMac = process.platform === 'darwin'
 
@@ -129,20 +130,45 @@ export const findChromium = async config => {
   return { path: undefined, source: 'missing' }
 }
 
-/** chromium.launch with the browser findChromium picks, and a fix the user can apply when it does not start */
+// How many times a browser that does not start is started again, and the pause before each try (a machine
+// with a full disk or a busy CPU often starts it fine a little later)
+const LAUNCH_ATTEMPTS = 3
+const LAUNCH_BACKOFF_MS = [10_000, 30_000]
+
+/**
+ * chromium.launch with the browser findChromium picks: started again when it does not start in time, under
+ * the machine's browser lock when there is one (config.browserLock), and with a fix the user can apply when
+ * it never starts.
+ */
 export const launchChromium = async (config, options) => {
   const { chromium } = await import('playwright')
   const found = await findChromium(config)
   if (found.source === 'missing') {
     throw new UserError('no browser to record with: run `tourwright install`, install Chrome or Edge, or set TOURWRIGHT_CHROMIUM')
   }
-  try {
-    return await chromium.launch({ ...options, ...(found.path ? { executablePath: found.path } : {}) })
-  } catch (error) {
-    if (found.source === 'system') {
-      throw new UserError(`the browser ${found.path} did not start (${String(error.message).split('\n')[0]}). ` +
-        "Use another one with TOURWRIGHT_CHROMIUM, or Playwright's own: TOURWRIGHT_SYSTEM_BROWSER=0 tourwright install")
+  const release = config.browserLock ? await acquireLock(config.browserLock) : () => {}
+  let lastError
+  for (let attempt = 1; attempt <= LAUNCH_ATTEMPTS; attempt++) {
+    try {
+      const browser = await chromium.launch({ ...options, ...(found.path ? { executablePath: found.path } : {}) })
+      browser.on('disconnected', release)
+      return browser
+    } catch (error) {
+      lastError = error
+      const first = String(error.message).split('\n')[0]
+      // A browser that cannot run at all (missing libraries, wrong file) will not start on a second try
+      if (!/timeout|timed out|Target.*closed|crashed|ECONNRESET|EAGAIN|ENOSPC|EMFILE/i.test(error.message)) break
+      if (attempt === LAUNCH_ATTEMPTS) break
+      const pause = LAUNCH_BACKOFF_MS[attempt - 1] ?? 30_000
+      log.warn(`the browser did not start (${first}); trying again in ${pause / 1000} s (${attempt + 1}/${LAUNCH_ATTEMPTS})`)
+      await sleep(pause)
     }
-    throw error
   }
+  release()
+  const first = String(lastError?.message).split('\n')[0]
+  if (found.source === 'system') {
+    throw new UserError(`the browser ${found.path} did not start (${first}). ` +
+      "Use another one with TOURWRIGHT_CHROMIUM, or Playwright's own: TOURWRIGHT_SYSTEM_BROWSER=0 tourwright install")
+  }
+  throw lastError
 }

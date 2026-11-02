@@ -38,6 +38,8 @@ Usage:
       --timeout <s>                           maximum seconds
       --var name=value                        set a script variable ({{name}}); repeatable
       --json                                  print the manifest as JSON on stdout
+      --lock <file>                           one browser at a time on this machine: wait for this lock file
+                                              (on Linux the same lock as flock <file>; also TOURWRIGHT_BROWSER_LOCK)
   tourwright explore <url|script> [options]   the sections of a site and the targets to write a script
       --draft <file.yaml>                     write a first script that goes through every section
       --pages /a,/b                           these pages instead of the site's navigation
@@ -175,11 +177,14 @@ export const main = async argv => {
       check: { type: 'boolean' },
       samples: { type: 'boolean' },
       text: { type: 'string' },
+      lock: { type: 'string' },
       plan: { type: 'boolean' },
       yes: { type: 'boolean', short: 'y' },
     },
   })
   if (values.help) return void process.stdout.write(HELP)
+  // Before the config is read: renders started by a worker inherit it
+  if (values.lock) process.env.TOURWRIGHT_BROWSER_LOCK = resolve(values.lock)
   const config = loadConfig()
   await loadPlugins(config)
   // --var name=value (repeatable) overrides the script's `vars`

@@ -98,6 +98,8 @@ export const loadConfig = (overrides = {}) => {
     chromium: env.TOURWRIGHT_CHROMIUM ?? file.chromium,
     systemBrowser: bool(env.TOURWRIGHT_SYSTEM_BROWSER ?? file.systemBrowser, true),
     browsersPath,
+    // One browser at a time on this machine: a file every Tourwright (and, on Linux, any `flock` user) waits on
+    browserLock: env.TOURWRIGHT_BROWSER_LOCK ?? file.browserLock,
     // Threads per ffmpeg process and CPU priority: a shared server stays responsive.
     threads: num(env.TOURWRIGHT_FFMPEG_THREADS ?? file.threads, Math.max(1, Math.min(4, cpus().length))),
     nice: num(env.TOURWRIGHT_NICE ?? file.nice, 10),
