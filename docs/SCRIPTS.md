@@ -536,7 +536,7 @@ tourwright render app.yaml --export video,audio,silent
 export: [video, audio]
 ```
 
-Subtitles, poster and manifest always come. `--quality` picks the size: `sd`, `hd` (default), `fullhd`,
+Subtitles, poster and manifest always come. `--quality` picks the size: `sd`, `hd` (default; yours with `tourwright config set quality`), `fullhd`,
 `vertical` (1080×1920, for phones and reels) or `square`.
 
 ## Testing a script

@@ -3,7 +3,7 @@
 import { existsSync, rmSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { compose, QUALITIES } from '../compose.js'
+import { compose, qualityOf } from '../compose.js'
 import { loadConfig } from '../config.js'
 import { interpolate, secretsShown } from '../script/load.js'
 import { hash, holdsSecret, log, plainText, UserError } from '../util.js'
@@ -64,14 +64,15 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   if (shown.length) log.warn(`${shown.join(', ')}: a secret outside \`type\`/\`fill\` in \`steps\` (a narration, a caption…) can be seen or heard in the video`)
   const script = interpolate(loaded.script, { allowed: !sandboxed || config.api.allowSecrets, config })
   const progress = opts.onProgress ?? (() => {})
-  const quality = QUALITIES[opts.quality ?? script.quality ?? 'hd']
+  // The command, then the script, then the person's own default (tourwright config set quality …)
+  const quality = qualityOf(opts.quality ?? script.quality ?? config.render.quality)
   const width = opts.width ?? script.width ?? quality.width
   const height = opts.height ?? script.height ?? quality.height
-  const fps = script.fps ?? 30
+  const fps = script.fps ?? config.render.fps
   const dryRun = Boolean(opts.dryRun)
   const voiceSpec = opts.voice ?? script.voice ?? config.tts.defaultVoice
   const voice = dryRun || voiceSpec === 'none' ? null : voiceSpec
-  const mode = dryRun ? 'dry' : pickCapture(opts.capture, config)
+  const mode = dryRun ? 'dry' : pickCapture(opts.capture ?? config.render.capture, config)
   const work = opts.workDir
   const theme = resolveTheme(script.theme, config.theme, dir, { sandboxed })
   const audio = script.audio ?? {}
