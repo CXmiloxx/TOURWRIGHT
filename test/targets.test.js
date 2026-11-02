@@ -55,3 +55,15 @@ test('the browser lock lets one holder in at a time', async () => {
   }
 })
 
+test('mask rules and a preview of some steps are checked like the rest of the script', async () => {
+  const { parseSteps } = await import('../src/render/index.js')
+  assert.deepEqual(parseSteps('5'), [5, 5])
+  assert.deepEqual(parseSteps('3-6'), [3, 6])
+  assert.equal(parseSteps(undefined), null)
+  assert.throws(() => parseSteps('6-3'), /range goes up/)
+  assert.throws(() => parseSteps('x'), /step number/)
+  const ok = validateScript({ title: 't', mask: ['email', 'id', { text: 'Ana Pérez', as: 'Laura Gómez' }, { pattern: 'P-\d+', as: 'P-0000' }], steps: [{ goto: '/' }] })
+  assert.equal(ok.ok, true)
+  const bad = validateScript({ title: 't', mask: ['passport'], steps: [{ goto: '/' }] })
+  assert.equal(bad.ok, false)
+})

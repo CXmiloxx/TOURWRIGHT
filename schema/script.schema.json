@@ -687,6 +687,59 @@
             ]
           }
         },
+        "mask": {
+          "description": "Real data on screen replaced by invented data: email, phone, id, { text: \"Ana Pérez\", as: \"Laura Gómez\" } or { pattern, as }",
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "email",
+                  "phone",
+                  "id"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "as": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "text",
+                  "as"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "pattern": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "as": {
+                    "type": "string"
+                  },
+                  "flags": {
+                    "type": "string",
+                    "pattern": "^[imsu]*$"
+                  }
+                },
+                "required": [
+                  "pattern"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
         "dismiss": {
           "description": "Things the app puts in the way (its own product tour, a cookie banner, a chat bubble): clicked off camera whenever they show up, like { role: button, name: Skip }",
           "type": "array",

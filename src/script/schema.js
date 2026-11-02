@@ -6,6 +6,7 @@
 //
 // A step is an object with exactly one action key: { click: "#buy" }, { say: "Hello" }…
 import { z } from 'zod'
+import { maskRule } from '../render/mask.js'
 
 // How to find an element. A string is a Playwright selector (CSS, `text=…`, `xpath=…`); the object forms
 // are the robust ones (by role and accessible name, label, placeholder, visible text or test id).
@@ -180,6 +181,8 @@ const browser = z.object({
   warmup: z.array(z.string()).optional().describe('Pages opened before recording so they load fast on camera'),
   hosts: z.record(z.string(), z.string().url()).optional().describe('Serve a hostname from another origin: { "app.example.com": "http://localhost:3000" }'),
   blur: z.array(target).optional().describe('Selectors blurred during the whole video'),
+  mask: z.array(maskRule).optional()
+    .describe('Real data on screen replaced by invented data: email, phone, id, { text: "Ana Pérez", as: "Laura Gómez" } or { pattern, as }'),
   dismiss: z.array(target).optional()
     .describe('Things the app puts in the way (its own product tour, a cookie banner, a chat bubble): clicked off camera whenever they show up, like { role: button, name: Skip }'),
   blocks: z.record(z.string().regex(/^[\w-]+$/), z.array(step)).optional().describe('Reusable groups of steps, inserted with `use`'),
