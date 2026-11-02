@@ -4,8 +4,9 @@
 // PATH, a piper, an edge-tts) is used as it is.
 //
 //   ffmpeg    static build: Linux (x64, arm64) and Windows (x64, arm64). macOS: Homebrew.
-//   Piper     release binary: Linux (x64, arm64, armv7) and Windows. macOS: the piper-tts Python package,
-//             which takes the same command line (the macOS release binaries are broken).
+//   Piper     the piper-tts Python package (OHF-Voice/piper1-gpl, PIPER_TTS), kept loaded during a render.
+//             Where it has no build (32-bit ARM, Windows on ARM) or Python cannot be set up: the last
+//             standalone release of rhasspy/piper (archived; the same voices).
 //   edge-tts  Python package.
 //   Python    Python packages live in a virtual environment (TOURWRIGHT_HOME/venv) made by uv with a
 //             Python of its own (TOURWRIGHT_HOME/python): the system's Python is never used or changed,
@@ -25,6 +26,10 @@ import { findBinary, isInside, isWindows, log, run, UserError, which } from './u
 
 export const DEFAULT_VOICES = ['es_MX-claude-high', 'en_US-lessac-medium']
 const PIPER_VOICES = 'https://huggingface.co/rhasspy/piper-voices/resolve/main'
+// Pinned: a new piper-tts is tried (speed, sound) before it is used
+const PIPER_TTS = 'piper-tts==1.8.0'
+// Platforms with a piper-tts build
+const PIPER_WHEELS = new Set(['linux-x64', 'linux-arm64', 'darwin-x64', 'darwin-arm64', 'win32-x64'])
 const PIPER_RELEASE = 'https://github.com/rhasspy/piper/releases/download/2023.11.14-2'
 const BTBN = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest'
 // A release series, not the development branch: "-latest" brings its bug fixes, never a new major version
@@ -239,13 +244,24 @@ const installFfmpeg = async (config, key) => {
 }
 
 const installPiper = async (config, key) => {
-  if (await usable(config.tts.piper.bin, config.home)) return log.info(`Piper: already there (${config.tts.piper.bin})`)
-  const asset = PIPER[key]
-  if (!asset) {
-    const why = await pipInstall(config.home, 'piper-tts')
-    if (!why) return log.info('Piper: installed (piper-tts)')
-    return log.warn(`Piper: not installed, ${why}`)
+  const { python, bin } = config.tts.piper
+  if (python && (await usable(python, config.home))) return log.info(`Piper: already there (piper-tts, ${python})`)
+  const ownBinary = Boolean(bin) && isInside(bin, join(config.home, 'piper'))
+  // A piper the system has is used as it is
+  if (bin && !ownBinary && (await usable(bin, config.home))) return log.info(`Piper: already there (${bin})`)
+  if (PIPER_WHEELS.has(key)) {
+    const why = await pipInstall(config.home, PIPER_TTS)
+    if (!why) {
+      // The standalone build Tourwright put here before is replaced by the faster one
+      if (ownBinary) rmSync(join(config.home, 'piper'), { recursive: true, force: true })
+      return log.info(`Piper: installed (${PIPER_TTS}, kept loaded during a render)`)
+    }
+    if (ownBinary) return log.warn(`Piper: keeping ${bin}; ${PIPER_TTS} not installed, ${why}`)
+    log.warn(`${PIPER_TTS}: not installed, ${why}; using Piper's standalone build`)
   }
+  if (ownBinary) return log.info(`Piper: already there (${bin})`)
+  const asset = PIPER[key]
+  if (!asset) return log.warn(`Piper: no build for ${key}; set TOURWRIGHT_PIPER_BIN to a piper you have`)
   await inScratch(config.home, async dir => {
     await fetchAndExtract(`${PIPER_RELEASE}/${asset}`, dir)
     const found = findFile(dir, exe('piper'))
