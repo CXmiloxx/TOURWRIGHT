@@ -1,7 +1,32 @@
 # Configuration
 
-Order: built-in defaults < `tourwright.config.json` in the working directory (or the file in `TOURWRIGHT_CONFIG`)
-< environment variables < command-line flags.
+Order: built-in defaults < your own defaults (`tourwright config set`, in `$TOURWRIGHT_HOME/config.json`) <
+`tourwright.config.json` in the working directory (or the file in `TOURWRIGHT_CONFIG`) < environment variables <
+the script < command-line flags.
+
+## Your defaults
+
+Everyone picks their own video size, voice, frame rate and the rest once, for every project on the machine:
+
+```bash
+tourwright config                         # each setting, its value and where it comes from
+tourwright config set quality fullhd      # sd 480p · hd 720p (default) · fullhd 1080p · vertical · square
+tourwright config set voice gonzalo       # any voice from `tourwright voices`
+tourwright config set fps 24
+tourwright config unset quality           # back to the default
+```
+
+Settings: `quality`, `fps`, `capture`, `voice`, `pause`, `polish`, `preset`, `threads`, `chromium`,
+`systemBrowser`, `lock`. A value is checked before it is saved, so a typo never breaks the next render. A script
+that sets `quality` or `voice`, or `--quality` / `--voice` on the command line, still wins.
+
+| Variable | Default | |
+|---|---|---|
+| `TOURWRIGHT_QUALITY` | `hd` | Video size when neither the command nor the script says: `sd`, `hd`, `fullhd`, `vertical`, `square` |
+| `TOURWRIGHT_FPS` | `30` | Frames per second (1–60) |
+| `TOURWRIGHT_CAPTURE` | `auto` | `auto`, `screen` (Xvfb), `screencast`, `playwright` |
+
+In `tourwright.config.json` they go under `render`: `{ "render": { "quality": "fullhd", "fps": 30 } }`.
 
 ## Paths and binaries
 

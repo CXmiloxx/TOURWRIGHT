@@ -361,7 +361,7 @@ export const explore = async (input, { pages: only, draft, fresh = false, max = 
 
     const report = { site: host, start, home: { ...homeInfo, shot: home.shot }, pages, screenshots: outDir, loggedIn: Boolean(state), needsLogin: !complete }
     if (draft) {
-      const text = draftScript({ header: { title: header.title, language: header.language, voice: header.voice, quality: header.quality ?? 'hd', ...header }, start, home: homeInfo, pages, site: header.title ?? host, menu: bodyItems.find(i => i.role === 'navigation' && i.name)?.name, login: onCamera })
+      const text = draftScript({ header: { title: header.title, language: header.language, voice: header.voice, ...header }, start, home: homeInfo, pages, site: header.title ?? host, menu: bodyItems.find(i => i.role === 'navigation' && i.name)?.name, login: onCamera })
       fromData(YAML.parse(text), { name: 'draft' })
       writeFileSync(draft, text)
       report.draft = resolve(draft)

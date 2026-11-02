@@ -3,7 +3,7 @@ import { existsSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { createInterface } from 'node:readline/promises'
 import { parseArgs } from 'node:util'
-import { loadConfig, reloadConfig } from './config.js'
+import { loadConfig, reloadConfig, userConfigFile } from './config.js'
 import { DEFAULT_VOICES, installAll, installVoice, planInstall } from './install.js'
 import { loadPlugins } from './plugins.js'
 import { findChromium } from './render/chromium.js'
@@ -11,6 +11,7 @@ import { render } from './render/index.js'
 import { clearSessions, deleteSession, listSessions } from './render/session.js'
 import { loadFile, missingSecretsMessage, secretsIn, secretsShown } from './script/load.js'
 import { jsonSchema } from './script/schema.js'
+import { listSettings, setSetting, unsetSetting } from './settings.js'
 import { clearSecrets, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret } from './secrets.js'
 import { log, openPath, UserError } from './util.js'
 import { listVoices, narrate, recordSamples, SAMPLES_DIR, SAMPLES_URL } from './voice/index.js'
@@ -63,6 +64,9 @@ Usage:
                                               about 1 GB with PyTorch. Becomes the default voice
   tourwright install-voice <piper-voice>      download a Piper voice (es_MX-claude-high, en_US-lessac-medium…)
   tourwright doctor                           check ffmpeg, Xvfb, Chromium and TTS engines
+  tourwright config [--json]                  your defaults (quality, voice, fps…) and where each one comes from
+  tourwright config set <setting> <value>     change one for every project on this machine (e.g. quality fullhd)
+  tourwright config unset <setting>           back to the default
   tourwright init [file]                      write an example script
   tourwright schema                           print the JSON Schema of declarative scripts
   tourwright serve [--port 4700] [--host h]   HTTP API (+ an embedded worker with --worker)
@@ -401,6 +405,31 @@ export const main = async argv => {
     case 'install-voice': {
       if (!positionals.length) throw new UserError('usage: tourwright install-voice <voice> [voice…]')
       for (const v of positionals) log.info(`installed ${await installVoice(v, config)}`)
+      return
+    }
+    case 'config': {
+      const [sub, key, ...value] = positionals
+      if (sub === 'set') {
+        if (!key || !value.length) throw new UserError('usage: tourwright config set <setting> <value>')
+        const saved = setSetting(key, value.join(' '))
+        log.info(`${key} = ${saved} (in ${userConfigFile()})`)
+        return
+      }
+      if (sub === 'unset') {
+        if (!key) throw new UserError('usage: tourwright config unset <setting>')
+        unsetSetting(key)
+        log.info(`${key}: back to its default`)
+        return
+      }
+      if (sub === 'path') return void process.stdout.write(`${userConfigFile()}\n`)
+      if (sub) throw new UserError(`unknown: tourwright config ${sub} (use set, unset or path)`)
+      const settings = listSettings(reloadConfig())
+      if (values.json) return void process.stdout.write(`${JSON.stringify(settings, null, 2)}\n`)
+      for (const s of settings) {
+        const value = s.value === undefined || s.value === null ? '—' : String(s.value)
+        process.stdout.write(`${s.key.padEnd(14)} ${value.padEnd(28)} ${s.from === 'default' ? '' : `(${s.from})`}\n`)
+      }
+      process.stdout.write(`\nChange one: tourwright config set quality fullhd · back to default: tourwright config unset quality\n`)
       return
     }
     case 'doctor': {

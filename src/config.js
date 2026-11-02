@@ -29,14 +29,45 @@ const piperPython = (home, file) =>
   env.TOURWRIGHT_PIPER_PYTHON ?? file.tts?.piper?.python ??
   (!env.TOURWRIGHT_PIPER_BIN && !file.tts?.piper?.bin && findBinary(venvBin(home, 'piper')) ? findBinary(venvBin(home, 'python')) : null)
 
-const readConfigFile = () => {
-  const file = env.TOURWRIGHT_CONFIG ?? (existsSync('tourwright.config.json') ? 'tourwright.config.json' : null)
-  if (!file) return {}
+// The person's own defaults (`tourwright config set quality fullhd`), for every project on this machine
+export const userConfigFile = () => join(defaultHome(), 'config.json')
+
+// The project's settings: TOURWRIGHT_CONFIG or ./tourwright.config.json
+export const projectConfigFile = () => env.TOURWRIGHT_CONFIG ?? (existsSync('tourwright.config.json') ? 'tourwright.config.json' : null)
+
+export const readJson = file => {
   try {
     return JSON.parse(readFileSync(file, 'utf8'))
   } catch (error) {
-    throw new Error(`cannot read config ${file}: ${error.message}`)
+    throw new UserError(`cannot read config ${file}: ${error.message}`)
   }
+}
+
+const isPlain = v => v && typeof v === 'object' && !Array.isArray(v)
+const merge = (a, b) => {
+  const out = { ...a }
+  for (const [k, v] of Object.entries(b)) out[k] = isPlain(v) && isPlain(a[k]) ? merge(a[k], v) : v
+  return out
+}
+
+// The user's file first, then the project's on top of it
+const readConfigFile = () => {
+  const user = userConfigFile()
+  const project = projectConfigFile()
+  return merge(existsSync(user) ? readJson(user) : {}, project ? readJson(project) : {})
+}
+
+export const QUALITY_NAMES = ['sd', 'hd', 'fullhd', 'vertical', 'square']
+export const CAPTURE_NAMES = ['auto', 'screen', 'screencast', 'playwright']
+const choice = (name, value, allowed) => {
+  if (value === undefined || value === '') return undefined
+  if (!allowed.includes(value)) throw new UserError(`${name} must be one of ${allowed.join(', ')} (got "${value}")`)
+  return value
+}
+const fpsOf = value => {
+  const fps = num(value, 30)
+  if (!Number.isInteger(fps) || fps < 1 || fps > 60) throw new UserError(`fps must be a whole number from 1 to 60 (got "${value}")`)
+  return fps
 }
 
 const bool = (value, fallback) => (value === undefined ? fallback : ['1', 'true', 'yes', 'on'].includes(String(value).toLowerCase()))
@@ -105,6 +136,14 @@ export const loadConfig = (overrides = {}) => {
     nice: num(env.TOURWRIGHT_NICE ?? file.nice, 10),
     // x264 preset of the final video (default: medium). Faster on weak or virtual CPUs, at a larger file.
     preset: preset(env.TOURWRIGHT_PRESET ?? file.preset),
+
+    // What a render uses when neither the command nor the script says: each person picks their own
+    // (tourwright config set quality fullhd, or TOURWRIGHT_QUALITY…)
+    render: {
+      quality: choice('quality', env.TOURWRIGHT_QUALITY ?? file.render?.quality, QUALITY_NAMES) ?? 'hd',
+      fps: fpsOf(env.TOURWRIGHT_FPS ?? file.render?.fps),
+      capture: choice('capture', env.TOURWRIGHT_CAPTURE ?? file.render?.capture, CAPTURE_NAMES) ?? 'auto',
+    },
 
     tts: {
       // The most natural voice installed: Pocket TTS when it is there, else Piper

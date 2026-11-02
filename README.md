@@ -75,6 +75,7 @@ Node.js 22+, on Linux, macOS or Windows:
 npm install -g tourwright
 tourwright install                    # ffmpeg, Piper + voices, edge-tts, Chromium (no root)
 tourwright install --plan             # only show what it would use from this PC and what it would download
+tourwright config set quality fullhd  # your own defaults: quality, voice, fps… (tourwright config lists them)
 tourwright install --pocket           # + Pocket TTS: natural offline voices (about 1 GB)
 tourwright clean                      # what each part takes on disk; removes downloads and leftovers
 tourwright doctor                     # what works on this machine

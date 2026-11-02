@@ -3,7 +3,7 @@
 // without any browser, with ffmpeg alone.
 import { existsSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { compose, ffmpeg, QUALITIES } from '../compose.js'
+import { compose, ffmpeg, qualityOf } from '../compose.js'
 import { loadConfig } from '../config.js'
 import { launchChromium } from './chromium.js'
 import { concatEntry, escapeHtml, log, plainText, UserError } from '../util.js'
@@ -74,10 +74,10 @@ const motionFilter = (motion, frames, width, height, fps) => {
 export const renderSlides = async (loaded, opts, config = loadConfig()) => {
   const { name, dir, sandboxed, script } = loaded
   const progress = opts.onProgress ?? (() => {})
-  const quality = QUALITIES[opts.quality ?? script.quality ?? 'hd']
+  const quality = qualityOf(opts.quality ?? script.quality ?? config.render.quality)
   const width = opts.width ?? script.width ?? quality.width
   const height = opts.height ?? script.height ?? quality.height
-  const fps = script.fps ?? 30
+  const fps = script.fps ?? config.render.fps
   const voiceSpec = opts.voice ?? script.voice ?? config.tts.defaultVoice
   const voice = opts.dryRun || voiceSpec === 'none' ? null : voiceSpec
   const theme = resolveTheme(script.theme, config.theme, dir, { sandboxed })

@@ -5,6 +5,7 @@ import { spawn } from 'node:child_process'
 import { existsSync, writeFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { loadConfig } from './config.js'
+import { UserError } from './util.js'
 import { chaptersFrom, cutFilter, normalizeCuts, toFfmetadata, toOutput, toSrt, toVtt } from './timeline.js'
 import { polishFilter } from './voice/index.js'
 
@@ -15,6 +16,13 @@ export const QUALITIES = {
   // Vertical, for phones and short-form platforms
   vertical: { width: 1080, height: 1920, crf: '21', preset: 'medium' },
   square: { width: 1080, height: 1080, crf: '21', preset: 'medium' },
+}
+
+/** A quality by name, or an error that lists them */
+export const qualityOf = name => {
+  const q = QUALITIES[name]
+  if (!q) throw new UserError(`quality "${name}" does not exist: use ${Object.keys(QUALITIES).join(', ')}`)
+  return q
 }
 
 export const ffmpeg = (args, config = loadConfig()) =>
