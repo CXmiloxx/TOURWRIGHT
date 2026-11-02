@@ -11,6 +11,7 @@ import { render } from './render/index.js'
 import { clearSessions, deleteSession, listSessions } from './render/session.js'
 import { loadFile, missingSecretsMessage, secretsIn, secretsShown } from './script/load.js'
 import { jsonSchema } from './script/schema.js'
+import { checkScript, markdownReport, textReport, writeFixes } from './repair.js'
 import { listSettings, setSetting, unsetSetting } from './settings.js'
 import { clearSecrets, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret } from './secrets.js'
 import { log, openPath, UserError } from './util.js'
@@ -48,6 +49,9 @@ Usage:
       --fresh                                 log in again instead of reusing the saved session
       --json                                  the report as JSON on stdout
   tourwright validate <script> [--var n=v]    check a script without running it (and its secrets)
+  tourwright check <script…> [--json]         dry-run each one: every broken step, with the likely fix; exit 1
+      --report <file.md>                      if one broke (CI). In GitHub Actions it also fills the job summary
+  tourwright fix <script> [--write]           propose the new target for each broken step; --write saves them
   tourwright voices [--json] [--open]         voices and engines here; --open opens the samples of each voice
   tourwright voices --samples [names] [--text "…"] [--out dir]
                                               record a sample of each voice (default: ./videos/voces/)
@@ -183,6 +187,8 @@ export const main = async argv => {
       text: { type: 'string' },
       lock: { type: 'string' },
       plan: { type: 'boolean' },
+      report: { type: 'string' },
+      write: { type: 'boolean' },
       yes: { type: 'boolean', short: 'y' },
     },
   })
@@ -405,6 +411,45 @@ export const main = async argv => {
     case 'install-voice': {
       if (!positionals.length) throw new UserError('usage: tourwright install-voice <voice> [voice…]')
       for (const v of positionals) log.info(`installed ${await installVoice(v, config)}`)
+      return
+    }
+    case 'check': {
+      // Every script as a dry run: what broke, where, and the likely fix. Exit code 1 when one is broken (CI).
+      if (!positionals.length) throw new UserError('usage: tourwright check <script…> [--json] [--report file.md]')
+      const results = []
+      for (const file of positionals) {
+        let loaded
+        try {
+          loaded = await loadFile(file, { vars })
+        } catch (error) {
+          if (!(error instanceof UserError)) throw error
+          results.push({ name: basename(file), ok: false, failures: [{ message: error.message }] })
+          continue
+        }
+        log.info(`checking ${file}…`)
+        results.push({ file, ...(await checkScript(loaded, {}, config)) })
+      }
+      const markdown = markdownReport(results)
+      if (values.report) writeFileSync(values.report, markdown)
+      // GitHub Actions shows it on the run's page
+      if (process.env.GITHUB_STEP_SUMMARY) writeFileSync(process.env.GITHUB_STEP_SUMMARY, markdown, { flag: 'a' })
+      process.stdout.write(values.json ? `${JSON.stringify(results, null, 2)}\n` : textReport(results))
+      if (results.some(r => !r.ok)) process.exitCode = 1
+      return
+    }
+    case 'fix': {
+      if (!positionals[0]) throw new UserError('usage: tourwright fix <script> [--write]')
+      const result = await checkScript(await loadFile(positionals[0], { vars }), {}, config)
+      if (result.ok) return void log.info(`${positionals[0]}: every step works, nothing to fix`)
+      const fixes = result.failures.map(f => f.fix).filter(Boolean)
+      process.stdout.write(textReport([result]))
+      if (!fixes.length) {
+        process.exitCode = 1
+        return void log.warn('no fix found: the screenshot of the failure marks what the page offers')
+      }
+      if (!values.write) return void log.info(`tourwright fix ${positionals[0]} --write puts ${fixes.length === 1 ? 'it' : `these ${fixes.length}`} in the file`)
+      const applied = writeFixes(positionals[0], fixes)
+      log.info(`${applied} target${applied === 1 ? '' : 's'} changed in ${positionals[0]}; run it again: tourwright render ${positionals[0]} --dry-run`)
       return
     }
     case 'config': {
