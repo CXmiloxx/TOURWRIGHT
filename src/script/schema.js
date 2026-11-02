@@ -66,6 +66,7 @@ export const STEPS = {
   goto: z.string().min(1).describe('Open a URL or a path relative to baseUrl'),
   title: z.union([z.string(), z.object({ text: z.string(), subtitle: z.string().optional(), ms: ms.optional(), say: z.string().optional(), ...titleLook, ...prosody }).strict()])
     .describe('Full-screen title card, animated; also starts a chapter'),
+  chapter: z.string().min(1).max(120).describe('Starts a chapter here, with nothing on screen: in the chapters of the video and as a section of the guide'),
   say: z.union([z.string(), z.null(), z.object({ caption: z.string().optional(), speak: z.string().optional(), ms: ms.optional(), ...prosody }).strict()])
     .describe('Caption at the bottom, narrated aloud. `speak` is said instead of the caption when it must explain more; voice, rate, pitch, volume and style change how. null clears it'),
   caption: z.union([z.string(), z.null()]).describe('Caption without narration; null clears it'),

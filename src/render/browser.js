@@ -250,6 +250,11 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         await hideTitle(page)
         await wait(600)
       },
+      // A chapter of the video starting here, with nothing on screen
+      chapter: async name => {
+        markStart()
+        marks.push({ start: now(), title: name })
+      },
       say: async (html, options = {}) => {
         const { speak, ms = 0, silent = false, ...prosody } = typeof options === 'number' ? { ms: options } : options
         await waitVoice()

@@ -50,6 +50,8 @@ Usage:
       --login setup|camera                    the draft logs in off camera (setup, default) or on camera
       --fresh                                 log in again instead of reusing the saved session
       --json                                  the report as JSON on stdout
+  tourwright record <url> [--out f.yaml]      do the tour by hand in a browser window: each click and field
+                                              becomes a step with a first narration (--language es|en)
   tourwright validate <script> [--var n=v]    check a script without running it (and its secrets)
   tourwright check <script…> [--json]         dry-run each one: every broken step, with the likely fix; exit 1
       --report <file.md>                      if one broke (CI). In GitHub Actions it also fills the job summary
@@ -189,6 +191,7 @@ export const main = async argv => {
       text: { type: 'string' },
       lock: { type: 'string' },
       step: { type: 'string' },
+      language: { type: 'string' },
       plan: { type: 'boolean' },
       report: { type: 'string' },
       write: { type: 'boolean' },
@@ -415,6 +418,14 @@ export const main = async argv => {
     case 'install-voice': {
       if (!positionals.length) throw new UserError('usage: tourwright install-voice <voice> [voice…]')
       for (const v of positionals) log.info(`installed ${await installVoice(v, config)}`)
+      return
+    }
+    case 'record': {
+      if (!positionals[0]) throw new UserError('usage: tourwright record <url> [--out script.yaml] [--language es|en]')
+      const { record } = await import('./record.js')
+      const out = values.out ?? 'recorded.yaml'
+      if (existsSync(out) && !values.yes) throw new UserError(`${out} already exists: choose another --out (or --yes to replace it)`)
+      await record(positionals[0], { out, language: values.language ?? 'es' }, config)
       return
     }
     case 'check': {

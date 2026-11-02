@@ -115,6 +115,7 @@ const runStep = async (step, v, page) => {
         else await v.say(arg.caption ?? arg.speak, { speak: arg.speak, ms: arg.ms, ...prosodyOf(arg) })
         break
       case 'caption': await v.say(arg, { silent: true }); break
+      case 'chapter': await v.chapter(arg); break
       case 'click': await v.click(await find(withTarget(arg).target)); break
       case 'dblclick': await v.click(await find(withTarget(arg).target), { clickCount: 2 }); break
       case 'rightClick': await v.click(await find(withTarget(arg).target), { button: 'right' }); break
@@ -224,6 +225,7 @@ export const plainHelpers = (page, resolveUrl, uploads, toPath) => {
     back: () => page.goBack({ waitUntil: 'domcontentloaded' }),
     reload: () => page.reload({ waitUntil: 'domcontentloaded' }),
     title: noop,
+    chapter: noop,
     say: noop,
     click: (l, options) => l.first().click(options),
     check: (l, on) => l.first().setChecked(on),
