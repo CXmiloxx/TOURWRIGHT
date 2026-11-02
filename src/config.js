@@ -177,6 +177,14 @@ export const loadConfig = (overrides = {}) => {
 
     theme: { ...file.theme },
 
+    // The AI a person brings for writing narration (src/ai.js): anthropic, openai or ollama. The key is never here:
+    // ANTHROPIC_API_KEY / OPENAI_API_KEY / TOURWRIGHT_AI_KEY, or `tourwright secret set AI_KEY`
+    ai: {
+      provider: env.TOURWRIGHT_AI_PROVIDER ?? file.ai?.provider,
+      model: env.TOURWRIGHT_AI_MODEL ?? file.ai?.model,
+      url: env.TOURWRIGHT_AI_URL ?? file.ai?.url,
+    },
+
     // Modules that add step actions, TTS engines and voices (see src/plugins.js and docs/PLUGINS.md)
     plugins: list(env.TOURWRIGHT_PLUGINS) ?? file.plugins ?? [],
 
