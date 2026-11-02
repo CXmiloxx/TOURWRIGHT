@@ -53,13 +53,14 @@ export const hideTyped = locator =>
 
 // Runs declarative steps with the helpers `v`. A step whose element is missing fails with what the page has
 // instead; a dry run (`v.dryRun`) goes on to the end and lists every step that failed.
-export const runSteps = async (steps, v, page, top = true) => {
+// `offset`: how many steps of the script come before these (a preview of some steps keeps their numbers)
+export const runSteps = async (steps, v, page, top = true, offset = 0) => {
   const failures = []
   for (const [index, step] of steps.entries()) {
     try {
       await runStep(step, v, page)
     } catch (error) {
-      const failure = await explain(error, step, page, index)
+      const failure = await explain(error, step, page, index + offset)
       if (!(top && v.dryRun && failure instanceof UserError)) throw failure
       failures.push(failure)
       log.warn(failure.message.split('\n')[0])

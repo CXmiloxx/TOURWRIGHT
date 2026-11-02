@@ -78,6 +78,7 @@ tourwright install --plan             # solo muestra qué usaría del PC y qué 
 tourwright config set quality fullhd  # tus valores por defecto: calidad, voz, fps… (tourwright config los lista)
 tourwright check videos/*.yaml        # qué videos se rompieron tras un despliegue, en qué paso, y el arreglo
 tourwright fix tour.yaml --write      # pone los objetivos nuevos en el guion
+tourwright render tour.yaml --step 7  # graba un solo paso con su voz, sin el video completo
 tourwright install --pocket           # + Pocket TTS: voces naturales sin internet (cerca de 1 GB)
 tourwright clean                      # cuánto ocupa cada parte; borra descargas y sobrantes
 tourwright doctor                     # qué funciona en esta máquina

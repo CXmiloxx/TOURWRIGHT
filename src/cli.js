@@ -37,6 +37,8 @@ Usage:
       --capture auto|screen|screencast|playwright
       --dry-run                               run the script fast, without voice or video (tests selectors)
       --fresh                                 log in again instead of reusing the saved session
+      --step <n|a-b>                          film only that step (or range), with its voice: the steps before
+                                              run fast off camera. Saved as <name>-step<n>.mp4
       --timeout <s>                           maximum seconds
       --var name=value                        set a script variable ({{name}}); repeatable
       --json                                  print the manifest as JSON on stdout
@@ -186,6 +188,7 @@ export const main = async argv => {
       samples: { type: 'boolean' },
       text: { type: 'string' },
       lock: { type: 'string' },
+      step: { type: 'string' },
       plan: { type: 'boolean' },
       report: { type: 'string' },
       write: { type: 'boolean' },
@@ -213,6 +216,7 @@ export const main = async argv => {
         quality: values.quality,
         capture: values.capture,
         dryRun: values['dry-run'],
+        steps: values.step,
         timeout: values.timeout ? Number(values.timeout) : undefined,
         width: values.width ? Number(values.width) : undefined,
         height: values.height ? Number(values.height) : undefined,

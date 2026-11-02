@@ -15,7 +15,7 @@ import { centerOf, createCursor } from './cursor.js'
 import { createGuard, setupNetwork } from './network.js'
 import { OVERLAY } from './overlay.js'
 import { needsPrep, prepare, saveSession, sessionPath } from './session.js'
-import { dismissing, hideTyped, locate, runSteps, setStepTimeout } from './steps.js'
+import { dismissing, hideTyped, locate, plainHelpers, runSteps, setStepTimeout } from './steps.js'
 import { markOffered } from './targets.js'
 import { resolveTheme, safePath, themeCss, titleHtml } from './theme.js'
 import { callout, camera, focusOff, focusOn, frame, hideTitle, setCaption, showTitle, spotlight } from './visuals.js'
@@ -475,7 +475,14 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
 
     try {
       if (loaded.run) await loaded.run({ page, context, v })
-      else await runSteps(script.steps, v, page)
+      else if (opts.steps) {
+        // A preview of some steps: the ones before run fast and off camera (like `setup`), then these are filmed
+        const [from, to] = opts.steps
+        if (from > script.steps.length) throw new UserError(`--step ${from}: the script has ${script.steps.length} steps`)
+        const quick = plainHelpers(page, resolveUrl, uploads, f => safePath(f, dir, sandboxed))
+        await v.offCamera(() => runSteps(script.steps.slice(0, from - 1), quick, page, false))
+        await runSteps(script.steps.slice(from - 1, to), v, page, true, from - 1)
+      } else await runSteps(script.steps, v, page)
     } catch (error) {
       const shot = join(opts.failureDir ?? work, `failure-${name}.png`)
       // A missing element: the screenshot marks what the page offers instead, with the target of each
