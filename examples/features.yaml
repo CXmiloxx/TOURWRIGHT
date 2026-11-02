@@ -24,7 +24,8 @@ steps:
   - if: { visible: { text: Accept cookies }, then: [ { click: { text: Accept cookies } } ] }
   - title: { text: "{{site}}", subtitle: "Variables, voices, sounds and callouts", say: "Welcome. [[400ms]] Let's take a look." }
   - say: "This is <b>{{site}}</b>, a domain reserved by IANA for documentation."
-  - use: { block: point, with: { what: h1 } }
+  # The first paragraph: example.com has changed its heading more than once
+  - use: { block: point, with: { what: p } }
   - callout: { target: { role: link }, text: "More <b>information</b> lives here", ms: 2500 }
   - focus:
       target: { role: link }
