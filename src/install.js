@@ -27,17 +27,20 @@ export const DEFAULT_VOICES = ['es_MX-claude-high', 'en_US-lessac-medium']
 const PIPER_VOICES = 'https://huggingface.co/rhasspy/piper-voices/resolve/main'
 const PIPER_RELEASE = 'https://github.com/rhasspy/piper/releases/download/2023.11.14-2'
 const BTBN = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest'
+// A release series, not the development branch: "-latest" brings its bug fixes, never a new major version
+const FFMPEG_SERIES = '9.0'
+const btbn = target => `${BTBN}/ffmpeg-n${FFMPEG_SERIES}-latest-${target}-gpl-${FFMPEG_SERIES}.${target.startsWith('win') ? 'zip' : 'tar.xz'}`
 // A fixed uv release: every install gets the same one
 const UV_RELEASE = 'https://github.com/astral-sh/uv/releases/download/0.13.6'
 const PYTHON_VERSION = '3.12'
-const JVS = 'https://johnvansickle.com/ffmpeg/releases'
 
 // Keyed by `${process.platform}-${process.arch}`
 const FFMPEG = {
-  'linux-x64': `${JVS}/ffmpeg-release-amd64-static.tar.xz`,
-  'linux-arm64': `${JVS}/ffmpeg-release-arm64-static.tar.xz`,
-  'win32-x64': `${BTBN}/ffmpeg-master-latest-win64-gpl.zip`,
-  'win32-arm64': `${BTBN}/ffmpeg-master-latest-winarm64-gpl.zip`,
+  // Static builds: they run on any distribution (no 32-bit ARM build: apt install ffmpeg on a Raspberry Pi)
+  'linux-x64': btbn('linux64'),
+  'linux-arm64': btbn('linuxarm64'),
+  'win32-x64': btbn('win64'),
+  'win32-arm64': btbn('winarm64'),
 }
 const PIPER = {
   'linux-x64': 'piper_linux_x86_64.tar.gz',
@@ -70,6 +73,8 @@ export const download = async (url, target, attempts = 3) => {
       const response = await fetch(url)
       if (response.status === 404) throw new UserError(`not found (404): ${url}`)
       if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`)
+      // A site that moved or blocks the download answers with a web page and 200: not the file
+      if (/^text\/html/i.test(response.headers.get('content-type') ?? '')) throw new UserError(`${url} answered with a web page instead of the file`)
       const expected = Number(response.headers.get('content-length'))
       await pipeline(Readable.fromWeb(/** @type {any} */ (response.body)), createWriteStream(partial))
       const got = statSync(partial).size
