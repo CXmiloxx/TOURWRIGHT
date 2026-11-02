@@ -39,6 +39,9 @@ export const SETTINGS = {
   threads: { path: ['threads'], env: 'TOURWRIGHT_FFMPEG_THREADS', parse: number(1, 64), about: 'threads per ffmpeg' },
   chromium: { path: ['chromium'], env: 'TOURWRIGHT_CHROMIUM', parse: text, about: 'the browser to record with (a path)' },
   systemBrowser: { path: ['systemBrowser'], env: 'TOURWRIGHT_SYSTEM_BROWSER', parse: yesNo, about: 'use a Chrome or Edge already installed' },
+  ai: { path: ['ai', 'provider'], env: 'TOURWRIGHT_AI_PROVIDER', parse: oneOf(['anthropic', 'openai', 'ollama']), about: 'the AI that writes narration (tourwright narrate): anthropic, openai, ollama' },
+  aiModel: { path: ['ai', 'model'], env: 'TOURWRIGHT_AI_MODEL', parse: text, about: 'its model (default: claude-opus-5-5, gpt-4o-mini, gemma3)' },
+  aiUrl: { path: ['ai', 'url'], env: 'TOURWRIGHT_AI_URL', parse: text, about: 'its server, for an OpenAI-compatible one or a remote Ollama' },
   lock: { path: ['browserLock'], env: 'TOURWRIGHT_BROWSER_LOCK', parse: text, about: 'one browser at a time: a lock file' },
 }
 
@@ -93,6 +96,7 @@ export const listSettings = (config = loadConfig()) => {
     quality: config.render.quality, fps: config.render.fps, capture: config.render.capture, voice: config.tts.defaultVoice,
     pause: config.tts.pause, polish: config.tts.polish, preset: config.preset, threads: config.threads,
     chromium: config.chromium, systemBrowser: config.systemBrowser, lock: config.browserLock,
+    ai: config.ai?.provider, aiModel: config.ai?.model, aiUrl: config.ai?.url,
   }
   return Object.entries(SETTINGS).map(([key, s]) => {
     const from = process.env[s.env] !== undefined ? s.env

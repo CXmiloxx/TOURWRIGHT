@@ -634,7 +634,28 @@ first narration that knows where the element is:
 - The user and the password of a login become `${secret:…}`, a 2FA code `${totp:…}`: nobody's account is in
   the script, and it works for whoever has the secrets saved.
 
-The narration is correct but plain: rewrite it in your own words, or let an agent do it (MCP).
+The narration is correct but plain: rewrite it in your own words, let your AI rewrite it (below), or let an agent
+do it through MCP.
+
+### Narration written by your AI
+
+Tourwright does not ship an AI: it connects to the one you bring, as it does with voices.
+
+```bash
+tourwright config set ai anthropic        # Claude (key: ANTHROPIC_API_KEY, or tourwright secret set AI_KEY)
+tourwright config set ai openai           # OpenAI, or any OpenAI-compatible server: also set aiUrl
+tourwright config set ai ollama           # free, on this PC, nothing leaves it: ollama pull gemma3
+tourwright narrate tour.yaml              # shows the new line for each step
+tourwright narrate tour.yaml --write      # saves them (the old script is kept as tour.before-narrate.yaml)
+```
+
+The script runs fast and the AI gets the steps in order with a picture of each one, so it writes from what the
+screen shows ("Para encontrar a un cliente, escribe su documento, su nombre o su celular") instead of from the
+element's name. Every line is checked before it is proposed: the `{word}` the focus lands on stays (put back
+around the element's name when the AI drops the braces), and a line that holds a secret, a password or a code is
+refused and the old one stays. Lines written with `{{variables}}` are never touched. `aiModel` picks the model
+(default `claude-opus-5-5`, `gpt-4o-mini`, `gemma3`); a model that sees pictures writes better narration.
+
 ### A step-by-step guide from the same script
 
 ```bash

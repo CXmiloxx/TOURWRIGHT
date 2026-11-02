@@ -494,6 +494,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       v.onStep = async step => {
         const entry = guideEntry(step, script.language)
         if (!entry) return
+        // Which step of the script it is (`tourwright narrate` writes back to it)
+        entry.step = v.step
         const previous = guide.at(-1)
         // A focus on a field, then typing in it: one step of the guide, with what to type
         if ((step.type || step.fill) && previous?.merge && JSON.stringify(previous.target) === JSON.stringify(entry.target)) {
@@ -566,6 +568,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       if (sessionFile) saveSession(sessionFile, await context.storageState())
       await context.close()
       reportFindings(watcher.findings)
+      // `collect`: the steps and their pictures, for `tourwright narrate`; else the guide's files
+      if (guide && opts.guide === 'collect') return { entries: guide, title: script.title ?? name, language: script.language }
       if (guide) return { guide: writeGuide({ title: script.title ?? name, language: script.language, entries: guide, out: opts.out }), title: script.title ?? name }
       return { dryRun: true, title: script.title ?? name, seconds: Number(end.toFixed(1)), chapters: marks.length, captions: captions.length, review: watcher.findings }
     }

@@ -17,7 +17,7 @@ tourwright config unset quality           # back to the default
 ```
 
 Settings: `quality`, `fps`, `capture`, `voice`, `pause`, `polish`, `preset`, `threads`, `chromium`,
-`systemBrowser`, `lock`. A value is checked before it is saved, so a typo never breaks the next render. A script
+`systemBrowser`, `lock`, `ai`, `aiModel`, `aiUrl`. A value is checked before it is saved, so a typo never breaks the next render. A script
 that sets `quality` or `voice`, or `--quality` / `--voice` on the command line, still wins.
 
 | Variable | Default | |
@@ -25,6 +25,10 @@ that sets `quality` or `voice`, or `--quality` / `--voice` on the command line, 
 | `TOURWRIGHT_QUALITY` | `hd` | Video size when neither the command nor the script says: `sd`, `hd`, `fullhd`, `vertical`, `square` |
 | `TOURWRIGHT_FPS` | `30` | Frames per second (1–60) |
 | `TOURWRIGHT_CAPTURE` | `auto` | `auto`, `screen` (Xvfb), `screencast`, `playwright` |
+| `TOURWRIGHT_AI_PROVIDER` | `anthropic` when `ANTHROPIC_API_KEY` is set, `openai` when `OPENAI_API_KEY` is | The AI of `tourwright narrate`: `anthropic`, `openai` (any OpenAI-compatible server) or `ollama` |
+| `TOURWRIGHT_AI_MODEL` | `claude-opus-5-5`, `gpt-4o-mini`, `gemma3` | Its model |
+| `TOURWRIGHT_AI_URL` | `https://api.openai.com`, `http://127.0.0.1:11434` for Ollama | Its server: an OpenAI-compatible one (LM Studio, OpenRouter…) or a remote Ollama |
+| `TOURWRIGHT_AI_KEY` | `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | Its key; or `tourwright secret set AI_KEY`, never in a config file |
 
 In `tourwright.config.json` they go under `render`: `{ "render": { "quality": "fullhd", "fps": 30 } }`.
 
