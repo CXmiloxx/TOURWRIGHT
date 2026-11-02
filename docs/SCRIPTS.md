@@ -163,9 +163,10 @@ a bubble explains it, and the camera can push in, all landing on the word the vo
     click: true        # and then the cursor clicks it
 ```
 
-- Order on screen: the cursor glides to the element, the narration (and its caption) starts, and at the
+- Order on screen: the narration (and its caption) starts while the cursor glides to the element, and at the
   marked word the camera moves in and the focus appears. It holds until the narration ends plus `ms`
-  (default 1200), fades, and the camera pulls back.
+  (default 600; 150 with `click`), fades, and the camera pulls back. The next step starts while the focus
+  fades, so a `type` into the field just focused begins as the voice stops, with no silence in between.
 - Without a `{word}` the focus appears as the narration starts; without `say` it is silent.
 - The zoom happens in the browser, so text stays sharp at any zoom (nothing is upscaled).
 - `caption` shows a different text than the one said; `voice`, `rate`, `pitch`… work as in `say`.

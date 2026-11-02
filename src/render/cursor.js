@@ -25,11 +25,18 @@ export const createCursor = (page, { width, height, dryRun }) => {
   }
 }
 
-// Scrolls the element to the middle of the screen and returns its center
+// Scrolls the element to the middle of the screen when it is not already in view, and returns its center.
+// Only a real scroll is waited for: an element on screen costs no time.
 /** @param {import('playwright').Page} page @param {import('playwright').Locator} locator */
 export const centerOf = async (page, locator, dryRun = false) => {
-  await locator.evaluate(el => el.scrollIntoView({ behavior: 'smooth', block: 'center' }))
-  await page.waitForTimeout(dryRun ? 50 : 500)
+  const scrolled = await locator.evaluate(el => {
+    const r = el.getBoundingClientRect()
+    const margin = 40
+    if (r.top >= margin && r.bottom <= innerHeight - margin && r.left >= 0 && r.right <= innerWidth) return false
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return true
+  })
+  if (scrolled) await page.waitForTimeout(dryRun ? 50 : 500)
   const box = await locator.boundingBox()
   if (!box) throw new UserError('element is not visible')
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
