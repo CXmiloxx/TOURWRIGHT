@@ -1,10 +1,12 @@
 // tourwright <command> — see `tourwright help`.
 import { existsSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
+import { createInterface } from 'node:readline/promises'
 import { parseArgs } from 'node:util'
 import { loadConfig, reloadConfig } from './config.js'
-import { DEFAULT_VOICES, installAll, installVoice } from './install.js'
+import { DEFAULT_VOICES, installAll, installVoice, planInstall } from './install.js'
 import { loadPlugins } from './plugins.js'
+import { findChromium } from './render/chromium.js'
 import { render } from './render/index.js'
 import { clearSessions, deleteSession, listSessions } from './render/session.js'
 import { loadFile, missingSecretsMessage, secretsIn, secretsShown } from './script/load.js'
@@ -53,6 +55,8 @@ Usage:
       --voices a,b                            Piper voices (default: ${DEFAULT_VOICES.join(',')})
       --no-edge                               skip edge-tts (Microsoft voices, online)
       --no-chromium                           skip Chromium
+      --plan                                  only show what is used from this PC and what would be downloaded
+      --yes, -y                               download without asking (it asks only in a terminal)
       --pocket                                Pocket TTS: open, natural voices (Spanish: pocket:lola), CPU only;
                                               about 1 GB with PyTorch. Becomes the default voice
   tourwright install-voice <piper-voice>      download a Piper voice (es_MX-claude-high, en_US-lessac-medium…)
@@ -104,10 +108,11 @@ export const doctor = async (config = loadConfig()) => {
   add('ffprobe', config.ffprobe, config.ffprobe ?? 'missing: comes with ffmpeg, or TOURWRIGHT_FFPROBE')
   add('Xvfb (best capture)', config.xvfb, config.xvfb ?? (process.platform === 'linux' ? 'optional: apt install xvfb — without it, screencast capture is used' : 'Linux only — screencast capture is used'))
   try {
-    if (config.browsersPath) process.env.PLAYWRIGHT_BROWSERS_PATH ??= config.browsersPath
+    const found = await findChromium(config)
     const { chromium } = await import('playwright')
-    const path = config.chromium ?? chromium.executablePath()
-    add('Chromium', existsSync(path), existsSync(path) ? path : 'missing: tourwright install (or TOURWRIGHT_CHROMIUM)')
+    const path = found.path ?? chromium.executablePath()
+    const ok = found.source !== 'missing' && existsSync(path)
+    add('Chromium', ok, ok ? `${path}${found.source === 'system' ? ' (from the system)' : ''}` : 'missing: tourwright install, a Chrome or Edge on the system, or TOURWRIGHT_CHROMIUM')
   } catch (error) {
     add('Chromium', false, error.message)
   }
@@ -170,6 +175,8 @@ export const main = async argv => {
       check: { type: 'boolean' },
       samples: { type: 'boolean' },
       text: { type: 'string' },
+      plan: { type: 'boolean' },
+      yes: { type: 'boolean', short: 'y' },
     },
   })
   if (values.help) return void process.stdout.write(HELP)
@@ -354,10 +361,36 @@ export const main = async argv => {
     case 'install': {
       const voices = values.voices === undefined ? DEFAULT_VOICES : values.voices.split(/[\s,]+/).filter(Boolean)
       if (values.whisper) log.warn('--whisper: Whisper is no longer needed (the voices come calibrated), skipped')
-      await installAll({ voices, edge: !values['no-edge'], chromium: !values['no-chromium'], pocket: values.pocket }, config)
-      // A fresh look: what was just installed is found now
+      const options = { voices, edge: !values['no-edge'], chromium: !values['no-chromium'], pocket: values.pocket }
+      // What is already on this PC is used; only the rest is downloaded, and it is said first
+      const plan = await planInstall(options, config)
+      const downloads = plan.filter(p => p.download && p.mb)
+      for (const p of plan) {
+        const what = p.use ?? `${p.download}${p.mb ? ` (~${p.mb} MB)` : ''}`
+        process.stderr.write(`  ${p.use ? 'use     ' : 'download'}  ${p.name.padEnd(28)} ${what}\n`)
+      }
+      const total = downloads.reduce((a, p) => a + (p.mb ?? 0), 0)
+      process.stderr.write(downloads.length ? `  about ${total} MB to download into ${config.home}\n` : '  nothing to download\n')
+      if (values.plan) return
+      if (downloads.length && !values.yes && process.stdin.isTTY && process.stderr.isTTY) {
+        const ask = createInterface({ input: process.stdin, output: process.stderr })
+        const answer = (await ask.question('Download them? [Y/n] ')).trim().toLowerCase()
+        ask.close()
+        if (answer.startsWith('n')) {
+          process.stderr.write('Nothing was downloaded. To use what you already have: TOURWRIGHT_FFMPEG, TOURWRIGHT_PIPER_BIN,\n' +
+            'TOURWRIGHT_EDGE_TTS_BIN, TOURWRIGHT_CHROMIUM (docs/CONFIGURATION.md)\n')
+          return
+        }
+      }
+      await installAll(options, config)
+      // A fresh look, in one line: what was just installed is found now. The full list is `tourwright doctor`.
       const checks = await doctor(reloadConfig())
-      for (const c of checks) process.stdout.write(`${c.ok ? '✔' : '✘'} ${c.name.padEnd(22)} ${c.detail}\n`)
+      // What was skipped on purpose (--no-chromium) is not reported missing
+      const needed = checks.filter(c => ['ffmpeg', 'ffprobe', 'voices', ...(values['no-chromium'] ? [] : ['Chromium'])].includes(c.name))
+      const broken = needed.filter(c => !c.ok)
+      for (const c of broken) process.stdout.write(`✘ ${c.name.padEnd(22)} ${c.detail}\n`)
+      if (broken.length) process.exitCode = 1
+      else process.stdout.write(`✔ ready to render (${checks.filter(c => c.ok).length} checks passed; tourwright doctor lists them)\n`)
       return
     }
     case 'install-voice': {

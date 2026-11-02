@@ -7,16 +7,17 @@ Order: built-in defaults < `tourwright.config.json` in the working directory (or
 
 | Variable | Default | |
 |---|---|---|
-| `TOURWRIGHT_HOME` | `~/.local/share/tourwright` (Windows: `%LOCALAPPDATA%\tourwright`) | Base folder. `tourwright install` puts everything here (programs, voices, a Python of its own and its virtual environment) and nothing on the system: deleting it uninstalls. If you move it, run `tourwright install` again to rebuild the Python environment |
+| `TOURWRIGHT_HOME` | `~/.local/share/tourwright` (Windows: `%LOCALAPPDATA%\tourwright`) | Base folder. `tourwright install` puts everything here (programs, voices, a Python environment, and a Python only when the system has no 3.12) and nothing on the system: deleting it uninstalls. If you move it, run `tourwright install` again to rebuild the Python environment |
 | `TOURWRIGHT_DATA_DIR` | `$TOURWRIGHT_HOME/data` | Jobs, queue, saved sessions |
 | `TOURWRIGHT_SECRETS_FILE` | `$TOURWRIGHT_HOME/secrets.json` | Credentials saved with `tourwright secret set` (readable only by its owner) |
 | `TOURWRIGHT_SECRET_<NAME>` | — | A secret for `${secret:NAME}`; wins over the saved one |
 | `TOURWRIGHT_CACHE_DIR` | `$TOURWRIGHT_HOME/cache` | Voice cache (safe to delete) |
 | `TOURWRIGHT_TMP_DIR` | `/dev/shm` if it exists | Work files of each render |
-| `TOURWRIGHT_FFMPEG`, `TOURWRIGHT_FFPROBE` | from `PATH`, then `$TOURWRIGHT_HOME/bin` | |
+| `TOURWRIGHT_FFMPEG`, `TOURWRIGHT_FFPROBE` | from `PATH`, then where winget, scoop, Chocolatey or Homebrew put it, then `$TOURWRIGHT_HOME/bin` | `ffprobe` is looked for next to `ffmpeg` first |
 | `TOURWRIGHT_XVFB` | `Xvfb` from `PATH` | Without it, capture is `screencast` |
-| `TOURWRIGHT_CHROMIUM` | Playwright's Chromium | Another Chromium/Chrome binary |
-| `TOURWRIGHT_BROWSERS_PATH` | Playwright default | Where Playwright's browsers are |
+| `TOURWRIGHT_CHROMIUM` | Playwright's Chromium if installed, else `CHROME_PATH` / `CHROME_BIN` / `PUPPETEER_EXECUTABLE_PATH`, a build left by another Playwright or Puppeteer version, or a Chrome, Edge or Chromium on the system (not snap or Flatpak) | Another Chromium/Chrome binary |
+| `TOURWRIGHT_SYSTEM_BROWSER` | `true` | `false`: never use the system's browser; `tourwright install` downloads Playwright's Chromium |
+| `TOURWRIGHT_BROWSERS_PATH` | `$TOURWRIGHT_HOME/browsers` | Where `tourwright install` puts Playwright's Chromium. A folder other tools share (`PLAYWRIGHT_BROWSERS_PATH`, `/opt/ms-playwright`) is only read, to reuse a Chromium already there, and never written to |
 | `TOURWRIGHT_FFMPEG_THREADS` | min(4, CPUs) | Threads per ffmpeg |
 | `TOURWRIGHT_PRESET` | `medium` | x264 preset of the final video: `ultrafast` … `veryslow`. `veryfast` encodes ~3× faster on weak or virtual CPUs, at a larger file |
 | `TOURWRIGHT_NICE` | `10` | CPU priority of renders (0–19; also idle disk priority) |
@@ -30,9 +31,10 @@ Order: built-in defaults < `tourwright.config.json` in the working directory (or
 | `TOURWRIGHT_VOICE` | `pocket:lola` when Pocket TTS is installed, else `piper:es_MX-claude-high` | Default voice |
 | `TOURWRIGHT_POCKET_PYTHON` | the Python of `$TOURWRIGHT_HOME/venv` when `pocket-tts` is in it | A Python with `pocket-tts` installed, for the `pocket` engine |
 | `TOURWRIGHT_PIPER_PYTHON` | the Python of `$TOURWRIGHT_HOME/venv` when `piper-tts` is in it | A Python with `piper-tts` 1.8+: Piper stays loaded during a render (about 5× faster per sentence than the `piper` command) |
-| `TOURWRIGHT_PIPER_BIN` | `piper` in `PATH`, `$TOURWRIGHT_HOME/piper/piper`, `$TOURWRIGHT_HOME/venv/bin/piper` | The `piper-tts` Python package works too |
+| `TOURWRIGHT_PIPER_BIN` | `piper` in `PATH`, in the folders of `pip install --user`, pipx or uv tool, `$TOURWRIGHT_HOME/piper/piper`, `$TOURWRIGHT_HOME/venv/bin/piper` | The `piper-tts` Python package works too |
+| `TOURWRIGHT_PIPER_VOICE_DIRS` | — | More folders with Piper voices already downloaded, separated like `PATH` (`:`, `;` on Windows). The Hugging Face cache (`HF_HUB_CACHE`, `~/.cache/huggingface/hub`) is always searched: a voice found there is not downloaded again |
 | `TOURWRIGHT_PIPER_VOICES` | `$TOURWRIGHT_HOME/voices` | `.onnx` + `.onnx.json` models |
-| `TOURWRIGHT_EDGE_TTS_BIN` | `edge-tts` in `PATH`, `$TOURWRIGHT_HOME/venv/bin/edge-tts` (Windows: `venv\Scripts`) | |
+| `TOURWRIGHT_EDGE_TTS_BIN` | `edge-tts` in `PATH`, in the folders of `pip install --user`, pipx or uv tool, `$TOURWRIGHT_HOME/venv/bin/edge-tts` (Windows: `venv\Scripts`) | |
 | `TOURWRIGHT_OPENAI_TTS_URL` | `https://api.openai.com` if `OPENAI_API_KEY` is set | Any `/v1/audio/speech` server |
 | `TOURWRIGHT_OPENAI_TTS_KEY` | `OPENAI_API_KEY` | |
 | `TOURWRIGHT_OPENAI_TTS_MODEL` | `tts-1` | |

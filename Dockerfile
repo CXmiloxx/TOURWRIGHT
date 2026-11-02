@@ -14,7 +14,8 @@ ENV NODE_ENV=production \
     TOURWRIGHT_HOST=0.0.0.0 \
     TOURWRIGHT_TMP_DIR=/tmp \
     TOURWRIGHT_PIPER_VOICES=/opt/tourwright/voices \
-    PLAYWRIGHT_BROWSERS_PATH=/opt/tourwright/browsers
+    PLAYWRIGHT_BROWSERS_PATH=/opt/tourwright/browsers \
+    TOURWRIGHT_BROWSERS_PATH=/opt/tourwright/browsers
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ffmpeg xvfb ca-certificates curl tini \

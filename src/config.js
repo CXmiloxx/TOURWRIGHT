@@ -2,7 +2,8 @@
 // Every path and binary is discovered or configurable: nothing is tied to one machine.
 import { existsSync, readFileSync } from 'node:fs'
 import { cpus, homedir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { delimiter, dirname, join, resolve } from 'node:path'
+import { elsewhere } from './locate.js'
 import { findBinary, isWindows, UserError } from './util.js'
 
 const env = process.env
@@ -48,6 +49,21 @@ const preset = value => {
 }
 const list = value => (value ? String(value).split(',').map(x => x.trim()).filter(Boolean) : undefined)
 
+// Tourwright's own browsers live in its folder (TOURWRIGHT_HOME/browsers), never in a folder other tools share
+// (PLAYWRIGHT_BROWSERS_PATH, /opt/ms-playwright): those are only read, to reuse a Chromium already there.
+// Playwright reads where its browsers are once, when it loads, so this is in place before anything imports it.
+const ownBrowsersPath = () => {
+  let file = {}
+  try {
+    file = readConfigFile()
+  } catch {}
+  return resolve(env.TOURWRIGHT_BROWSERS_PATH ?? file.browsersPath ?? join(file.home ?? defaultHome(), 'browsers'))
+}
+const browsersPath = ownBrowsersPath()
+// What the environment pointed Playwright to before: kept for child processes, which inherit the change below
+if (env.TOURWRIGHT_SHARED_BROWSERS_PATH === undefined) env.TOURWRIGHT_SHARED_BROWSERS_PATH = env.PLAYWRIGHT_BROWSERS_PATH ?? ''
+env.PLAYWRIGHT_BROWSERS_PATH = browsersPath
+
 let cached
 
 // Binaries are looked up once; after installing them, a new lookup finds them
@@ -61,6 +77,8 @@ export const loadConfig = (overrides = {}) => {
   const file = readConfigFile()
   const home = overrides.home ?? file.home ?? defaultHome()
   const pocket = pocketPython(home, file)
+  // In PATH first, then where pip, pipx, winget, scoop, Chocolatey or Homebrew put programs, then Tourwright's own
+  const ffmpeg = findBinary(env.TOURWRIGHT_FFMPEG, file.ffmpeg, 'ffmpeg', elsewhere('ffmpeg'), join(home, 'bin', 'ffmpeg'))
   const config = {
     home,
     // Rendered jobs (queue, outputs) and the shared voice cache
@@ -71,12 +89,15 @@ export const loadConfig = (overrides = {}) => {
     // Temporary work files. /dev/shm (RAM) is faster than disk when it exists.
     tmpDir: env.TOURWRIGHT_TMP_DIR ?? file.tmpDir ?? (existsSync('/dev/shm') ? '/dev/shm' : undefined),
 
-    ffmpeg: findBinary(env.TOURWRIGHT_FFMPEG, file.ffmpeg, 'ffmpeg', join(home, 'bin', 'ffmpeg')),
-    ffprobe: findBinary(env.TOURWRIGHT_FFPROBE, file.ffprobe, 'ffprobe', join(home, 'bin', 'ffprobe')),
-    xvfb: findBinary(env.TOURWRIGHT_XVFB, file.xvfb, 'Xvfb'),
-    // Chromium: Playwright's own build by default; TOURWRIGHT_CHROMIUM points to another one (system package, ARM…)
+    ffmpeg,
+    // The ffprobe next to that ffmpeg first: both of the same build
+    ffprobe: findBinary(env.TOURWRIGHT_FFPROBE, file.ffprobe, ffmpeg && join(dirname(ffmpeg), 'ffprobe'), 'ffprobe', elsewhere('ffprobe'), join(home, 'bin', 'ffprobe')),
+    xvfb: findBinary(env.TOURWRIGHT_XVFB, file.xvfb, 'Xvfb', elsewhere('Xvfb')),
+    // Chromium: TOURWRIGHT_CHROMIUM points to one. Else Playwright's build when installed, else a Chrome, Edge or
+    // Chromium the system has (systemBrowser: false never uses one; see src/render/chromium.js)
     chromium: env.TOURWRIGHT_CHROMIUM ?? file.chromium,
-    browsersPath: env.TOURWRIGHT_BROWSERS_PATH ?? file.browsersPath,
+    systemBrowser: bool(env.TOURWRIGHT_SYSTEM_BROWSER ?? file.systemBrowser, true),
+    browsersPath,
     // Threads per ffmpeg process and CPU priority: a shared server stays responsive.
     threads: num(env.TOURWRIGHT_FFMPEG_THREADS ?? file.threads, Math.max(1, Math.min(4, cpus().length))),
     nice: num(env.TOURWRIGHT_NICE ?? file.nice, 10),
@@ -89,10 +110,12 @@ export const loadConfig = (overrides = {}) => {
       pocket: { python: pocket },
       piper: {
         python: piperPython(home, file),
-        bin: findBinary(env.TOURWRIGHT_PIPER_BIN, file.tts?.piper?.bin, 'piper', join(home, 'piper', 'piper'), venvBin(home, 'piper')),
+        bin: findBinary(env.TOURWRIGHT_PIPER_BIN, file.tts?.piper?.bin, 'piper', elsewhere('piper'), join(home, 'piper', 'piper'), venvBin(home, 'piper')),
         voicesDir: resolve(env.TOURWRIGHT_PIPER_VOICES ?? file.tts?.piper?.voicesDir ?? join(home, 'voices')),
+        // More folders with voices already downloaded (the Hugging Face cache is always searched too)
+        extraVoiceDirs: (env.TOURWRIGHT_PIPER_VOICE_DIRS?.split(delimiter).filter(Boolean) ?? file.tts?.piper?.extraVoiceDirs ?? []).map(d => resolve(d)),
       },
-      edge: { bin: findBinary(env.TOURWRIGHT_EDGE_TTS_BIN, file.tts?.edge?.bin, 'edge-tts', venvBin(home, 'edge-tts')) },
+      edge: { bin: findBinary(env.TOURWRIGHT_EDGE_TTS_BIN, file.tts?.edge?.bin, 'edge-tts', elsewhere('edge-tts'), venvBin(home, 'edge-tts')) },
       // Any server speaking the OpenAI /v1/audio/speech protocol: OpenAI, Kokoro-FastAPI, LocalAI, openedai-speech…
       openai: {
         url: env.TOURWRIGHT_OPENAI_TTS_URL ?? file.tts?.openai?.url ?? (env.OPENAI_API_KEY ? 'https://api.openai.com' : undefined),

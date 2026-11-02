@@ -14,13 +14,14 @@
 // whole, so commas are breathed by the voice itself; the silence around each one is trimmed and a short,
 // even pause is placed between them. Every sentence and phrase is cached by engine, voice and text:
 // rendering the same script twice never asks the engine again.
-import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadConfig } from '../config.js'
 import { concatEntry, hash, run, UserError } from '../util.js'
 import { ENGINES } from './engines.js'
 import { lexicon, speakable, voiceLanguage } from './lexicon.js'
+import { findPiperVoice, installedPiperVoices } from './piper-voices.js'
 
 // Built-in aliases: tested voices that sound good. Config `tts.aliases` adds or overrides.
 export const ALIASES = {
@@ -356,7 +357,7 @@ export const listVoices = async (config = loadConfig()) => {
     const engine = spec.split(':')[0]
     if (engine === 'piper' && engines.piper.ok) {
       const model = spec.slice(6).split('?')[0]
-      if (!existsSync(join(config.tts.piper.voicesDir, `${model}.onnx`))) continue
+      if (!findPiperVoice(config, model)) continue
     }
     let languages = []
     try {
@@ -365,10 +366,10 @@ export const listVoices = async (config = loadConfig()) => {
     const samples = Object.fromEntries(languages.map(l => [l, join(SAMPLES_DIR, l, `${alias}.mp3`)]).filter(([, f]) => existsSync(f)))
     voices.push({ name: alias, voice: spec, engine, languages, available: Boolean(engines[engine]?.ok), samples })
   }
-  if (engines.piper.ok && existsSync(config.tts.piper.voicesDir)) {
+  if (engines.piper.ok) {
     // Installed Piper voices without a name of their own
-    for (const f of readdirSync(config.tts.piper.voicesDir).filter(f => f.endsWith('.onnx') && !voices.some(v => v.voice === `piper:${f.slice(0, -5)}`))) {
-      voices.push({ name: `piper:${f.slice(0, -5)}`, voice: `piper:${f.slice(0, -5)}`, engine: 'piper', languages: [f.slice(0, 2)], available: true, samples: {} })
+    for (const id of installedPiperVoices(config).filter(id => !voices.some(v => v.voice === `piper:${id}`))) {
+      voices.push({ name: `piper:${id}`, voice: `piper:${id}`, engine: 'piper', languages: [id.slice(0, 2)], available: true, samples: {} })
     }
   }
   return { default: config.tts.defaultVoice, engines, voices }

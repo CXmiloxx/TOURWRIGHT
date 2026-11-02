@@ -5,6 +5,7 @@ import { spawn } from 'node:child_process'
 import { existsSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { log, run, runWithInput, sleep, UserError } from '../util.js'
+import { findPiperVoice } from './piper-voices.js'
 import { pythonProcess } from './python.js'
 
 // "+10%" / "-4.5%" → "+10%" / "-5%" (edge-tts takes whole signed numbers only)
@@ -28,8 +29,8 @@ const piper = {
   synthesize: async ({ text, voice, out, config }) => {
     const { bin, python } = config.tts.piper
     if (!bin && !python) throw new Error('piper not installed (run `tourwright install` or set TOURWRIGHT_PIPER_BIN)')
-    const model = join(config.tts.piper.voicesDir, `${voice.id}.onnx`)
-    if (!existsSync(model)) throw new UserError(`piper voice ${voice.id} not installed: tourwright install-voice ${voice.id}`)
+    const model = findPiperVoice(config, voice.id)
+    if (!model) throw new UserError(`piper voice ${voice.id} not installed: tourwright install-voice ${voice.id}`)
     // length_scale > 1 speaks slower; a "rate" like edge's (-10%) is translated
     const rate = voice.options.rate ? 1 / (1 + Number.parseFloat(voice.options.rate) / 100) : voice.options.lengthScale
     // piper-tts 1.8 keeps the voice loaded for the whole render: about 5× faster per sentence than the command
