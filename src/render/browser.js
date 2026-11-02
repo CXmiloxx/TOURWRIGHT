@@ -16,6 +16,7 @@ import { createGuard, setupNetwork } from './network.js'
 import { OVERLAY } from './overlay.js'
 import { needsPrep, prepare, saveSession, sessionPath } from './session.js'
 import { dismissing, hideTyped, locate, plainHelpers, runSteps, setStepTimeout } from './steps.js'
+import { maskInPage } from './mask.js'
 import { markOffered } from './targets.js'
 import { resolveTheme, safePath, themeCss, titleHtml } from './theme.js'
 import { callout, camera, focusOff, focusOn, frame, hideTitle, setCaption, showTitle, spotlight } from './visuals.js'
@@ -128,6 +129,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     const closeStreams = await setupNetwork(context, network)
     const blurCss = (script.blur ?? []).filter(t => typeof t === 'string').map(sel => `${sel} { filter: blur(8px) !important; }`).join('\n')
     await context.addInitScript(OVERLAY, [themeCss(theme), blurCss, theme.logo])
+    // Real data on screen becomes invented data, on every page (and frame) of the video
+    if (script.mask?.length) await context.addInitScript(maskInPage, script.mask)
     const page = await context.newPage()
     // A dry run is for finding mistakes: a missing element is reported in seconds, and the run goes on
     setStepTimeout(page, dryRun ? DRY_RUN_TIMEOUT : 30_000)

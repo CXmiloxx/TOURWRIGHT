@@ -226,6 +226,24 @@ dismiss:
   - { text: Accept cookies }
 ```
 
+### Invented data on screen
+
+A video made on a real account shows real people. `mask` replaces them with invented data in the page itself,
+so the screen stays natural (blur hides, mask replaces):
+
+```yaml
+mask:
+  - email                                   # ana.perez@gmail.com → luis31@ejemplo.com
+  - phone                                   # 300 555 1234 → 905 042 1655
+  - id                                      # CC 1.023.456.789 → CC 7.144.349.251 (amounts like $ 1.250.000 stay)
+  - { text: "Ana Pérez", as: "Laura Gómez" }
+  - { pattern: "P-\\d{5}", as: "P-00000" }  # anything else, by regular expression
+```
+
+The same real value always becomes the same invented one, on every page, also in what loads later. Only what
+is drawn changes: the app keeps working with the real data, and a field that can be edited keeps its real
+value (a form would send the invented one; blur those). `examples/app.yaml` shows it on a customer table.
+
 ### Secrets
 
 Passwords and keys never go in the script. Save them once:
