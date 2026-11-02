@@ -15,7 +15,8 @@ import { centerOf, createCursor } from './cursor.js'
 import { createGuard, setupNetwork } from './network.js'
 import { OVERLAY } from './overlay.js'
 import { needsPrep, prepare, saveSession, sessionPath } from './session.js'
-import { dismissing, hideTyped, locate, runSteps } from './steps.js'
+import { dismissing, hideTyped, locate, runSteps, setStepTimeout } from './steps.js'
+import { markOffered } from './targets.js'
 import { resolveTheme, safePath, themeCss, titleHtml } from './theme.js'
 import { callout, camera, focusOff, focusOn, frame, hideTitle, setCaption, showTitle, spotlight } from './visuals.js'
 
@@ -38,6 +39,8 @@ export const urlResolver = (script, dir, sandboxed) => {
   const origin = baseUrl && /^https?:/.test(baseUrl) ? new URL(baseUrl).origin : undefined
   return { resolveUrl, origin }
 }
+
+const DRY_RUN_TIMEOUT = 5000
 
 export const launch = async ({ headless, display, width, height, locale }, config) => {
   return launchChromium(config, {
@@ -125,7 +128,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     const blurCss = (script.blur ?? []).filter(t => typeof t === 'string').map(sel => `${sel} { filter: blur(8px) !important; }`).join('\n')
     await context.addInitScript(OVERLAY, [themeCss(theme), blurCss, theme.logo])
     const page = await context.newPage()
-    page.setDefaultTimeout(30_000)
+    // A dry run is for finding mistakes: a missing element is reported in seconds, and the run goes on
+    setStepTimeout(page, dryRun ? DRY_RUN_TIMEOUT : 30_000)
     page.on('pageerror', e => log.debug(`page error: ${e.message}`))
     const blocker = await dismissing(page, script.dismiss)
 
@@ -473,6 +477,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       else await runSteps(script.steps, v, page)
     } catch (error) {
       const shot = join(opts.failureDir ?? work, `failure-${name}.png`)
+      // A missing element: the screenshot marks what the page offers instead, with the target of each
+      if (['element_not_found', 'steps_failed'].includes(error.code)) await markOffered(page)
       await page.screenshot({ path: shot }).catch(() => {})
       error.screenshot = shot
       throw error

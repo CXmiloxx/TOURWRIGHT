@@ -5,6 +5,7 @@ import { basename } from 'node:path'
 import { PLUGIN_STEPS } from '../script/schema.js'
 import { withCodes } from '../secrets.js'
 import { holdsSecret, log, sleep, UserError } from '../util.js'
+import { asTarget, describeTarget, isMissingElement, offeredElements, resolveTarget, targetsOf } from './targets.js'
 
 // A target of a script (a selector, or { role, name }, { label }…) → a Playwright locator
 export const locate = (page, t) => {
@@ -50,11 +51,54 @@ export const hideTyped = locator =>
     if (!(el instanceof HTMLInputElement && el.type === 'password')) el.classList.add('tw-blur')
   })
 
-// Runs declarative steps with the helpers `v`.
-export const runSteps = async (steps, v, page) => {
-  for (const step of steps) {
+// Runs declarative steps with the helpers `v`. A step whose element is missing fails with what the page has
+// instead; a dry run (`v.dryRun`) goes on to the end and lists every step that failed.
+export const runSteps = async (steps, v, page, top = true) => {
+  const failures = []
+  for (const [index, step] of steps.entries()) {
+    try {
+      await runStep(step, v, page)
+    } catch (error) {
+      const failure = await explain(error, step, page, index)
+      if (!(top && v.dryRun && failure instanceof UserError)) throw failure
+      failures.push(failure)
+      log.warn(failure.message.split('\n')[0])
+    }
+  }
+  if (failures.length) {
+    const count = `${failures.length} step${failures.length > 1 ? 's' : ''}`
+    const error = new UserError(`${count} failed (later ones may fail because of an earlier one):\n${failures.map(f => `  ${f.message}`).join('\n')}`, { code: 'steps_failed' })
+    // For `tourwright check` and `fix`: each failure as data
+    Object.assign(error, { failures: failures.map(f => f.failure ?? { message: f.message }) })
+    throw error
+  }
+}
+
+// A missing element, said with its target and with what the page offers instead. The error carries it as data
+// too (`failure`): the step, the target, the page and the elements on it, for `tourwright check` and `fix`.
+const explain = async (error, step, page, index) => {
+  const [action, arg] = Object.entries(step)[0]
+  const targets = targetsOf(action, arg)
+  if (!targets.length || !isMissingElement(error) || error.explained) return error
+  const absent = []
+  for (const t of targets) if (!(await locate(page, t).count().catch(() => 0))) absent.push(t)
+  // Found but never usable (hidden, covered, disabled) is a different problem from not there at all
+  const what = absent.length ? `cannot find ${describeTarget(absent[0])}` : `${describeTarget(targets[0])} is there but cannot be used (hidden or covered?)`
+  const elements = await offeredElements(page)
+  const seen = new Set()
+  const offered = elements.map(e => asTarget(e.target)).filter(s => !seen.has(s) && seen.add(s)).slice(0, 15)
+  const message = `step ${index + 1} (${action}): ${what}` +
+    (offered.length ? `\n    on this page (${page.url()}): ${offered.join(' · ')}` : `\n    page: ${page.url()}`)
+  const explained = new UserError(message, { code: 'element_not_found' })
+  const failure = { step: index + 1, action, target: absent[0] ?? targets[0], found: !absent.length, url: page.url(), message, elements }
+  Object.assign(explained, { explained: true, cause: error, failure })
+  return explained
+}
+
+const runStep = async (step, v, page) => {
     if (v.beforeStep) await v.beforeStep()
     const [action, arg] = Object.entries(step)[0]
+    const find = t => resolveTarget(page, t, stepTimeout(page))
     const withTarget = a => (typeof a === 'object' && a && 'target' in a ? a : { target: a })
     switch (action) {
       case 'goto': await v.goto(arg); break
@@ -68,30 +112,30 @@ export const runSteps = async (steps, v, page) => {
         else await v.say(arg.caption ?? arg.speak, { speak: arg.speak, ms: arg.ms, ...prosodyOf(arg) })
         break
       case 'caption': await v.say(arg, { silent: true }); break
-      case 'click': await v.click(locate(page, withTarget(arg).target)); break
-      case 'dblclick': await v.click(locate(page, withTarget(arg).target), { clickCount: 2 }); break
-      case 'rightClick': await v.click(locate(page, withTarget(arg).target), { button: 'right' }); break
-      case 'hover': await v.hover(locate(page, arg)); break
-      case 'check': await v.check(locate(page, arg), true); break
-      case 'uncheck': await v.check(locate(page, arg), false); break
-      case 'drag': await v.drag(locate(page, arg.from), locate(page, arg.to)); break
+      case 'click': await v.click(await find(withTarget(arg).target)); break
+      case 'dblclick': await v.click(await find(withTarget(arg).target), { clickCount: 2 }); break
+      case 'rightClick': await v.click(await find(withTarget(arg).target), { button: 'right' }); break
+      case 'hover': await v.hover(await find(arg)); break
+      case 'check': await v.check(await find(arg), true); break
+      case 'uncheck': await v.check(await find(arg), false); break
+      case 'drag': await v.drag(await find(arg.from), await find(arg.to)); break
       case 'type':
-        if (arg.clear) await locate(page, arg.target).first().fill('')
-        if (holdsSecret(arg.text)) await hideTyped(locate(page, arg.target))
-        await v.type(locate(page, arg.target), await withCodes(arg.text), arg.delay)
+      case 'fill': {
+        const field = await find(arg.target)
+        if (action === 'type' && arg.clear) await field.first().fill('')
+        if (holdsSecret(arg.text)) await hideTyped(field)
+        if (action === 'type') await v.type(field, await withCodes(arg.text), arg.delay)
+        else await field.first().fill(await withCodes(arg.text))
         break
-      case 'fill':
-        if (holdsSecret(arg.text)) await hideTyped(locate(page, arg.target))
-        await locate(page, arg.target).first().fill(await withCodes(arg.text))
-        break
+      }
       case 'press': await page.keyboard.press(arg); await v.pause(300); break
-      case 'select': await locate(page, arg.target).first().selectOption(arg.value); await v.pause(400); break
-      case 'highlight': { const a = withTarget(arg); await v.highlight(locate(page, a.target), a.ms); break }
-      case 'spotlight': { const a = withTarget(arg); await v.spotlight(locate(page, a.target), a.ms); break }
-      case 'focus': await v.focus(locate(page, arg.target), arg); break
-      case 'callout': await v.callout(locate(page, arg.target), arg.text, { ms: arg.ms, position: arg.position }); break
-      case 'zoom': { const a = withTarget(arg); await v.zoom(locate(page, a.target), a.ms, a.scale); break }
-      case 'scrollTo': await v.scrollTo(locate(page, arg)); break
+      case 'select': await (await find(arg.target)).first().selectOption(arg.value); await v.pause(400); break
+      case 'highlight': { const a = withTarget(arg); await v.highlight(await find(a.target), a.ms); break }
+      case 'spotlight': { const a = withTarget(arg); await v.spotlight(await find(a.target), a.ms); break }
+      case 'focus': await v.focus(await find(arg.target), arg); break
+      case 'callout': await v.callout(await find(arg.target), arg.text, { ms: arg.ms, position: arg.position }); break
+      case 'zoom': { const a = withTarget(arg); await v.zoom(await find(a.target), a.ms, a.scale); break }
+      case 'scrollTo': await v.scrollTo(await find(arg)); break
       case 'scroll': await v.scroll(arg); break
       case 'cursor': await v.cursor(arg === 'show'); break
       case 'back': await v.back(); break
@@ -100,12 +144,12 @@ export const runSteps = async (steps, v, page) => {
       case 'sound': await v.sound(typeof arg === 'string' ? { file: arg } : arg); break
       case 'wait': await v.offCamera(() => waitFor(page, arg)); break
       case 'blur': for (const t of [arg].flat()) await v.blur(locate(page, t)); break
-      case 'upload': await v.upload(locate(page, arg.target), [arg.files].flat()); break
-      case 'offCamera': await v.offCamera(() => runSteps(arg, v, page)); break
+      case 'upload': await v.upload(await find(arg.target), [arg.files].flat()); break
+      case 'offCamera': await v.offCamera(() => runSteps(arg, v, page, false)); break
       case 'if': {
         const ok = arg.timeout ? await v.offCamera(() => holds(page, arg)) : await holds(page, arg)
-        if (ok) await runSteps(arg.then, v, page)
-        else if (arg.else) await runSteps(arg.else, v, page)
+        if (ok) await runSteps(arg.then, v, page, false)
+        else if (arg.else) await runSteps(arg.else, v, page, false)
         break
       }
       case 'try': await attempt(page, v, arg); break
@@ -115,7 +159,6 @@ export const runSteps = async (steps, v, page) => {
         await plugin.run(arg, { page, v, locate: t => locate(page, t), dryRun: Boolean(v.dryRun) })
       }
     }
-  }
 }
 
 const waitFor = async (page, arg) => {
@@ -142,20 +185,26 @@ const holds = async (page, c) => {
   return true
 }
 
-// `try`: steps that may fail (a banner that is not always there). Each one waits briefly, not 30 s.
+// How long a step waits for its element: 30 s while recording, less in a dry run and inside `try`
 const timeouts = new WeakMap()
+export const stepTimeout = page => timeouts.get(page) ?? 30_000
+/** @param {import('playwright').Page} page @param {number} ms */
+export const setStepTimeout = (page, ms) => {
+  timeouts.set(page, ms)
+  page.setDefaultTimeout(ms)
+}
+
+// `try`: steps that may fail (a banner that is not always there). Each one waits briefly, not 30 s.
 const attempt = async (page, v, arg) => {
   const { steps, timeout = 3000 } = Array.isArray(arg) ? { steps: arg } : arg
-  const previous = timeouts.get(page) ?? 30_000
-  timeouts.set(page, timeout)
-  page.setDefaultTimeout(timeout)
+  const previous = stepTimeout(page)
+  setStepTimeout(page, Math.min(timeout, previous))
   try {
-    await runSteps(steps, v, page)
+    await runSteps(steps, v, page, false)
   } catch (error) {
     log.info(`try: skipped the rest (${String(error.message).split('\n')[0].replace(/\u001b\[[0-9;]*m/g, '')})`)
   } finally {
-    timeouts.set(page, previous)
-    page.setDefaultTimeout(previous)
+    setStepTimeout(page, previous)
   }
 }
 
