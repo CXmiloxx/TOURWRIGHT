@@ -635,6 +635,17 @@ first narration that knows where the element is:
   the script, and it works for whoever has the secrets saved.
 
 The narration is correct but plain: rewrite it in your own words, or let an agent do it (MCP).
+### A step-by-step guide from the same script
+
+```bash
+tourwright guide tour.yaml --open
+```
+
+Runs the script fast and, before each action, captures the page with the element marked. The narration becomes
+the text of each numbered step, chapters and title cards become sections, and what was typed is shown as an
+example (never a secret or a code). You get `tour.guide.html` — one file with its pictures inside, to send, put
+in a help center or print as PDF — and `tour.guide.md` with its pictures in `tour.guide/`.
+
 ### The review of every video
 
 While a video is filmed and once it is finished, Tourwright looks for what a viewer would notice: a JavaScript

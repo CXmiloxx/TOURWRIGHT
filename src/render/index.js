@@ -87,6 +87,11 @@ export const render = async (loaded, opts = {}, config = loadConfig()) => {
   if (steps && loaded.run) throw new UserError('--step works with YAML and JSON scripts, not JavaScript ones')
   const out = outputBase(opts.out, steps ? `${loaded.name}-step${steps[0]}${steps[1] !== steps[0] ? `-${steps[1]}` : ''}` : loaded.name)
   if (steps) opts = { ...opts, steps }
+  // A guide runs the script like a dry run: fast, no voice, no video
+  if (opts.guide) {
+    if (loaded.kind !== 'browser') throw new UserError('a guide is made from a browser walkthrough (slides are already a guide)')
+    opts = { ...opts, dryRun: true }
+  }
   mkdirSync(dirname(out), { recursive: true })
   const base = config.tmpDir ?? tmpdir()
   mkdirSync(base, { recursive: true })
