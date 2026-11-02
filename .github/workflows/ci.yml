@@ -53,6 +53,19 @@ jobs:
         run: sudo npx playwright install-deps chromium
       - run: node bin/tourwright.js render examples/slides.yaml --out out/
       - run: node bin/tourwright.js render examples/example-com.yaml --voice lessac --capture ${{ matrix.capture }} --out out/
+      # A real app, served here: login with a 2FA code, masked data, an upload, a long process, a live notice.
+      # `check` fails the job naming the broken step (and fills the job summary); then the video is made.
+      - name: Demo app, end to end
+        shell: bash
+        env:
+          TOURWRIGHT_SECRET_ACME_USER: demo@acme.test
+          TOURWRIGHT_SECRET_ACME_PASSWORD: demo123
+          TOURWRIGHT_SECRET_ACME_TOTP: JBSWY3DPEHPK3PXP
+        run: |
+          node examples/app/server.js &
+          sleep 1
+          node bin/tourwright.js check examples/app.yaml examples/example-com.yaml examples/features.yaml
+          node bin/tourwright.js render examples/app.yaml --capture ${{ matrix.capture }} --out out/
       - uses: actions/upload-artifact@v7
         with: { name: "videos-${{ matrix.os }}", path: out/ }
   image:

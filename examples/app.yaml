@@ -1,0 +1,59 @@
+# The complete cases of a real app, against the demo app in examples/app (no internet needed):
+# a login on camera with a 2FA code, real data replaced by invented data, an upload, a long process and a
+# live notice. CI renders it on every change.
+#
+#   node examples/app/server.js &
+#   export TOURWRIGHT_SECRET_ACME_USER=demo@acme.test TOURWRIGHT_SECRET_ACME_PASSWORD=demo123
+#   export TOURWRIGHT_SECRET_ACME_TOTP=JBSWY3DPEHPK3PXP
+#   tourwright check examples/app.yaml            # every step, in seconds
+#   tourwright render examples/app.yaml --open
+title: Acme, de punta a punta
+language: es
+baseUrl: http://127.0.0.1:4800
+# Emails, phones and ID numbers on screen become invented ones (the same real value, the same invented one)
+mask:
+  - email
+  - phone
+  - id
+  - { text: "Ana Pérez", as: "Laura Gómez" }
+steps:
+  - goto: /login
+  - title: { text: Acme, subtitle: "Login con 2FA, datos protegidos, archivos y procesos largos", say: "Así se usa Acme." }
+
+  # ── The login, on camera. The label "Usuario o correo" is not linked to its field (an icon wraps it):
+  # `label` still finds it. The password shows as dots; secrets come from the environment.
+  - focus: { target: { label: Usuario o correo }, say: "Primero, escribe tu {usuario o correo}.", text: "<b>Usuario</b>" }
+  - type: { target: { label: Usuario o correo }, text: "${secret:ACME_USER}" }
+  - focus: { target: { label: Contraseña }, say: "Luego tu {contraseña}.", text: "<b>Contraseña</b>" }
+  - type: { target: { label: Contraseña }, text: "${secret:ACME_PASSWORD}" }
+  - focus: { target: { role: button, name: Ingresar }, say: "Y pulsa {Ingresar}.", click: true }
+
+  # ── The 2FA code of an authenticator app, made when it is typed
+  - wait: { target: { label: Código de verificación } }
+  - focus: { target: { label: Código de verificación }, say: "Escribe el {código} de tu aplicación de autenticación." }
+  - type: { target: { label: Código de verificación }, text: "${totp:ACME_TOTP}" }
+  - click: { role: button, name: Verificar }
+  - wait: { target: { role: heading, name: Clientes } }
+
+  # ── Real data, invented on screen
+  - say: "En Clientes ves a cada cliente con sus datos de contacto y su saldo."
+  - highlight: { target: table, ms: 2500 }
+
+  # ── Uploading a file
+  - focus: { target: { role: link, name: Facturas }, say: "Para subir una factura, abre {Facturas}.", click: true }
+  - wait: { target: { role: heading, name: Facturas } }
+  - upload: { target: { label: Archivo de la factura }, files: [app/factura.txt] }
+  - select: { target: { label: Cliente }, value: Luis Gómez }
+  - focus: { target: { role: button, name: Subir factura }, say: "Elige el archivo y el cliente, y pulsa {Subir factura}.", click: true }
+  - wait: { text: guardada }
+  - say: "La factura queda guardada."
+
+  # ── A long process: the wait is cut from the video, then a live notice from the server
+  - focus: { target: { role: link, name: Reportes }, say: "En {Reportes} generas el resumen del mes.", click: true }
+  - focus: { target: { role: button, name: Generar reporte }, say: "Pulsa {Generar reporte}.", click: true }
+  - wait: { text: Reporte listo, timeout: 20000 }
+  - say: "Cuando termina, ves el resultado."
+  - wait: { target: { role: status } }
+  - say: "Y los avisos llegan en vivo, como este pago."
+  - pause: 1500
+  - say: null
