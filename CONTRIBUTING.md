@@ -6,7 +6,7 @@ vulnerabilities to [SECURITY.md](SECURITY.md), never a public issue.
 
 ## Setup
 
-Node.js 20+ on Linux, macOS or Windows. CI runs the tests and a real render on all three.
+Node.js 22+ on Linux, macOS or Windows. CI runs the tests and a real render on all three.
 
 ```bash
 git clone https://github.com/CXmiloxx/tourwright && cd tourwright
@@ -60,7 +60,7 @@ per commit; a breaking change takes `!` after the type and a `BREAKING CHANGE:` 
 1. Open an issue first for new syntax, breaking changes or new dependencies.
 2. Branch from `main`, keep the pull request focused, describe the why.
 3. `npm run check`; for rendering changes, also render `examples/` and look at the result.
-4. Fill in the checklist of the pull request template. CI runs tests on Node 20/22/24 and renders the
+4. Fill in the checklist of the pull request template. CI runs tests on Node 22/24/26 and renders the
    examples.
 5. A maintainer reviews; see [GOVERNANCE.md](GOVERNANCE.md).
 

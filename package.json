@@ -21,7 +21,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "test": "node --test",
@@ -72,7 +72,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.3",
-    "@types/node": "^20.19.43",
+    "@types/node": "^22.20.5",
     "typescript": "^7.0.2"
   }
 }

@@ -9,8 +9,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 20 ? 0 : 1)' \
-  || { echo "Tourwright needs Node.js 20 or newer" >&2; exit 1; }
+node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 22 ? 0 : 1)' \
+  || { echo "Tourwright needs Node.js 22 or newer" >&2; exit 1; }
 
 (cd "$ROOT" && npm install --omit=dev --no-audit --no-fund)
 

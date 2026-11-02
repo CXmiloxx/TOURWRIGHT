@@ -22,7 +22,7 @@ about changing Tourwright itself.
 
 ## Rules
 
-- Plain Node.js ESM, no build step, Node 20+. Types are JSDoc checked by `tsc` (`jsconfig.json`); page globals in `src/globals.d.ts`;
+- Plain Node.js ESM, no build step, Node 22+. Types are JSDoc checked by `tsc` (`jsconfig.json`); page globals in `src/globals.d.ts`;
   script types come from the zod schema (`z.infer`), never written by hand. Few dependencies: Playwright, yaml, zod, the MCP SDK;
   BullMQ/ioredis are optional. Speak S3 and HTTP with the standard library.
 - No machine-specific paths: everything comes from `loadConfig()`.

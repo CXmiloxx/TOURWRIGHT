@@ -7,7 +7,7 @@ updates:
       minor-and-patch:
         update-types: [minor, patch]
     ignore:
-      # The types follow the oldest supported Node (engines: >=20), not the newest
+      # The types follow the oldest supported Node (engines: >=22), not the newest
       - dependency-name: "@types/node"
         update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
