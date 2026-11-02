@@ -18,6 +18,7 @@ Order: built-in defaults < `tourwright.config.json` in the working directory (or
 | `TOURWRIGHT_CHROMIUM` | Playwright's Chromium if installed, else `CHROME_PATH` / `CHROME_BIN` / `PUPPETEER_EXECUTABLE_PATH`, a build left by another Playwright or Puppeteer version, or a Chrome, Edge or Chromium on the system (not snap or Flatpak) | Another Chromium/Chrome binary |
 | `TOURWRIGHT_SYSTEM_BROWSER` | `true` | `false`: never use the system's browser; `tourwright install` downloads Playwright's Chromium |
 | `TOURWRIGHT_BROWSERS_PATH` | `$TOURWRIGHT_HOME/browsers` | Where `tourwright install` puts Playwright's Chromium. A folder other tools share (`PLAYWRIGHT_BROWSERS_PATH`, `/opt/ms-playwright`) is only read, to reuse a Chromium already there, and never written to |
+| `TOURWRIGHT_BROWSER_LOCK` | — | One browser at a time on the machine: renders, `explore` and workers wait for this file (`--lock <file>` does the same). On Linux it is the same lock as `flock <file>`, so other tools that use it take turns with Tourwright |
 | `TOURWRIGHT_FFMPEG_THREADS` | min(4, CPUs) | Threads per ffmpeg |
 | `TOURWRIGHT_PRESET` | `medium` | x264 preset of the final video: `ultrafast` … `veryslow`. `veryfast` encodes ~3× faster on weak or virtual CPUs, at a larger file |
 | `TOURWRIGHT_NICE` | `10` | CPU priority of renders (0–19; also idle disk priority) |
