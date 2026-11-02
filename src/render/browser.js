@@ -157,6 +157,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     let cursorHidden = false
     let startS = 0
     let voiceUntil = 0
+    // When the voice really stops; voiceUntil adds the breath before the next sentence
+    let voiceEnd = 0
     const markStart = () => {
       if (!startS) startS = now()
     }
@@ -168,6 +170,11 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     // A new caption, a title card or a cut wait for the previous narration to finish
     const waitVoice = async () => {
       const left = voiceUntil - now()
+      if (left > 0 && !dryRun) await page.waitForTimeout(left * 1000)
+    }
+    // An action that follows what was said starts as the voice stops, not a breath later
+    const waitSpeech = async () => {
+      const left = voiceEnd - now()
       if (left > 0 && !dryRun) await page.waitForTimeout(left * 1000)
     }
 
@@ -284,7 +291,13 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       type: async (locator, text, delay = 70) => {
         locator = locator.first()
         if (holdsSecret(text)) await hideTyped(locator)
-        await v.click(locator)
+        // Into the field and typing at once: a click that only focuses needs no pause after it
+        const { x, y } = await center(locator)
+        await moveTo(x, y)
+        await wait(150)
+        if (clickSound) effect(clickSound)
+        await locator.click()
+        await wait(120)
         if (audio.typing && !dryRun && text) effect(await offClock(() => typingSound(text.length, delay, config)), 0.8)
         await locator.pressSequentially(text, { delay: dryRun ? 0 : delay })
         await wait(300)
@@ -336,7 +349,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         await wait(900)
       },
       focus: async (locator, options = {}) => {
-        const { text, say, caption, step, zoom, pulse, click, ms = 1200, position, ...prosody } = options
+        // The hold after the voice is short: a long silence before the next action loses the viewer
+        const { text, say, caption, step, zoom, pulse, click, ms = click ? 150 : 600, position, ...prosody } = options
         locator = locator.first()
         await waitVoice()
         // "{Pay}" marks the word the focus lands on. Its time is the length of what is said before it
@@ -345,9 +359,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         const narration = spoken ? await synth(plainText(spoken), prosody) : null
         const lead = narration && /[\p{L}\p{N}]/u.test(before ?? '') ? await synth(plainText(before), prosody) : null
         const at = lead ? Math.max(0, lead.duration - 0.25) : 0
-        // The cursor glides there while nothing else moves
+        // The voice starts and the cursor glides there meanwhile: no silence while it travels
         const { x, y } = await center(locator)
-        await moveTo(x, y)
         const shown = caption ?? (spoken || null)
         if (shown) {
           const html = stripMarks(shown)
@@ -357,7 +370,10 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
           captions.push({ start: now(), text: plainText(html) })
         } else markStart()
         if (narration) play(narration)
-        if (at) await wait(at * 1000)
+        const started = now()
+        await moveTo(x, y)
+        const left = at - (now() - started)
+        if (left > 0) await wait(left * 1000)
         if (zoom && zoom > 1) {
           // The focus lands once the camera has done most of its move: a layer chasing a fast element lags
           await camera(locator, zoom)
@@ -370,12 +386,13 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
           const box = await locator.boundingBox()
           if (box) await moveTo(box.x + box.width / 2, box.y + box.height / 2)
         }
-        await waitVoice()
+        await waitSpeech()
         await wait(ms)
-        // The focus fades out first, then the camera pulls back
+        // The focus fades out first, then the camera pulls back. Without a camera move the next action
+        // starts while it fades (`type` right after a focus on the field: no gap)
         await focusOff(page)
-        await wait(500)
         if (zoom && zoom > 1) {
+          await wait(500)
           await camera(locator, 1)
           await wait(900)
         }
@@ -416,7 +433,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     }
     const play = n => {
       narrations.push({ at: now(), file: n.file })
-      voiceUntil = now() + n.duration + 0.4
+      voiceEnd = now() + n.duration
+      voiceUntil = voiceEnd + 0.4
     }
     const speakNow = async (text, prosody) => {
       const n = await synth(text, prosody)
