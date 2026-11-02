@@ -606,3 +606,9 @@ tourwright render video.yaml --step 7-9
 
 The preview is saved as `<name>-step7.mp4`, next to the full video, which it never replaces.
 
+### The review of every video
+
+While a video is filmed and once it is finished, Tourwright looks for what a viewer would notice: a JavaScript
+error or a 5xx answer on the page, a click that changed nothing (the wrong element, or a missing wait), and a
+blank or black screen for more than a second. Each finding is printed with its step and saved under `review` in
+the video's `.json` manifest; none of them stops the render.

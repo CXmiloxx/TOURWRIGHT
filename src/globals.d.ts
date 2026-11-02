@@ -8,5 +8,8 @@ declare global {
     __twSseOpen?: (id: string, url: string) => void
     __twSseClose?: (id: string) => void
     __twSseEmit?: (id: string, type: string, data: string, lastEventId?: string) => void
+    // The review's probe: how many changes a click made (src/render/review.js)
+    __twChanges?: number
+    __twProbe?: MutationObserver
   }
 }
