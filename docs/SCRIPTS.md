@@ -579,3 +579,12 @@ so a deploy that breaks a video says which one and at which step:
 
 Agents get the same with the MCP tool `tourwright_check`, which also returns the fixed script.
 
+### One step at a time
+
+```bash
+tourwright render video.yaml --step 7      # films step 7 with its voice; steps 1–6 run fast off camera
+tourwright render video.yaml --step 7-9
+```
+
+The preview is saved as `<name>-step7.mp4`, next to the full video, which it never replaces.
+

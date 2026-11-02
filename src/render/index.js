@@ -67,10 +67,26 @@ const exportExtras = async (result, wanted, config) => {
  * @param {Record<string, any>} [opts]  { out, voice, quality, width, height, capture, dryRun, timeout (s), onProgress, sessionNamespace }
  * @returns manifest: { title, duration, files, chapters, captions, paths } (or a dry-run summary)
  */
+/** "5" or "3-6" → [5, 5] or [3, 6] (1-based, inclusive); nothing → null */
+export const parseSteps = spec => {
+  if (spec === undefined || spec === null || spec === '') return null
+  if (Array.isArray(spec)) return spec
+  const m = /^(\d+)(?:-(\d+))?$/.exec(String(spec).trim())
+  if (!m) throw new UserError(`--step ${spec}: use a step number (5) or a range (3-6)`)
+  const from = Number(m[1])
+  const to = Number(m[2] ?? m[1])
+  if (from < 1 || to < from) throw new UserError(`--step ${spec}: steps count from 1, and the range goes up`)
+  return [from, to]
+}
+
 export const render = async (loaded, opts = {}, config = loadConfig()) => {
   lowerPriority(config)
   await loadPlugins(config)
-  const out = outputBase(opts.out, loaded.name)
+  // A preview of some steps never overwrites the whole video: it gets its own name
+  const steps = parseSteps(opts.steps)
+  if (steps && loaded.run) throw new UserError('--step works with YAML and JSON scripts, not JavaScript ones')
+  const out = outputBase(opts.out, steps ? `${loaded.name}-step${steps[0]}${steps[1] !== steps[0] ? `-${steps[1]}` : ''}` : loaded.name)
+  if (steps) opts = { ...opts, steps }
   mkdirSync(dirname(out), { recursive: true })
   const base = config.tmpDir ?? tmpdir()
   mkdirSync(base, { recursive: true })
