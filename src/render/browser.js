@@ -3,13 +3,13 @@
 import { existsSync, rmSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { chromium } from 'playwright'
 import { compose, QUALITIES } from '../compose.js'
 import { loadConfig } from '../config.js'
 import { interpolate, secretsShown } from '../script/load.js'
 import { hash, holdsSecret, log, plainText, UserError } from '../util.js'
 import { builtInSound, typingSound } from '../voice/effects.js'
 import { durationOf, markedLine, narrate, parseVoice, stripMarks, withProsody } from '../voice/index.js'
+import { launchChromium } from './chromium.js'
 import { CHROME_MAX, openDisplay, pickCapture, recordScreen, recordScreencast } from './capture.js'
 import { centerOf, createCursor } from './cursor.js'
 import { createGuard, setupNetwork } from './network.js'
@@ -40,10 +40,8 @@ export const urlResolver = (script, dir, sandboxed) => {
 }
 
 export const launch = async ({ headless, display, width, height, locale }, config) => {
-  if (config.browsersPath) process.env.PLAYWRIGHT_BROWSERS_PATH ??= config.browsersPath
-  return chromium.launch({
+  return launchChromium(config, {
     headless,
-    ...(config.chromium ? { executablePath: config.chromium } : {}),
     // The browser UI speaks the script's language: no "translate this page?" bubble on camera
     env: { ...process.env, ...(display ? { DISPLAY: display } : {}), LANG: `${locale.replace('-', '_')}.UTF-8`, LANGUAGE: locale.replace('-', '_') },
     args: ['--disable-gpu', '--disable-dev-shm-usage', '--disable-extensions', '--no-first-run', '--mute-audio', '--hide-scrollbars',

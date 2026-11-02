@@ -5,7 +5,6 @@
 // Pocket TTS and Whisper with their models. Chromium lives in Playwright's shared folder, which other
 // projects may use: it is only reported (Playwright removes old versions itself when it installs new ones).
 import { existsSync, lstatSync, readdirSync, rmSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { venvBin } from './config.js'
 import { findBinary, log, run } from './util.js'
@@ -23,10 +22,8 @@ export const sizeOf = path => {
 export const human = bytes =>
   bytes >= 1e9 ? `${(bytes / 1e9).toFixed(1)} GB` : bytes >= 1e6 ? `${Math.round(bytes / 1e6)} MB` : bytes >= 1e3 ? `${Math.round(bytes / 1e3)} KB` : `${bytes} B`
 
-const browsersDir = config =>
-  config.browsersPath ?? process.env.PLAYWRIGHT_BROWSERS_PATH ??
-  (process.platform === 'win32' ? join(process.env.LOCALAPPDATA ?? homedir(), 'ms-playwright')
-    : process.platform === 'darwin' ? join(homedir(), 'Library', 'Caches', 'ms-playwright') : join(homedir(), '.cache', 'ms-playwright'))
+// Only Tourwright's own browsers: a shared Playwright folder belongs to other tools too
+const browsersDir = config => config.browsersPath
 
 // The models Tourwright downloaded, from the shared Hugging Face cache: only these are ever touched
 const MODELS = { pocket: /^kyutai\/pocket-tts/, whisper: /^Systran\/faster-whisper-/ }

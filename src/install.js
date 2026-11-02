@@ -8,11 +8,11 @@
 //             Where it has no build (32-bit ARM, Windows on ARM) or Python cannot be set up: the last
 //             standalone release of rhasspy/piper (archived; the same voices).
 //   edge-tts  Python package.
-//   Python    Python packages live in a virtual environment (TOURWRIGHT_HOME/venv) made by uv with a
-//             Python of its own (TOURWRIGHT_HOME/python): the system's Python is never used or changed,
-//             and none is needed. Without uv (no build for the platform, offline) the system's Python
-//             makes the environment instead.
-//   Chromium  Playwright's build.
+//   Python    Python packages live in a virtual environment (TOURWRIGHT_HOME/venv) made by uv. It uses the
+//             system's Python when it is 3.10–3.13 (never changing it) and downloads 3.12 into
+//             TOURWRIGHT_HOME/python only when there is none. Without uv (no build for the platform,
+//             offline) the system's Python makes the environment instead.
+//   Chromium  a Chrome, Edge or Chromium already on the system; Playwright's build only when there is none.
 import { spawn } from 'node:child_process'
 import { chmodSync, copyFileSync, createWriteStream, existsSync, mkdirSync, mkdtempSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -22,6 +22,8 @@ import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import { cleanDownloads, human } from './clean.js'
 import { loadConfig, venvBin } from './config.js'
+import { findChromium } from './render/chromium.js'
+import { findPiperVoice } from './voice/piper-voices.js'
 import { findBinary, isInside, isWindows, log, run, UserError, which } from './util.js'
 
 export const DEFAULT_VOICES = ['es_MX-claude-high', 'en_US-lessac-medium']
@@ -37,6 +39,8 @@ const FFMPEG_SERIES = '9.0'
 const btbn = target => `${BTBN}/ffmpeg-n${FFMPEG_SERIES}-latest-${target}-gpl-${FFMPEG_SERIES}.${target.startsWith('win') ? 'zip' : 'tar.xz'}`
 // A fixed uv release: every install gets the same one
 const UV_RELEASE = 'https://github.com/astral-sh/uv/releases/download/0.13.6'
+// Any of these the system has is used; without one, uv downloads PYTHON_VERSION (every package has wheels for it)
+const PYTHONS = '>=3.10,<3.14'
 const PYTHON_VERSION = '3.12'
 
 // Keyed by `${process.platform}-${process.arch}`
@@ -98,6 +102,8 @@ export const installVoice = async (voice, config = loadConfig()) => {
   const m = /^([a-z]{2,3})_([A-Z]{2})-([\w]+)-(x_low|low|medium|high)$/.exec(voice)
   if (!m) throw new UserError(`"${voice}" is not a Piper voice name (language_REGION-name-quality, e.g. es_MX-claude-high)`)
   const [, lang, region, speaker, q] = m
+  const found = findPiperVoice(config, voice)
+  if (found) return found
   mkdirSync(config.tts.piper.voicesDir, { recursive: true })
   for (const ext of ['onnx', 'onnx.json']) {
     const url = `${PIPER_VOICES}/${lang}/${lang}_${region}/${speaker}/${q}/${voice}.${ext}`
@@ -149,14 +155,13 @@ const runVisible = (command, args, env = process.env) =>
     child.on('exit', code => (code === 0 ? resolve(undefined) : reject(new Error(`${basename(command)} exited with ${code}`))))
   })
 
-const systemPython = () => (isWindows ? ['py', 'python'] : ['python3', 'python']).map(which).find(Boolean)
 
 // uv and everything it makes stay in TOURWRIGHT_HOME: its Pythons, its cache, no user or system config
-const uvEnv = home => ({
+const uvEnv = (home, preference = 'only-managed') => ({
   ...process.env,
   UV_PYTHON_INSTALL_DIR: join(home, 'python'),
   UV_PYTHON_BIN_DIR: join(home, 'python', 'bin'),
-  UV_PYTHON_PREFERENCE: 'only-managed',
+  UV_PYTHON_PREFERENCE: preference,
   UV_CACHE_DIR: join(home, 'cache', 'uv'),
   UV_NO_CONFIG: '1',
   VIRTUAL_ENV: '',
@@ -200,16 +205,24 @@ const pipInstall = async (home, pkg, extra = []) => {
   })
   if (uv) {
     if (!existsSync(join(venv, 'pyvenv.cfg'))) {
-      log.info(`Python ${PYTHON_VERSION} environment in ${venv} (its own Python, nothing on the system)`)
-      await run(uv, ['venv', '--quiet', '--python', PYTHON_VERSION, venv], { env: uvEnv(home), maxBuffer: 16 * 1024 * 1024 })
+      // The system's Python when it has a usable one (it is not changed); else one downloaded into TOURWRIGHT_HOME/python
+      try {
+        await run(uv, ['venv', '--quiet', '--python', PYTHONS, venv], { env: uvEnv(home, 'only-system'), maxBuffer: 16 * 1024 * 1024 })
+        log.info(`Python environment in ${venv}, with the system's Python`)
+      } catch {
+        rmSync(venv, { recursive: true, force: true })
+        log.info(`Python environment in ${venv}, with its own Python ${PYTHON_VERSION} (the system has no Python 3.10–3.13)`)
+        await run(uv, ['venv', '--quiet', '--python', PYTHON_VERSION, venv], { env: uvEnv(home), maxBuffer: 16 * 1024 * 1024 })
+      }
     }
     log.info(`installing ${pkg}`)
-    await run(uv, ['pip', 'install', '--quiet', '--python', venv, ...extra, pkg], { env: uvEnv(home), maxBuffer: 16 * 1024 * 1024, timeout: 1_800_000 })
+    // 'system': the environment may be built on the system's Python, which only-managed would refuse
+    await run(uv, ['pip', 'install', '--quiet', '--python', venv, ...extra, pkg], { env: uvEnv(home, 'system'), maxBuffer: 16 * 1024 * 1024, timeout: 1_800_000 })
     return null
   }
   if (!findBinary(venvBin(home, 'pip'))) {
-    const py = systemPython()
-    if (!py) return 'there is no Python 3 and no uv for this system'
+    const py = await usablePython()
+    if (!py) return 'there is no Python 3.10 or newer and no uv for this system'
     try {
       await run(py, ['-m', 'venv', venv])
     } catch {
@@ -224,6 +237,8 @@ const pipInstall = async (home, pkg, extra = []) => {
 
 const installFfmpeg = async (config, key) => {
   if (config.ffmpeg && config.ffprobe) return log.info(`ffmpeg: already there (${config.ffmpeg})`)
+  // Only what is missing is put in place: an ffmpeg the system has stays the one used
+  const missing = ['ffmpeg', 'ffprobe'].filter(name => !config[name])
   const url = FFMPEG[key]
   if (!url) {
     const how = platform() === 'darwin' ? 'brew install ffmpeg' : 'install it with your package manager'
@@ -233,14 +248,14 @@ const installFfmpeg = async (config, key) => {
   mkdirSync(bin, { recursive: true })
   await inScratch(config.home, async dir => {
     await fetchAndExtract(url, dir)
-    for (const name of ['ffmpeg', 'ffprobe']) {
+    for (const name of missing) {
       const found = findFile(dir, exe(name))
       if (!found) throw new Error(`${exe(name)} is not in ${url}`)
       copyFileSync(found, join(bin, exe(name)))
       chmodSync(join(bin, exe(name)), 0o755)
     }
   })
-  log.info(`ffmpeg: installed in ${bin}`)
+  log.info(`${missing.join(' and ')}: installed in ${bin}`)
 }
 
 const installPiper = async (config, key) => {
@@ -292,12 +307,74 @@ const installPocket = async config => {
 }
 
 const installChromium = async config => {
+  const found = await findChromium(config)
+  if (found.source === 'configured' || found.source === 'system') return log.info(`Chromium: using ${found.path}, nothing to download`)
+  if (found.source === 'playwright') return log.info(`Chromium: already there (${config.browsersPath})`)
+  log.info(`Chromium: none on this PC, downloading Playwright's into ${config.browsersPath}`)
   const cli = join(dirname(createRequire(import.meta.url).resolve('playwright/package.json')), 'cli.js')
   // As root on Linux, the system libraries Chromium needs come along
   const withDeps = platform() === 'linux' && process.getuid?.() === 0
-  const env = config.browsersPath ? { ...process.env, PLAYWRIGHT_BROWSERS_PATH: config.browsersPath } : process.env
+  const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: config.browsersPath }
   await runVisible(process.execPath, [cli, 'install', ...(withDeps ? ['--with-deps'] : []), 'chromium'], env)
   if (platform() === 'linux' && !withDeps) log.info('If Chromium misses system libraries: sudo npx playwright install-deps chromium')
+}
+
+// A Python the virtual environment can be built on, without downloading one (the same range uv is asked for).
+// On Windows `python` may be the stub that opens the Microsoft Store: it is run, not just found.
+const usablePython = async () => {
+  for (const py of [...new Set((isWindows ? ['py', 'python3', 'python'] : ['python3', 'python']).map(which).filter(Boolean))]) {
+    const ok = await run(py, ['-c', 'import sys, venv; assert (3, 10) <= sys.version_info[:2] < (3, 14)'], { timeout: 30_000 }).then(() => true, () => false)
+    if (ok) return py
+  }
+  return null
+}
+
+/**
+ * What `install` would use from the PC and what it would download, without changing anything.
+ * @param {{ voices?: string[], edge?: boolean, chromium?: boolean, pocket?: boolean }} [options]
+ * @returns {Promise<{ name: string, use?: string, download?: string, mb?: number }[]>}
+ */
+export const planInstall = async ({ voices = DEFAULT_VOICES, edge = true, chromium = true, pocket = false } = {}, config = loadConfig()) => {
+  const key = `${platform()}-${arch()}`
+  const plan = []
+  const venvReady = existsSync(join(config.home, 'venv', 'pyvenv.cfg')) && (await venvWorks(config.home))
+  let needsVenv = false
+  if (config.ffmpeg && config.ffprobe) plan.push({ name: 'ffmpeg', use: config.ffmpeg })
+  else if (FFMPEG[key]) plan.push({ name: 'ffmpeg', download: `ffmpeg ${FFMPEG_SERIES}`, mb: 90 })
+  else plan.push({ name: 'ffmpeg', download: platform() === 'darwin' ? 'none: brew install ffmpeg' : 'none: install it with your package manager' })
+  const { python, bin } = config.tts.piper
+  if (python && (await usable(python, config.home))) plan.push({ name: 'Piper', use: python })
+  else if (bin && !isInside(bin, join(config.home, 'piper'))) plan.push({ name: 'Piper', use: bin })
+  else if (PIPER_WHEELS.has(key)) {
+    needsVenv = true
+    plan.push({ name: 'Piper', download: PIPER_TTS, mb: 120 })
+  } else if (bin) plan.push({ name: 'Piper', use: bin })
+  else plan.push({ name: 'Piper', download: 'Piper (standalone)', mb: 25 })
+  for (const v of voices) {
+    const found = findPiperVoice(config, v)
+    plan.push(found ? { name: `voice ${v}`, use: found } : { name: `voice ${v}`, download: v, mb: v.endsWith('-high') ? 115 : 65 })
+  }
+  if (edge) {
+    if (await usable(config.tts.edge.bin, config.home)) plan.push({ name: 'edge-tts', use: config.tts.edge.bin })
+    else {
+      needsVenv = true
+      plan.push({ name: 'edge-tts', download: 'edge-tts', mb: 5 })
+    }
+  }
+  if (pocket) {
+    needsVenv = true
+    plan.push({ name: 'Pocket TTS', download: 'pocket-tts, PyTorch and the Spanish model', mb: 1000 })
+  }
+  if (needsVenv && !venvReady) {
+    const py = await usablePython()
+    plan.push(py ? { name: 'Python', use: py } : { name: 'Python', download: `Python ${PYTHON_VERSION} (and uv)`, mb: 60 })
+  }
+  if (chromium) {
+    const found = await findChromium(config)
+    if (found.source === 'missing') plan.push({ name: 'Chromium', download: `Playwright's Chromium into ${config.browsersPath}`, mb: 250 })
+    else plan.push({ name: 'Chromium', use: found.path ?? config.browsersPath })
+  }
+  return plan
 }
 
 /**

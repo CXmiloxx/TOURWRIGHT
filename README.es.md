@@ -74,6 +74,7 @@ Con Node.js 22 o superior, en Linux, macOS o Windows:
 ```bash
 npm install -g tourwright
 tourwright install                    # ffmpeg, Piper y voces, edge-tts, Chromium (sin root)
+tourwright install --plan             # solo muestra qué usaría del PC y qué descargaría
 tourwright install --pocket           # + Pocket TTS: voces naturales sin internet (cerca de 1 GB)
 tourwright clean                      # cuánto ocupa cada parte; borra descargas y sobrantes
 tourwright doctor                     # qué funciona en esta máquina
@@ -93,16 +94,26 @@ node bin/tourwright.js doctor  # qué funciona en esta máquina
 npm link                       # opcional: el comando `tourwright`
 ```
 
-| | Linux (x64, arm64) | macOS | Windows 10/11 |
+Cada pieza se busca primero en el PC y solo se descarga si falta:
+
+| | Linux (x64, arm64) | macOS (Intel, Apple Silicon) | Windows 10/11 (x64, ARM) |
 |---|---|---|---|
-| ffmpeg | se descarga | `brew install ffmpeg` | se descarga |
-| Piper (voces sin internet) | se descarga | se descarga (`piper-tts`) | se descarga |
-| edge-tts (voces de Microsoft) | se descarga | se descarga | se descarga |
+| Chromium | Chrome, Edge o Chromium (apt, dnf, pacman, Raspberry Pi OS); si no, se descarga | Chrome, Edge o Chromium; si no, se descarga | Chrome o Edge; si no, se descarga |
+| ffmpeg | `PATH`, Homebrew, Nix; si no, se descarga | Homebrew, MacPorts, Nix; si no, `brew install ffmpeg` | `PATH`, winget, scoop, Chocolatey, `C:fmpeg`; si no, se descarga |
+| Piper (voces sin internet) | `PATH`, pip, pipx, conda; si no, se descarga | `PATH`, pip, pipx, conda; si no, `piper-tts` | `PATH`, pip, pipx, conda; si no, se descarga |
+| Voces de Piper | caché de Hugging Face, `TOURWRIGHT_PIPER_VOICE_DIRS`; si no, se descargan | igual | igual |
+| edge-tts (voces de Microsoft) | `PATH`, pip, pipx, conda; si no, se instala | igual | igual |
+| Python (para edge-tts, Pocket, Whisper) | el 3.10–3.13 del sistema; si no, se descarga 3.12 | igual | igual (no el acceso directo de Microsoft Store) |
 | Captura | `screen` con Xvfb (la más nítida); si no, `screencast` | `screencast` | `screencast` |
 
-No se instala nada en el sistema: todo queda en una sola carpeta (`TOURWRIGHT_HOME`), y los paquetes de
-Python corren en un entorno virtual con su propio Python, así que no necesitas tener Python y el tuyo nunca se
-toca. Para desinstalar, borra esa carpeta.
+También se reutiliza un Chromium que dejó otra versión de Playwright o Puppeteer, y `CHROME_PATH`, `CHROME_BIN`
+o `PUPPETEER_EXECUTABLE_PATH`. Los navegadores snap y Flatpak se descartan (su aislamiento bloquea a
+Playwright). `TOURWRIGHT_SYSTEM_BROWSER=0` usa siempre el Chromium de Playwright. `tourwright doctor` muestra
+qué encontró.
+
+No se instala nada en el sistema: lo que se descarga queda en una sola carpeta (`TOURWRIGHT_HOME`), y los
+paquetes de Python corren en un entorno virtual, así que el tuyo nunca se cambia. Para desinstalar, borra esa
+carpeta.
 
 Con `Xvfb` (`apt install xvfb`, solo Linux) la captura es la más nítida; sin él, Tourwright graba sin pantalla
 (screencast), que funciona donde corra Chromium. Los clientes de la API HTTP o de MCP pueden estar en

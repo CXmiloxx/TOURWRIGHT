@@ -5,6 +5,7 @@ import { existsSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { compose, ffmpeg, QUALITIES } from '../compose.js'
 import { loadConfig } from '../config.js'
+import { launchChromium } from './chromium.js'
 import { concatEntry, escapeHtml, log, plainText, UserError } from '../util.js'
 import { builtInSound } from '../voice/effects.js'
 import { narrate, stripMarks, withProsody } from '../voice/index.js'
@@ -109,9 +110,7 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
   let browser = null
   try {
     if (needsBrowser) {
-      const { chromium } = await import('playwright')
-      if (config.browsersPath) process.env.PLAYWRIGHT_BROWSERS_PATH ??= config.browsersPath
-      browser = await chromium.launch({ headless: true, ...(config.chromium ? { executablePath: config.chromium } : {}), args: ['--disable-gpu', '--disable-dev-shm-usage'] })
+      browser = await launchChromium(config, { headless: true, args: ['--disable-gpu', '--disable-dev-shm-usage'] })
     }
     const page = browser && (await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 }))
     if (page && sandboxed) {
