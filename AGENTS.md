@@ -8,16 +8,23 @@ about changing Tourwright itself.
 | Path | What |
 |---|---|
 | `bin/tourwright.js`, `src/cli.js` | CLI |
-| `src/config.js` | Every setting: defaults < `tourwright.config.json` < `TOURWRIGHT_*` env |
-| `src/install.js` | `tourwright install`: ffmpeg, Piper, voices, edge-tts, Chromium per OS and CPU |
+| `src/config.js` | Every setting: defaults < the user's `config.json` < `tourwright.config.json` < `TOURWRIGHT_*` env |
+| `src/settings.js` | `tourwright config`: each person's defaults (quality, voice, fps, AI…), checked before saved |
+| `src/install.js` | `tourwright install`: what the PC already has first (`locate.js`: folders outside PATH), then ffmpeg, Piper, voices, edge-tts, Chromium per OS and CPU |
+| `src/lock.js` | `--lock`: one browser at a time on the machine (`flock` on Linux) |
 | `src/script/` | Script formats: `schema.js` (zod, declarative), `expand.js` (vars, blocks, repeat), `load.js` (files, JS modules, secrets) |
-| `src/render/` | `browser.js` (walkthroughs: recording and the `v` helpers), `steps.js` (step interpreter, `if`/`try`, targets), `session.js` (off-camera login, saved sessions), `cursor.js`, `visuals.js` (title cards, captions, frames, callouts, zoom), `slides.js`, `capture.js` (Xvfb / screencast), `network.js` (sandbox, host remapping), `overlay.js` + `theme.js` (styles of what Tourwright draws) |
-| `src/voice/` | TTS engines, prosody, pauses, pronunciation, polish presets and the sentence cache; `effects.js` (built-in sounds) |
+| `src/render/` | `browser.js` (walkthroughs: recording and the `v` helpers), `steps.js` (step interpreter, `if`/`try`), `targets.js` (finding elements, fallbacks, errors that list what the page offers), `chromium.js` (which browser: configured, Playwright's, the system's), `mask.js` (invented data on screen), `review.js` (what went wrong on the page and in the video), `session.js` (off-camera login, saved sessions), `cursor.js`, `visuals.js` (title cards, captions, frames, callouts, zoom), `slides.js`, `capture.js` (Xvfb / screencast), `network.js` (sandbox, host remapping), `overlay.js` + `theme.js` (styles of what Tourwright draws) |
+| `src/voice/` | TTS engines, prosody, pauses, pronunciation, polish presets and the sentence cache; `effects.js` (built-in sounds); `piper_voice.py` (Piper kept loaded); `piper-voices.js` (voices already on the PC) |
+| `src/record.js` | `tourwright record`: the tour done by hand becomes a script with a first narration |
+| `src/guide.js` | `tourwright guide`: the script as a step-by-step guide with screenshots |
+| `src/narrate.js`, `src/ai.js` | `tourwright narrate`: the narration rewritten by the AI the user brings (Claude via the official SDK, OpenAI-compatible, Ollama) |
+| `src/repair.js` | `tourwright check` / `fix`: broken steps across scripts and the likely new target |
 | `src/plugins.js` | Loads plugins: extra step actions, TTS engines, voices |
 | `src/compose.js`, `src/timeline.js` | Raw recording → final mp4 (cuts, audio mix, subtitles, chapters) |
 | `src/jobs/` | Job records + queue (`store.js`: local folder / Redis), files (`blobs.js`: local / S3), signed links |
 | `src/worker.js`, `src/run-job.js` | Queue consumer; each render in its own process |
 | `src/server/http.js` | HTTP API |
+| `examples/app/` | A demo app with no dependencies (2FA login, personal data, upload, long process, live notice) that CI films |
 | `src/mcp.js` | MCP server |
 
 ## Rules
