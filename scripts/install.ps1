@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 
 $major = [int](node -p "process.versions.node.split('.')[0]")
-if ($major -lt 20) { throw "Tourwright needs Node.js 20 or newer (https://nodejs.org)" }
+if ($major -lt 22) { throw "Tourwright needs Node.js 22 or newer (https://nodejs.org)" }
 
 Push-Location $Root
 try {

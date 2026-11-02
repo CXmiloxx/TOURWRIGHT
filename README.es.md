@@ -69,7 +69,7 @@ docker compose up -d --scale worker=6
 
 ### Desde npm (lo más rápido para probar)
 
-Con Node.js 20 o superior, en Linux, macOS o Windows:
+Con Node.js 22 o superior, en Linux, macOS o Windows:
 
 ```bash
 npm install -g tourwright
@@ -83,7 +83,7 @@ Sin instalar nada global: `npx tourwright <comando>`.
 
 ### Sin Docker (Linux, macOS, Windows)
 
-Con Node.js 20 o superior. `tourwright install` deja ffmpeg, Piper, voces, edge-tts y Chromium en
+Con Node.js 22 o superior. `tourwright install` deja ffmpeg, Piper, voces, edge-tts y Chromium en
 `TOURWRIGHT_HOME`, sin permisos de root ni de administrador; lo que el sistema ya tiene se respeta.
 
 ```bash
