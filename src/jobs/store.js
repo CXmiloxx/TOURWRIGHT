@@ -129,7 +129,7 @@ export const redisStore = async config => {
     bull = await import('bullmq')
     IORedis = (await import('ioredis')).default
   } catch {
-    throw new Error('the redis queue needs the optional packages bullmq and ioredis (npm install bullmq ioredis)')
+    throw new Error('the redis queue needs bullmq and ioredis: npm install bullmq ioredis where Tourwright is (with -g if Tourwright is global)')
   }
   const url = config.queue.redisUrl
   // BullMQ does not close connections it is given: keep them to close on shutdown, or the process stays up

@@ -44,7 +44,7 @@ const askClaude = async ({ system, parts, schema }, ai) => {
   try {
     Anthropic = (await import('@anthropic-ai/sdk')).default
   } catch {
-    throw new UserError('the Claude SDK is not installed: npm install @anthropic-ai/sdk')
+    throw new UserError('the Claude SDK is not installed: npm install @anthropic-ai/sdk where Tourwright is (with -g if Tourwright is global)')
   }
   const client = new Anthropic({ ...(ai.key ? { apiKey: ai.key } : {}), ...(ai.url ? { baseURL: ai.url } : {}) })
   const content = parts.map(p => ('image' in p

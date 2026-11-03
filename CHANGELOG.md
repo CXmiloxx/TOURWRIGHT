@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- The Redis queue (`bullmq`, `ioredis`) and Claude for `narrate` (`@anthropic-ai/sdk`) are optional peer
+  dependencies instead of optional dependencies: a plain install no longer downloads them, so it is lighter,
+  and `pnpm add tourwright` finishes without the "Ignored build scripts: msgpackr-extract" error that
+  BullMQ's native helper caused. Install them next to Tourwright when you use the queue or Claude; the
+  Docker image brings them, at the versions of the lockfile.
+
 ## [2.0.0]
 
 A script written by doing the tour, a guide from the same script, narration by your own AI, nothing

@@ -642,7 +642,8 @@ do it through MCP.
 Tourwright does not ship an AI: it connects to the one you bring, as it does with voices.
 
 ```bash
-tourwright config set ai anthropic        # Claude (key: ANTHROPIC_API_KEY, or tourwright secret set AI_KEY)
+tourwright config set ai anthropic        # Claude (key: ANTHROPIC_API_KEY, or tourwright secret set AI_KEY;
+                                          #   once: npm install -g @anthropic-ai/sdk, already in the Docker image)
 tourwright config set ai openai           # OpenAI, or any OpenAI-compatible server: also set aiUrl
 tourwright config set ai ollama           # free, on this PC, nothing leaves it: ollama pull gemma3
 tourwright narrate tour.yaml              # shows the new line for each step

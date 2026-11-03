@@ -14,7 +14,8 @@
   hung browser never takes the worker down; the time limit kills it). Workers stop gracefully on SIGTERM:
   they finish what they are rendering.
 - **Queue**: `local` (a folder: tickets claimed by atomic rename, dead workers' tickets recovered) or
-  `redis` (BullMQ: retries with backoff, stalled-job recovery).
+  `redis` (BullMQ: retries with backoff, stalled-job recovery). The Docker image brings BullMQ; outside it,
+  install `bullmq` and `ioredis` next to Tourwright.
 - **Storage**: `local` (the data folder) or `s3`.
 
 ## Sizing
