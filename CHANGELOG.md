@@ -4,6 +4,50 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [2.3.0]
+
+Videos with a studio look, narration that sounds clear and even, a natural voice chosen for each script's language,
+`record` that hands you the finished video, translation into other languages, and verified downloads.
+
+### Added
+
+- `theme: { frame: window }`: the recording inside a browser window with rounded corners, a shadow and the title in
+  its bar, on a wallpaper of lights in the theme colors.
+- A camera that stays close after a zoomed focus and glides to the next element instead of pulling back and
+  pushing in again; it never zooms closer than the element fits whole.
+- `upload` shows the cursor clicking the drop zone and a drawn file chooser picking the files; `select` clicks the
+  list before choosing.
+- Vertical videos are filmed the way a phone shows the app (half as wide at twice the density): the app uses its
+  mobile layout, big and sharp, and captions sit above the area Reels, Shorts and TikTok cover.
+- With no voice chosen, each render picks the most natural voice for the script's `language`: Pocket TTS when
+  installed, else Microsoft's neural voices when they answer (Salomé in Spanish, Ava in English), else Piper.
+- `tourwright record` writes the script and makes the narrated video at once: the login typed during the tour is
+  saved as encrypted secrets, the AI rewrites the narration when one is set up, and the video gets the studio look
+  in the app's own main color. `--no-video` writes only the script; `--plain` leaves out the studio look.
+- `tourwright translate <script> --to en` (es, en, pt, fr, de, it): the same video in another language, translated
+  by your AI; targets and typed text stay, and a line whose variables or marked word changed stays as it was.
+- MCP tools `tourwright_jobs` (jobs on the server, with the links of finished videos) and `tourwright_delete_job`.
+- The archives `tourwright install` downloads from fixed releases (Piper, uv) are checked against their SHA-256.
+
+### Changed
+
+- `record` now makes the video too; `--no-video` keeps the old behavior.
+- The subtitle files are `captions.srt` and `captions.vtt` (`captions-stepN` for a preview), not named after the
+  video, and the `.mp4` has no subtitle track: players loaded them over the captions drawn on the video. The
+  manifest keeps the keys `files.srt` and `files.vtt`; through the API the files are `captions.srt` and
+  `captions.vtt` instead of `video.srt` and `video.vtt`.
+- The `default` sound has no room any more (the echo blurred the words), more presence and softer "s"; every preset
+  but `none` levels each sentence to -16 LUFS on its own, so no sentence is louder than the next.
+- Title cards with a voice hold 0.7 s after it instead of 3.5 s.
+- Glass captions, a bigger cursor, smoother focus ring and bubbles.
+- The npm package no longer ships `scripts/install.sh` and `install.ps1`, which only work from a clone.
+- The demo is Facturero, a billing app with a professional design and a mobile layout, filmed with the new look.
+
+### Fixed
+
+- Two captions on screen in mpv, VLC and Totem (the drawn one and the subtitle track or file).
+- A script in English with no voice chosen was spoken by the Spanish Piper voice.
+
 ## [2.2.0]
 
 A Docker image whose Redis queue works and whose voice is twice as fast, images tagged with each version, and
