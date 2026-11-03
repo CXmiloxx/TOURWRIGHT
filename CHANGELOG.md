@@ -8,6 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Every MCP tool says what it touches (MCP annotations: read-only, opens websites, may replace a file) and every
+  parameter has a description, so agents fill them in without guessing and clients know when to ask first.
 - The Docker image is tagged with each release (`2.1.0`, `2.1`, `2`) besides `latest`, so a server or a Kubernetes
   deployment can pin a version; the Kubernetes manifest and the deployment guide use `:2`.
 
