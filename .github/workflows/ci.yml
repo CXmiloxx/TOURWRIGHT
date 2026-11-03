@@ -22,13 +22,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        # macOS is not here: GitHub's macOS runners are so scarce that a job often waits 15 minutes for one and is
+        # cancelled without running, turning a good change red. macos.yml tests and renders on macOS every day and
+        # for each release
+        os: [ubuntu-latest, windows-latest]
         node: [22, 24, 26]
-        # macOS runners are scarce (jobs wait and get cancelled): every Node version runs on Linux and Windows,
-        # macOS runs the oldest supported one, and its real render below
-        exclude:
-          - { os: macos-latest, node: 24 }
-          - { os: macos-latest, node: 26 }
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
