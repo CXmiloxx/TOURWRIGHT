@@ -10,9 +10,11 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-server-8a2be2)](docs/AGENTS.md)
 
-**Recorridos guiados y narrados, a partir de un guion.** Escribes lo que pasa en pantalla y lo que se dice;
-Tourwright graba un navegador de verdad (o arma diapositivas), lleva la mirada a cada elemento, sintetiza la
-voz y entrega un `.mp4` con subtítulos, capítulos y miniatura. Hecho para personas *y* para agentes de IA, en cualquier servidor: de un portátil a un clúster.
+**Videos guiados y narrados de tu producto, sin editar.** Haces el recorrido por tu app una vez, o le pides el
+video a tu agente de IA: Tourwright escribe el guion, graba un navegador de verdad en un marco de estudio, lleva
+la mirada a cada elemento, habla con una voz natural y entrega un `.mp4` con subtítulos, capítulos y miniatura.
+Si la interfaz cambia, lo vuelves a generar. Hecho para personas *y* para agentes de IA, en cualquier servidor:
+de un portátil a un clúster.
 
 *[Read in English](README.md)*
 

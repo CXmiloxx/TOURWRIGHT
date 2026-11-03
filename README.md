@@ -10,9 +10,10 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-server-8a2be2)](docs/AGENTS.md)
 
-**Scripted, narrated product tours.** Write what should happen on screen and what should be said; Tourwright
-films a real browser (or builds slides), guides the eye to each element, synthesizes the voice, and delivers
-an `.mp4` with captions, chapters, subtitles and a thumbnail. Built for people *and* AI agents, on any server, from a laptop to a cluster.
+**Narrated product tours and how-to videos, without editing.** Click through your app once, or ask your AI
+agent for the video: Tourwright writes the script, films a real browser in a studio frame, guides the eye to each
+element, speaks with a natural voice and delivers an `.mp4` with captions, chapters and a thumbnail. When the UI
+changes, you render again. Built for people *and* AI agents, on any server, from a laptop to a cluster.
 
 *[Leer en español](README.es.md)*
 
