@@ -1,10 +1,25 @@
-# Tourwright
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="brand/logo-horizontal-dark.svg">
+    <img src="brand/logo-horizontal.svg" alt="Tourwright" height="56">
+  </picture>
+</h1>
+
+[![npm](https://img.shields.io/npm/v/tourwright)](https://www.npmjs.com/package/tourwright)
+[![CI](https://github.com/CXmiloxx/tourwright/actions/workflows/ci.yml/badge.svg)](https://github.com/CXmiloxx/tourwright/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![MCP](https://img.shields.io/badge/MCP-server-8a2be2)](docs/AGENTS.md)
 
 **Scripted, narrated product tours.** Write what should happen on screen and what should be said; Tourwright
 films a real browser (or builds slides), guides the eye to each element, synthesizes the voice, and delivers
 an `.mp4` with captions, chapters, subtitles and a thumbnail. Built for people *and* AI agents, on any server, from a laptop to a cluster.
 
 *[Leer en español](README.es.md)*
+
+<p align="center">
+  <a href="docs/demo/demo.mp4"><img src="docs/demo/demo.gif" alt="A Tourwright video: a login with 2FA, a guided focus on each field, invented data instead of real customers, an upload and a live notice" width="800"></a>
+  <br><sub>Made by Tourwright from <a href="examples/app.yaml">examples/app.yaml</a>, with nobody at the keyboard. <a href="docs/demo/demo.mp4">▶ Watch it with sound</a> (52 s)</sub>
+</p>
 
 ```yaml
 # tour.yaml
@@ -23,6 +38,21 @@ steps:
 ```bash
 tourwright render tour.yaml        # → videos/tour.mp4 (+ .srt .vtt .jpg .json)
 ```
+
+## Why Tourwright
+
+Screen recorders (Loom) and click-through demo tools (Arcade, Supademo, Scribe) need a person to record, and
+every redesign means recording again. Tourwright videos are **code**:
+
+| | Screen recorder | Demo SaaS | **Tourwright** |
+|---|---|---|---|
+| Re-record after a UI change | by hand | by hand | `tourwright render` |
+| Knows when a video went stale | no | no | `tourwright check` in CI names the broken step and the fix |
+| Narration | your voice, retakes | none or extra | text-to-speech in many voices, offline or online |
+| Same tour for 50 customers or languages | 50 recordings | 50 demos | one script with `{{variables}}` |
+| Personal data on screen | edit it out | edit it out | `mask` replaces it with invented data |
+| Lives in | a vendor's cloud | a vendor's cloud | your git repo, your servers; MIT |
+| AI agents can make one | no | no | MCP server and a Claude Code plugin |
 
 ## What you get
 

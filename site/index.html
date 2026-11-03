@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tourwright — narrated product tour videos from a script</title>
+<meta name="description" content="Open-source tool that turns a YAML script into a narrated product tour video: a real browser, a guided focus, captions and text-to-speech. CLI, HTTP API, MCP server for AI agents, Claude Code plugin and GitHub Action.">
+<meta property="og:title" content="Tourwright — write the tour, get the video">
+<meta property="og:description" content="A YAML script becomes a narrated product tour video. Re-render after every redesign; CI tells you when one went stale.">
+<meta property="og:image" content="https://cxmiloxx.github.io/tourwright/social-preview.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0B1120">
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>
+  // The theme before the first paint: the visitor's choice, else the system's
+  try {
+    const saved = localStorage.getItem('theme')
+    document.documentElement.dataset.theme = saved || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+  } catch {}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Tourwright","applicationCategory":"MultimediaApplication","operatingSystem":"Linux, macOS, Windows","license":"https://opensource.org/licenses/MIT","offers":{"@type":"Offer","price":"0"},"url":"https://github.com/CXmiloxx/tourwright","description":"Turns a script into a narrated product tour video with a real browser, captions and text-to-speech."}
+</script>
+</head>
+<body class="grain">
+<a href="#main" class="sr-only z-[70] rounded-lg bg-brand-fill px-4 py-3 font-semibold text-on-brand focus:not-sr-only focus:fixed focus:top-3 focus:left-3">Skip to content</a>
+
+<!-- ── Navigation ─────────────────────────────────────────────────────────────── -->
+<header class="sticky top-0 z-50 border-b border-border bg-bg/80 backdrop-blur-xl">
+  <nav class="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
+    <a href="#" class="flex shrink-0 items-center gap-2.5 py-2" aria-label="Tourwright home">
+      <svg viewBox="58 0 140 256" class="h-7 w-auto" aria-hidden="true"><path class="fill-brand-fill" d="M97.03 62.52 L198.30 121.0 L136.00 121.0 A20 20 0 1 0 136.00 135.0 L198.30 135.0 L97.03 193.48 A26 26 0 0 1 58 170.97 L58 85.03 A26 26 0 0 1 97.03 62.52 Z"/></svg>
+      <svg viewBox="0 0 677 132" class="h-[18px] w-auto translate-y-[1px]" aria-hidden="true"><path class="fill-fg" transform="translate(0 96.4)" d="M34.32 0.0Q27.852 0.0 23.826 -4.026Q19.8 -8.052 19.8 -14.784V-51.744H3.4320000000000004V-65.47200000000001H19.8V-85.8H36.432V-65.47200000000001H54.384V-51.744H36.432V-17.688000000000002Q36.432 -13.728000000000002 40.128 -13.728000000000002H52.800000000000004V0.0Z M98.60400000000001 1.848Q88.83600000000001 1.848 81.048 -2.112Q73.26 -6.072 68.772 -13.596Q64.284 -21.12 64.284 -31.68V-33.792Q64.284 -44.352000000000004 68.772 -51.876000000000005Q73.26 -59.400000000000006 81.048 -63.36000000000001Q88.83600000000001 -67.32000000000001 98.60400000000001 -67.32000000000001Q108.37200000000001 -67.32000000000001 116.16000000000001 -63.36000000000001Q123.94800000000001 -59.400000000000006 128.436 -51.876000000000005Q132.924 -44.352000000000004 132.924 -33.792V-31.68Q132.924 -21.12 128.436 -13.596Q123.94800000000001 -6.072 116.16000000000001 -2.112Q108.37200000000001 1.848 98.60400000000001 1.848ZM98.60400000000001 -12.936Q106.26 -12.936 111.27600000000001 -17.886000000000003Q116.292 -22.836000000000002 116.292 -32.076V-33.396Q116.292 -42.636 111.342 -47.586Q106.392 -52.536 98.60400000000001 -52.536Q90.94800000000001 -52.536 85.932 -47.586Q80.916 -42.636 80.916 -33.396V-32.076Q80.916 -22.836000000000002 85.932 -17.886000000000003Q90.94800000000001 -12.936 98.60400000000001 -12.936Z M171.204 1.056Q163.54800000000003 1.056 157.80600000000004 -2.442Q152.06400000000002 -5.94 148.89600000000002 -12.144000000000002Q145.728 -18.348000000000003 145.728 -26.400000000000002V-65.47200000000001H162.36V-27.720000000000002Q162.36 -20.328 165.99 -16.631999999999998Q169.62 -12.936 176.35200000000003 -12.936Q184.00800000000004 -12.936 188.23200000000003 -18.018Q192.45600000000002 -23.1 192.45600000000002 -32.208V-65.47200000000001H209.08800000000002V0.0H192.72000000000003V-8.58H190.34400000000002Q188.76000000000002 -5.28 184.40400000000002 -2.112Q180.04800000000003 1.056 171.204 1.056Z M225.58800000000002 0.0V-65.47200000000001H241.95600000000002V-58.080000000000005H244.33200000000002Q245.78400000000002 -62.040000000000006 249.15000000000003 -63.888000000000005Q252.51600000000002 -65.736 257.004 -65.736H264.92400000000004V-50.952000000000005H256.74Q250.40400000000002 -50.952000000000005 246.312 -47.586Q242.22000000000003 -44.22 242.22000000000003 -37.224000000000004V0.0Z M281.16 0.0 271.92 -65.47200000000001H288.4200000000001L294.22800000000007 -11.22H296.60400000000004L305.052 -65.47200000000001H331.71600000000007L340.16400000000004 -11.22H342.5400000000001L348.34800000000007 -65.47200000000001H364.84800000000007L355.60800000000006 0.0H328.02000000000004L319.57200000000006 -54.252H317.196L308.74800000000005 0.0Z M377.38800000000003 0.0V-65.47200000000001H393.75600000000003V-58.080000000000005H396.132Q397.584 -62.040000000000006 400.95000000000005 -63.888000000000005Q404.31600000000003 -65.736 408.80400000000003 -65.736H416.72400000000005V-50.952000000000005H408.54Q402.204 -50.952000000000005 398.112 -47.586Q394.02000000000004 -44.22 394.02000000000004 -37.224000000000004V0.0Z M427.68000000000006 0.0V-65.47200000000001H444.31200000000007V0.0ZM435.99600000000004 -73.128Q431.50800000000004 -73.128 428.40600000000006 -76.03200000000001Q425.30400000000003 -78.936 425.30400000000003 -83.688Q425.30400000000003 -88.44 428.40600000000006 -91.344Q431.50800000000004 -94.248 435.99600000000004 -94.248Q440.61600000000004 -94.248 443.65200000000004 -91.344Q446.68800000000005 -88.44 446.68800000000005 -83.688Q446.68800000000005 -78.936 443.65200000000004 -76.03200000000001Q440.61600000000004 -73.128 435.99600000000004 -73.128Z M457.64400000000006 -32.472V-34.584Q457.64400000000006 -44.88 461.7360000000001 -52.206Q465.8280000000001 -59.532000000000004 472.6260000000001 -63.426Q479.42400000000004 -67.32000000000001 487.47600000000006 -67.32000000000001Q496.45200000000006 -67.32000000000001 501.07200000000006 -64.152Q505.69200000000006 -60.984 507.8040000000001 -57.552H510.18000000000006V-65.47200000000001H526.548V11.616Q526.548 18.348000000000003 522.588 22.374000000000002Q518.628 26.400000000000002 512.028 26.400000000000002H468.20400000000006V11.88H506.2200000000001Q509.91600000000005 11.88 509.91600000000005 7.92V-9.108H507.5400000000001Q506.2200000000001 -6.996 503.84400000000005 -4.8180000000000005Q501.4680000000001 -2.64 497.50800000000004 -1.1880000000000002Q493.54800000000006 0.264 487.47600000000006 0.264Q479.42400000000004 0.264 472.6260000000001 -3.63Q465.8280000000001 -7.524 461.7360000000001 -14.850000000000001Q457.64400000000006 -22.176000000000002 457.64400000000006 -32.472ZM492.22800000000007 -14.256Q499.88400000000007 -14.256 505.03200000000004 -19.14Q510.18000000000006 -24.024 510.18000000000006 -32.868V-34.188Q510.18000000000006 -43.164 505.09800000000007 -47.982Q500.0160000000001 -52.800000000000004 492.22800000000007 -52.800000000000004Q484.57200000000006 -52.800000000000004 479.4240000000001 -47.982Q474.27600000000007 -43.164 474.27600000000007 -34.188V-32.868Q474.27600000000007 -24.024 479.4240000000001 -19.14Q484.57200000000006 -14.256 492.22800000000007 -14.256Z M543.0480000000001 0.0V-92.4H559.6800000000001V-57.42H562.0560000000002Q563.1120000000001 -59.532000000000004 565.3560000000001 -61.644000000000005Q567.6000000000001 -63.756 571.3620000000001 -65.142Q575.1240000000001 -66.528 580.9320000000001 -66.528Q588.5880000000001 -66.528 594.3300000000002 -63.03Q600.0720000000001 -59.532000000000004 603.2400000000001 -53.394000000000005Q606.4080000000001 -47.256 606.4080000000001 -39.072V0.0H589.7760000000001V-37.752Q589.7760000000001 -45.144000000000005 586.1460000000001 -48.84Q582.5160000000001 -52.536 575.7840000000001 -52.536Q568.1280000000002 -52.536 563.9040000000001 -47.454Q559.6800000000001 -42.372 559.6800000000001 -33.264V0.0Z M647.4600000000002 0.0Q640.9920000000001 0.0 636.9660000000001 -4.026Q632.94 -8.052 632.94 -14.784V-51.744H616.5720000000001V-65.47200000000001H632.94V-85.8H649.5720000000001V-65.47200000000001H667.5240000000001V-51.744H649.5720000000001V-17.688000000000002Q649.5720000000001 -13.728000000000002 653.2680000000001 -13.728000000000002H665.94V0.0Z"/></svg>
+    </a>
+    <div class="ml-auto hidden items-center gap-6 text-[14px] text-muted md:flex">
+      <a class="hover:text-fg" href="#demo">Demo</a>
+      <a class="hover:text-fg" href="#how">How it works</a>
+      <a class="hover:text-fg" href="#agents">AI agents</a>
+      <a class="hover:text-fg" href="#voices">Voices</a>
+      <a class="hover:text-fg" href="https://github.com/CXmiloxx/tourwright/blob/main/docs/SCRIPTS.md">Docs</a>
+    </div>
+    <div class="ml-auto flex items-center gap-2 md:ml-0">
+      <button id="theme" type="button" class="grid size-11 place-items-center rounded-lg border border-border text-muted transition hover:text-fg md:size-9" aria-label="Switch light or dark theme">
+        <svg class="size-4 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="hidden size-4 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <a href="https://github.com/CXmiloxx/tourwright" class="hidden h-9 items-center gap-2 rounded-lg border border-border px-3 text-[14px] font-medium transition hover:border-brand hover:text-brand sm:inline-flex">
+        <svg class="size-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0z"/></svg>
+        <span>GitHub</span>
+      </a>
+      <details class="group relative md:hidden">
+        <summary class="grid size-11 list-none place-items-center rounded-lg border border-border text-fg [&::-webkit-details-marker]:hidden" aria-label="Menu">
+          <svg class="size-5 group-open:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          <svg class="hidden size-5 group-open:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </summary>
+        <div class="absolute right-0 top-[calc(100%+10px)] w-64 rounded-2xl border border-border bg-surface p-2 shadow-2xl">
+          <a class="flex min-h-11 items-center rounded-lg px-3 hover:bg-surface-2" href="#demo">Demo</a>
+          <a class="flex min-h-11 items-center rounded-lg px-3 hover:bg-surface-2" href="#how">How it works</a>
+          <a class="flex min-h-11 items-center rounded-lg px-3 hover:bg-surface-2" href="#agents">AI agents</a>
+          <a class="flex min-h-11 items-center rounded-lg px-3 hover:bg-surface-2" href="#voices">Voices</a>
+          <a class="flex min-h-11 items-center rounded-lg px-3 hover:bg-surface-2" href="https://github.com/CXmiloxx/tourwright/blob/main/docs/SCRIPTS.md">Docs</a>
+          <a class="flex min-h-11 items-center rounded-lg px-3 hover:bg-surface-2" href="https://github.com/CXmiloxx/tourwright">GitHub</a>
+        </div>
+      </details>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+<!-- ── Hero ────────────────────────────────────────────────────────────────────── -->
+<section class="spot relative overflow-hidden">
+  <div class="mx-auto max-w-6xl px-4 pt-14 pb-12 sm:px-6 sm:pt-28 sm:pb-14">
+    <p class="kicker reveal" style="--i:0">Open source · MIT · Linux, macOS, Windows</p>
+    <h1 class="reveal mt-5 max-w-4xl font-display text-[clamp(44px,8.4vw,104px)] leading-[0.92] font-extrabold tracking-[-0.035em]" style="--i:1">
+      Write the tour.<br><span class="relative inline-block text-brand">Get the video.<svg class="absolute -bottom-2 left-0 h-3 w-full" viewBox="0 0 300 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 9 C 80 2, 220 2, 298 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span>
+    </h1>
+    <p class="reveal mt-8 max-w-2xl text-[clamp(17px,2vw,20px)] leading-relaxed text-muted" style="--i:2">
+      Tourwright drives a real browser through your app, puts a guided focus on each element, speaks your narration and
+      hands you an MP4 with captions and chapters. When the UI changes, you render again. No re-recording.
+    </p>
+    <div class="reveal mt-9 flex flex-wrap items-center gap-3" style="--i:3">
+      <a class="btn-primary" href="https://github.com/CXmiloxx/tourwright#install">Get started
+        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <button type="button" data-copy="npm install -g tourwright" class="group inline-flex items-center gap-3 rounded-xl border border-border bg-surface/60 px-4 py-3 font-mono text-[14px] hover:border-brand">
+        <span class="text-brand">$</span> npm install -g tourwright
+        <svg class="size-4 text-muted group-hover:text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+        <span class="copied hidden text-[12px] text-brand">copied</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ── The script is the video ─────────────────────────────────────────────────── -->
+<section id="demo" class="mx-auto max-w-6xl scroll-mt-20 px-4 pb-16 sm:px-6 sm:pb-24">
+  <div class="reveal grid gap-4 lg:grid-cols-[1.02fr_1fr]" style="--i:4">
+    <div class="order-2 min-w-0 lg:order-1 overflow-hidden code">
+      <div class="flex items-center justify-between border-b border-white/10 px-4 py-2.5 text-[12px] text-[#8a95b0]">
+        <span class="flex items-center gap-2"><span class="size-2.5 rounded-full bg-[#f5a524]"></span>examples/app.yaml</span>
+        <span id="stepinfo" class="tabular-nums">click a step to jump</span>
+      </div>
+      <pre id="script" class="max-h-[340px] overflow-auto py-3 text-[12px] leading-[1.8] sm:max-h-[460px] sm:text-[12.5px]" aria-label="The script of the video"><span class="ln is-plain">title: Acme, de punta a punta</span><span class="ln is-plain">language: es</span><span class="ln is-plain">mask: [email, phone, id]   # real data becomes invented</span><span class="ln is-plain">steps:</span><span class="ln" data-t="0">  - title: { text: Acme, say: "Así se usa Acme." }</span><span class="ln" data-t="5.67">  - focus: { target: { label: Usuario o correo }, say: "Primero, escribe tu {usuario o correo}." }</span><span class="ln" data-t="8.6">  - type: { target: { label: Usuario o correo }, text: "${secret:ACME_USER}" }</span><span class="ln" data-t="11.15">  - focus: { target: { label: Contraseña }, say: "Luego tu {contraseña}." }</span><span class="ln" data-t="13.2">  - type: { target: { label: Contraseña }, text: "${secret:ACME_PASSWORD}" }</span><span class="ln" data-t="14.5">  - focus: { target: { role: button, name: Ingresar }, say: "Y pulsa {Ingresar}.", click: true }</span><span class="ln" data-t="16.78">  - focus: { target: { label: Código de verificación }, say: "Escribe el {código}…" }</span><span class="ln" data-t="20">  - type: { target: { label: Código de verificación }, text: "${totp:ACME_TOTP}" }</span><span class="ln" data-t="22.7">  - say: "En Clientes ves a cada cliente con sus datos de contacto y su saldo."</span><span class="ln" data-t="24.3">  - highlight: { target: table }</span><span class="ln" data-t="27.2">  - focus: { target: { role: link, name: Facturas }, say: "…abre {Facturas}.", click: true }</span><span class="ln" data-t="29.8">  - upload: { target: { label: Archivo de la factura }, files: [factura.txt] }</span><span class="ln" data-t="32.03">  - focus: { target: { role: button, name: Subir factura }, click: true }</span><span class="ln" data-t="36.75">  - say: "La factura queda guardada."</span><span class="ln" data-t="39.1">  - focus: { target: { role: link, name: Reportes }, say: "En {Reportes}…", click: true }</span><span class="ln" data-t="43.2">  - focus: { target: { role: button, name: Generar reporte }, click: true }</span><span class="ln" data-t="45.6">  - wait: { text: Reporte listo, timeout: 20000 }   # cut from the video</span><span class="ln" data-t="45.75">  - say: "Cuando termina, ves el resultado."</span><span class="ln" data-t="48.23">  - say: "Y los avisos llegan en vivo, como este pago."</span></pre>
+    </div>
+    <figure class="order-1 min-w-0 lg:order-2 flex flex-col gap-3">
+      <div class="relative overflow-hidden rounded-2xl ring-1 ring-border shadow-[0_40px_120px_-40px_var(--glow)]">
+        <video id="video" class="block aspect-video w-full bg-ink-950" src="demo/demo.mp4" poster="demo/poster.jpg" controls preload="metadata" playsinline width="1280" height="720"><track kind="captions" src="demo/demo.vtt" srclang="es" label="Español"></video>
+      </div>
+      <figcaption class="text-[14px] leading-relaxed text-muted">
+        <span class="font-medium text-fg">This video was rendered from the file next to it</span>, by CI, with nobody at the keyboard:
+        a 2FA login, invented data instead of real customers, an upload, a 20-second job cut out, a live notice.
+        Play it and watch the script follow along.
+      </figcaption>
+    </figure>
+  </div>
+  <dl class="mt-6 grid grid-cols-2 overflow-hidden rounded-2xl border border-border bg-border gap-px sm:grid-cols-4">
+    <div class="bg-bg p-5"><dt class="text-[13px] text-muted">Steps in the script</dt><dd class="mt-1 font-display text-[32px] font-bold tabular-nums">19</dd></div>
+    <div class="bg-bg p-5"><dt class="text-[13px] text-muted">Length of the video</dt><dd class="mt-1 font-display text-[32px] font-bold tabular-nums">52 s</dd></div>
+    <div class="bg-bg p-5"><dt class="text-[13px] text-muted">To render, from scratch</dt><dd class="mt-1 font-display text-[32px] font-bold tabular-nums">74 s</dd></div>
+    <div class="bg-bg p-5"><dt class="text-[13px] text-muted">People at the keyboard</dt><dd class="mt-1 font-display text-[32px] font-bold tabular-nums text-brand">0</dd></div>
+  </dl>
+</section>
+
+<!-- ── How it works ─────────────────────────────────────────────────────────────── -->
+<section id="how" class="scroll-mt-20 border-y border-border bg-surface-2/60">
+  <div class="section">
+    <p class="kicker">How it works</p>
+    <h2 class="h2 mt-4 max-w-3xl">Three commands, from clicking around to a video that keeps itself current.</h2>
+    <ol class="mt-10 grid gap-4 sm:mt-14 sm:gap-5 md:grid-cols-3">
+      <li class="card relative">
+        <span class="font-display text-[64px] leading-none font-extrabold text-brand/25">01</span>
+        <h3 class="mt-3 font-display text-[22px] font-bold">Record or write</h3>
+        <p class="mt-2 text-[15px] text-muted">Click through your app once and get a script, or write the YAML. Targets are roles and labels, not brittle CSS.</p>
+        <pre class="code mt-5 overflow-x-auto px-4 py-3"><span class="p">$</span> tourwright record https://app.acme.com</pre>
+      </li>
+      <li class="card relative">
+        <span class="font-display text-[64px] leading-none font-extrabold text-brand/25">02</span>
+        <h3 class="mt-3 font-display text-[22px] font-bold">Render</h3>
+        <p class="mt-2 text-[15px] text-muted">A real Chromium follows the steps; loads and waits are cut; the voice, captions, chapters and poster are made.</p>
+        <pre class="code mt-5 overflow-x-auto px-4 py-3"><span class="p">$</span> tourwright render tour.yaml
+<span class="c">  52 s · 12 captions · tour.mp4</span></pre>
+      </li>
+      <li class="card relative">
+        <span class="font-display text-[64px] leading-none font-extrabold text-brand/25">03</span>
+        <h3 class="mt-3 font-display text-[22px] font-bold">Check in CI</h3>
+        <p class="mt-2 text-[15px] text-muted">After every deploy, each script runs in seconds. A renamed button fails the build with the step and the fix.</p>
+        <pre class="code mt-5 overflow-x-auto px-4 py-3"><span class="p">$</span> tourwright check videos/*.yaml
+<span class="c">  step 7: cannot find "Save" → "Save draft"</span></pre>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ── Features ────────────────────────────────────────────────────────────────── -->
+<section class="section">
+  <p class="kicker">What you get</p>
+  <h2 class="h2 mt-4 max-w-3xl">Everything a good product video does, done by the script.</h2>
+  <div class="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:mt-14 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="group bg-bg p-6 transition hover:bg-surface sm:p-7"><svg class="size-6 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/></svg><h3 class="mt-5 font-display text-[20px] font-bold">Guided focus</h3><p class="mt-2 text-[15px] leading-relaxed text-muted">Everything dims but the element; a ring, a bubble and a gentle zoom land on the exact word being said.</p></div>
+    <div class="group bg-bg p-6 transition hover:bg-surface sm:p-7"><svg class="size-6 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg><h3 class="mt-5 font-display text-[20px] font-bold">It edits itself</h3><p class="mt-2 text-[15px] leading-relaxed text-muted">Page loads, slow jobs and voice synthesis are cut out. Narration never overlaps; music ducks under the voice.</p></div>
+    <div class="group bg-bg p-6 transition hover:bg-surface sm:p-7"><svg class="size-6 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><h3 class="mt-5 font-display text-[20px] font-bold">Real apps, real logins</h3><p class="mt-2 text-[15px] leading-relaxed text-muted">2FA codes, saved sessions, uploads, live events. Credentials never sit in the script, and never show on screen.</p></div>
+    <div class="group bg-bg p-6 transition hover:bg-surface sm:p-7"><svg class="size-6 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z"/><path d="m4 4 16 16"/></svg><h3 class="mt-5 font-display text-[20px] font-bold">Private data, invented</h3><p class="mt-2 text-[15px] leading-relaxed text-muted"><code class="font-mono text-fg">mask</code> swaps emails, phones and IDs for consistent fake ones: film production safely.</p></div>
+    <div class="group bg-bg p-6 transition hover:bg-surface sm:p-7"><svg class="size-6 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h2M7 8v8M11 5v14M15 9v6M19 7v10M21 12h0"/></svg><h3 class="mt-5 font-display text-[20px] font-bold">A cast of voices</h3><p class="mt-2 text-[15px] leading-relaxed text-muted">Several voices per video, speed and pitch per line, exact pauses, a pronunciation dictionary, sound presets.</p></div>
+    <div class="group bg-bg p-6 transition hover:bg-surface sm:p-7"><svg class="size-6 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="m2 16 10 5 10-5M2 12l10 5 10-5"/></svg><h3 class="mt-5 font-display text-[20px] font-bold">From laptop to cluster</h3><p class="mt-2 text-[15px] leading-relaxed text-muted">One binary on a Raspberry Pi, or an API with a Redis queue, workers and S3. Linux, macOS and Windows.</p></div>
+  </div>
+</section>
+
+<!-- ── Comparison ───────────────────────────────────────────────────────────────── -->
+<section class="section pt-0 sm:pt-0">
+  <p class="kicker">Why a script</p>
+  <h2 class="h2 mt-4 max-w-3xl">A recording is out of date the day the UI changes. A script isn't.</h2>
+  <div class="mt-10 overflow-x-auto rounded-2xl border border-border sm:mt-12" tabindex="0" role="region" aria-label="Comparison, scrolls sideways">
+    <table class="w-full min-w-[620px] text-left text-[14px] sm:text-[15px]">
+      <thead class="bg-surface text-[13px] uppercase tracking-wider text-muted">
+        <tr><th class="sticky left-0 bg-surface px-4 py-4 font-medium sm:px-5"><span class="sr-only">What</span></th><th class="px-5 py-4 font-medium">Screen recorder</th><th class="px-5 py-4 font-medium">Demo SaaS</th><th class="px-5 py-4 font-semibold text-brand">Tourwright</th></tr>
+      </thead>
+      <tbody class="divide-y divide-border">
+        <tr><td class="sticky left-0 bg-bg px-4 py-4 text-muted sm:px-5">After a UI change</td><td class="px-5 py-4">record it again</td><td class="px-5 py-4">rebuild the demo</td><td class="px-5 py-4 font-semibold"><code class="font-mono">tourwright render</code></td></tr>
+        <tr><td class="sticky left-0 bg-bg px-4 py-4 text-muted sm:px-5">Knows a video went stale</td><td class="px-5 py-4">no</td><td class="px-5 py-4">no</td><td class="px-5 py-4 font-semibold"><code class="font-mono">check</code> in CI: the step and the fix</td></tr>
+        <tr><td class="sticky left-0 bg-bg px-4 py-4 text-muted sm:px-5">Narration</td><td class="px-5 py-4">your voice, retakes</td><td class="px-5 py-4">none, or extra</td><td class="px-5 py-4 font-semibold">dozens of voices, offline or online</td></tr>
+        <tr><td class="sticky left-0 bg-bg px-4 py-4 text-muted sm:px-5">The same tour for 50 customers</td><td class="px-5 py-4">50 recordings</td><td class="px-5 py-4">50 demos</td><td class="px-5 py-4 font-semibold">one script with <code class="font-mono">{{variables}}</code></td></tr>
+        <tr><td class="sticky left-0 bg-bg px-4 py-4 text-muted sm:px-5">Personal data on screen</td><td class="px-5 py-4">edit it out</td><td class="px-5 py-4">edit it out</td><td class="px-5 py-4 font-semibold">replaced with invented data</td></tr>
+        <tr><td class="sticky left-0 bg-bg px-4 py-4 text-muted sm:px-5">An AI agent can make one</td><td class="px-5 py-4">no</td><td class="px-5 py-4">no</td><td class="px-5 py-4 font-semibold">MCP server and Claude Code plugin</td></tr>
+        <tr><td class="sticky left-0 bg-bg px-4 py-4 text-muted sm:px-5">Where it lives</td><td class="px-5 py-4">a vendor’s cloud</td><td class="px-5 py-4">a vendor’s cloud</td><td class="px-5 py-4 font-semibold">your repo and your servers, MIT</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── Agents and CI ────────────────────────────────────────────────────────────── -->
+<section id="agents" class="scroll-mt-20 border-y border-border bg-surface-2/60">
+  <div class="section">
+    <p class="kicker">For AI agents and pipelines</p>
+    <h2 class="h2 mt-4 max-w-3xl">Ask your agent for a video. Let CI keep it honest.</h2>
+    <div class="mt-10 grid gap-4 sm:mt-14 sm:gap-5 lg:grid-cols-2">
+      <div class="card flex flex-col">
+        <h3 class="font-display text-[22px] font-bold">Claude Code plugin</h3>
+        <p class="mt-2 text-[15px] text-muted">The MCP server plus a skill that writes the script, dry-runs it against your app, fixes the targets and renders.</p>
+        <pre class="code mt-5 overflow-x-auto px-4 py-4"><span class="c"># in Claude Code</span>
+/plugin marketplace add CXmiloxx/tourwright
+/plugin install tourwright@tourwright
+
+<span class="p">&gt;</span> make a one-minute onboarding video of
+  http://localhost:3000 for new admins</pre>
+        <p class="mt-4 text-[14px] text-muted">Any other MCP client: <code class="font-mono text-fg">npx -y tourwright mcp</code></p>
+      </div>
+      <div class="card flex flex-col">
+        <h3 class="font-display text-[22px] font-bold">GitHub Action</h3>
+        <p class="mt-2 text-[15px] text-muted">Render the tours on every release, or fail the build when a deploy broke one. The job summary shows the fix.</p>
+        <pre class="code mt-5 overflow-x-auto px-4 py-4"><span class="k">- uses</span>: CXmiloxx/tourwright@v2
+  <span class="k">with</span>:
+    <span class="k">scripts</span>: <span class="s">videos/*.yaml</span>
+    <span class="k">command</span>: <span class="s">check</span>      <span class="c"># or render</span>
+  <span class="k">env</span>:
+    <span class="k">TOURWRIGHT_SECRET_APP_PASSWORD</span>: <span class="s">${{ secrets.APP_PASSWORD }}</span></pre>
+        <p class="mt-4 text-[14px] text-muted">Also: an HTTP API with a job queue and webhooks, Docker, Kubernetes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Voices ───────────────────────────────────────────────────────────────────── -->
+<section id="voices" class="section scroll-mt-20">
+  <div class="flex flex-wrap items-end justify-between gap-6">
+    <div>
+      <p class="kicker">Voices</p>
+      <h2 class="h2 mt-4 max-w-2xl">Pick who narrates. Offline or online.</h2>
+    </div>
+    <div class="inline-flex rounded-xl border border-border p-1 text-[14px]" role="tablist" aria-label="Language">
+      <button type="button" data-lang="en" class="min-h-11 rounded-lg px-4 font-medium" role="tab">English</button>
+      <button type="button" data-lang="es" class="min-h-11 rounded-lg px-4 font-medium" role="tab">Español</button>
+    </div>
+  </div>
+  <div id="voicelist" class="mt-8 grid grid-cols-2 gap-2.5 sm:mt-10 sm:gap-3 lg:grid-cols-4"></div>
+  <p class="mt-6 text-[14px] text-muted">Plus any OpenAI-compatible TTS server (OpenAI, Kokoro, LocalAI) or your own command. Speed, pitch and volume per line, on every engine.</p>
+</section>
+
+<!-- ── Closing ──────────────────────────────────────────────────────────────────── -->
+<section class="spot border-t border-border">
+  <div class="mx-auto flex max-w-6xl flex-col items-start gap-8 px-4 py-16 sm:px-6 sm:py-24 md:flex-row md:items-end md:justify-between">
+    <h2 class="h2 max-w-2xl">Your next tutorial is a <span class="text-brand">text file</span>.</h2>
+    <div class="flex flex-wrap gap-3">
+      <a class="btn-primary" href="https://github.com/CXmiloxx/tourwright#install">Get started</a>
+      <a class="btn-ghost" href="https://github.com/CXmiloxx/tourwright/blob/main/docs/SCRIPTS.md">Script reference</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="border-t border-border">
+  <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-10 text-[14px] text-muted sm:px-6">
+    <svg viewBox="58 0 140 256" class="h-5 w-auto" aria-hidden="true"><path class="fill-brand-fill" d="M97.03 62.52 L198.30 121.0 L136.00 121.0 A20 20 0 1 0 136.00 135.0 L198.30 135.0 L97.03 193.48 A26 26 0 0 1 58 170.97 L58 85.03 A26 26 0 0 1 97.03 62.52 Z"/></svg>
+    <span>MIT licensed · made in Colombia</span>
+    <a class="py-2 hover:text-fg" href="https://github.com/CXmiloxx/tourwright">GitHub</a>
+    <a class="py-2 hover:text-fg" href="https://www.npmjs.com/package/tourwright">npm</a>
+    <a class="py-2 hover:text-fg" href="https://github.com/CXmiloxx/tourwright/blob/main/README.es.md">Español</a>
+  </div>
+</footer>
+
+<script>
+// The phone menu closes once a link is chosen
+for (const a of document.querySelectorAll('details a')) a.addEventListener('click', () => a.closest('details').removeAttribute('open'))
+
+// Theme switch, remembered per visitor
+document.getElementById('theme').addEventListener('click', () => {
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
+  document.documentElement.dataset.theme = next
+  try { localStorage.setItem('theme', next) } catch {}
+})
+
+// Copy the install command
+for (const b of document.querySelectorAll('[data-copy]')) {
+  b.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(b.dataset.copy) } catch { return }
+    const note = b.querySelector('.copied')
+    note.classList.remove('hidden')
+    setTimeout(() => note.classList.add('hidden'), 1400)
+  })
+}
+
+// The script follows the video: the step on screen wears the focus ring; a click on a step jumps there
+const video = document.getElementById('video')
+const box = document.getElementById('script')
+const steps = [...box.querySelectorAll('.ln[data-t]')]
+const info = document.getElementById('stepinfo')
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+// Plain YAML colouring: keys, strings, comments
+for (const ln of box.querySelectorAll('.ln')) {
+  // The comment is split off first, so the colouring of the code never touches it
+  const [, code, comment = ''] = /^(.*?)(\s+#.*)?$/.exec(ln.textContent)
+  // Odd pieces are "strings"; keys are only looked for outside them
+  ln.innerHTML = code.split(/("[^"]*")/).map((part, i) => i % 2
+    ? `<span class="s">${esc(part)}</span>`
+    : esc(part).replace(/(^|[{\s,-])([A-Za-z]+)(:)/g, '$1<span class="k">$2</span>$3')).join('') +
+    (comment && `<span class="c">${esc(comment)}</span>`)
+}
+let current = -1
+const show = i => {
+  if (i === current) return
+  current = i
+  steps.forEach((s, j) => { s.classList.toggle('is-on', j === i); s.classList.toggle('is-past', j < i) })
+  if (i < 0) return
+  info.textContent = `step ${i + 1} / ${steps.length}`
+  const el = steps[i]
+  const top = el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2
+  box.scrollTo({ top, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+}
+video.addEventListener('timeupdate', () => {
+  const t = video.currentTime
+  let i = -1
+  steps.forEach((s, j) => { if (Number(s.dataset.t) <= t + 0.05) i = j })
+  show(i)
+})
+steps.forEach((s, j) => s.addEventListener('click', () => {
+  video.currentTime = Number(s.dataset.t) + 0.01
+  video.play().catch(() => {})
+  show(j)
+}))
+
+// Voice samples, published next to this page from docs/voices
+const VOICES = {
+  en: [['ava', 'Edge · multilingual'], ['andrew', 'Edge · multilingual'], ['emma', 'Edge · multilingual'], ['brian', 'Edge · multilingual'],
+    ['jenny', 'Edge · en-US'], ['guy', 'Edge · en-US'], ['sonia', 'Edge · en-GB'], ['alba', 'Pocket · offline'], ['jane', 'Pocket · offline'],
+    ['mary', 'Pocket · offline'], ['michael', 'Pocket · offline'], ['george', 'Pocket · offline'], ['lessac', 'Piper · offline'], ['ryan', 'Piper · offline']],
+  es: [['salome', 'Edge · Colombia'], ['gonzalo', 'Edge · Colombia'], ['dalia', 'Edge · México'], ['jorge', 'Edge · México'], ['paloma', 'Edge · EE. UU.'],
+    ['alonso', 'Edge · EE. UU.'], ['lola', 'Pocket · offline'], ['lola-rapida', 'Pocket · offline'], ['claude', 'Piper · offline'], ['davefx', 'Piper · España'],
+    ['ava', 'Edge · multilingüe'], ['andrew', 'Edge · multilingüe']],
+}
+const list = document.getElementById('voicelist')
+const audio = new Audio()
+let playing = null
+const icon = on => on
+  ? '<svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
+  : '<svg class="size-4 translate-x-[1px]" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>'
+const stop = () => { if (playing) { playing.classList.remove('ring-brand'); playing.querySelector('.ic').innerHTML = icon(false) } playing = null }
+audio.addEventListener('ended', stop)
+const showLang = lang => {
+  audio.pause(); stop()
+  for (const b of document.querySelectorAll('[data-lang]')) {
+    const on = b.dataset.lang === lang
+    b.setAttribute('aria-selected', on)
+    b.className = `min-h-11 rounded-lg px-4 font-medium transition ${on ? 'bg-brand-fill text-on-brand' : 'text-muted hover:text-fg'}`
+  }
+  list.innerHTML = ''
+  for (const [name, kind] of VOICES[lang]) {
+    const b = document.createElement('button')
+    b.type = 'button'
+    b.className = 'group flex min-w-0 items-center gap-2.5 rounded-xl border border-border bg-surface px-3 py-3 text-left ring-1 ring-transparent transition hover:border-brand sm:gap-3 sm:px-4'
+    b.innerHTML = `<span class="ic grid size-9 shrink-0 place-items-center rounded-full bg-brand-fill/15 text-brand group-hover:bg-brand-fill group-hover:text-on-brand">${icon(false)}</span>
+      <span><span class="block font-semibold">${name}</span><span class="block text-[13px] text-muted">${kind}</span></span>`
+    b.addEventListener('click', () => {
+      if (playing === b) { audio.pause(); stop(); return }
+      stop()
+      audio.src = `voices/${lang}/${name}.mp3`
+      audio.play().catch(() => {})
+      playing = b
+      b.classList.add('ring-brand')
+      b.querySelector('.ic').innerHTML = icon(true)
+    })
+    list.append(b)
+  }
+}
+for (const b of document.querySelectorAll('[data-lang]')) b.addEventListener('click', () => showLang(b.dataset.lang))
+showLang(document.documentElement.lang === 'es' || navigator.language?.startsWith('es') ? 'es' : 'en')
+</script>
+</body>
+</html>

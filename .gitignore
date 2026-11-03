@@ -1,6 +1,7 @@
 node_modules/
 videos/
 *.mp4
+!docs/demo/demo.mp4
 .env
 .env.*
 !.env.example

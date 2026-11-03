@@ -1,0 +1,12 @@
+{
+  "name": "tourwright-site",
+  "private": true,
+  "description": "The project page (GitHub Pages). Not part of the npm package.",
+  "scripts": {
+    "build": "tailwindcss -i src/styles.css -o styles.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "tailwindcss": "4.3.3"
+  }
+}

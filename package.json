@@ -14,6 +14,7 @@
     "schema",
     "docs",
     "!docs/voices",
+    "!docs/demo",
     "examples",
     "scripts",
     "!scripts/check-schema.js",
@@ -46,7 +47,16 @@
     "ffmpeg",
     "mcp",
     "ai-agents",
-    "piper"
+    "piper",
+    "screen-recording",
+    "video-generation",
+    "documentation",
+    "how-to",
+    "user-onboarding",
+    "demo",
+    "automation",
+    "claude-code",
+    "model-context-protocol"
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
@@ -79,7 +89,7 @@
     "type": "git",
     "url": "git+https://github.com/CXmiloxx/tourwright.git"
   },
-  "homepage": "https://github.com/CXmiloxx/tourwright",
+  "homepage": "https://github.com/CXmiloxx/tourwright#readme",
   "bugs": {
     "url": "https://github.com/CXmiloxx/tourwright/issues"
   },
