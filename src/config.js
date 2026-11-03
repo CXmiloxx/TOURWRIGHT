@@ -169,6 +169,8 @@ export const loadConfig = (overrides = {}) => {
       aliases: file.tts?.aliases ?? {},
       // Seconds of silence between sentences
       pause: num(env.TOURWRIGHT_TTS_PAUSE ?? file.tts?.pause, 0.5),
+      // Lines made at once ahead of the recording (an online voice waits on the network: several at a time)
+      parallel: Math.max(1, num(env.TOURWRIGHT_TTS_PARALLEL ?? file.tts?.parallel, 4)),
       // Sound of the narration: a preset (default, clean, warm, radio, podcast, none) or an ffmpeg audio filter
       polish: env.TOURWRIGHT_VOICE_POLISH ?? file.tts?.polish ?? 'default',
       // Words every voice should say differently: { "SaaS": "sas" }. A script's `pronounce` adds to it.

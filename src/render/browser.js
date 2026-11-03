@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url'
 import { compose, qualityOf } from '../compose.js'
 import { loadConfig } from '../config.js'
 import { interpolate, secretsShown } from '../script/load.js'
-import { hash, holdsSecret, log, plainText, UserError } from '../util.js'
+import { hash, holdsSecret, log, mapLimit, plainText, UserError } from '../util.js'
 import { builtInSound, typingSound } from '../voice/effects.js'
 import { durationOf, markedLine, narrate, parseVoice, stripMarks, withProsody } from '../voice/index.js'
 import { launchChromium } from './chromium.js'
@@ -15,7 +15,7 @@ import { centerOf, createCursor } from './cursor.js'
 import { createGuard, setupNetwork } from './network.js'
 import { OVERLAY } from './overlay.js'
 import { needsPrep, prepare, saveSession, sessionPath } from './session.js'
-import { dismissing, hideTyped, locate, plainHelpers, runSteps, setStepTimeout } from './steps.js'
+import { dismissing, hideTyped, locate, plainHelpers, runSteps, setStepTimeout, spokenLines } from './steps.js'
 import { maskInPage } from './mask.js'
 import { clickWithEffect, reportFindings, reviewVideo, watchPage } from './review.js'
 import { markOffered, resolveTarget } from './targets.js'
@@ -93,10 +93,22 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   // --fresh: log in again instead of reusing the saved session
   if (opts.fresh && sessionFile) rmSync(sessionFile, { force: true })
 
+  // Every line the script says is made ahead, a few at once, while the browser starts and logs in: on camera
+  // each one is ready, or already on its way. A line that fails here fails again where it is said, with its step.
+  let warming = !!voice && !loaded.run
+  if (warming) {
+    const filmed = opts.steps ? script.steps.slice(opts.steps[0] - 1, opts.steps[1]) : script.steps
+    mapLimit(spokenLines(filmed), config.tts.parallel, async ([text, prosody]) => {
+      if (!warming) return
+      await narrate(text, withProsody(prosody.voice ?? voice, prosody), config, speech).catch(e => log.debug(`voice ahead: ${e.message}`))
+    })
+  }
+
   let browser
   let display = null
   let recorder = null
   const cleanup = async () => {
+    warming = false
     recorder?.kill()
     await browser?.close().catch(() => {})
     display?.close()

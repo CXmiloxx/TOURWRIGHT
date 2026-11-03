@@ -6,8 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `TOURWRIGHT_TTS_PARALLEL` (default 4): how many narration lines are made at once.
+
 ### Changed
 
+- Faster renders with a new script: every line a walkthrough says is made ahead, several at once, while the
+  browser starts and logs in, instead of one by one during the recording. With an online voice the demo app
+  went from 108 s to 74 s. Slides make their narration in parallel too.
+- The review of the finished video (blank or black screens) runs both passes at once on a small picture:
+  about 3× faster.
+- The length of each narration is read from its WAV header instead of starting `ffprobe` every time.
 - The Redis queue (`bullmq`, `ioredis`) and Claude for `narrate` (`@anthropic-ai/sdk`) are optional peer
   dependencies instead of optional dependencies: a plain install no longer downloads them, so it is lighter,
   and `pnpm add tourwright` finishes without the "Ignored build scripts: msgpackr-extract" error that

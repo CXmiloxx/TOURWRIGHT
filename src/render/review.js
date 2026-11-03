@@ -71,19 +71,20 @@ const SPANS = /black_start:([\d.]+)\s+black_end:([\d.]+)/g
  * @returns {Promise<Finding[]>}
  */
 export const reviewVideo = async (file, config) => {
-  const findings = []
-  // Nearly every pixel near pure black, or near pure white once the picture is inverted
-  for (const [what, filter] of [['black', 'blackdetect=d=1:pix_th=0.03:pic_th=0.995'], ['blank (white)', 'negate,blackdetect=d=1:pix_th=0.03:pic_th=0.995']]) {
-    if (!config.ffmpeg) return findings
+  if (!config.ffmpeg) return []
+  // Nearly every pixel near pure black, or near pure white once the picture is inverted. A small grey picture
+  // at 10 fps says the same, and both passes run at once
+  const look = [['black', 'blackdetect=d=1:pix_th=0.03:pic_th=0.995'], ['blank (white)', 'negate,blackdetect=d=1:pix_th=0.03:pic_th=0.995']]
+  const found = await Promise.all(look.map(async ([what, filter]) => {
     // blackdetect reports at the info level, on stderr
-    const { stderr } = await run(config.ffmpeg, ['-hide_banner', '-nostats', '-i', file, '-an', '-vf', filter, '-f', 'null', '-'], { maxBuffer: 16 * 1024 * 1024 })
+    const { stderr } = await run(config.ffmpeg, ['-hide_banner', '-nostats', '-i', file, '-an', '-vf', `fps=10,scale=320:-2,format=gray,${filter}`, '-f', 'null', '-'], { maxBuffer: 16 * 1024 * 1024 })
       .catch(error => ({ stderr: String(error.stderr ?? '') }))
-    for (const m of String(stderr ?? '').matchAll(SPANS)) {
+    return [...String(stderr ?? '').matchAll(SPANS)].map(m => {
       const [start, end] = [Number(m[1]), Number(m[2])]
-      findings.push({ kind: 'blank', at: start, message: `the screen is ${what} from ${start.toFixed(1)} s to ${end.toFixed(1)} s` })
-    }
-  }
-  return findings
+      return /** @type {Finding} */ ({ kind: 'blank', at: start, message: `the screen is ${what} from ${start.toFixed(1)} s to ${end.toFixed(1)} s` })
+    })
+  }))
+  return found.flat()
 }
 
 /** Says each finding once, with its step */
