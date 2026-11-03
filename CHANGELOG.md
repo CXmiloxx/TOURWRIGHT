@@ -8,6 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `render` shows its progress on one line in a terminal: the stage, the step being filmed and the time so far.
+  Jobs of the API report the step too (`progress.step`, `progress.steps`).
 - `TOURWRIGHT_TTS_PARALLEL` (default 4): how many narration lines are made at once.
 
 ### Changed
