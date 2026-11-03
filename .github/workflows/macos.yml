@@ -1,13 +1,8 @@
-# Everything on macOS: the tests and a real render. GitHub's macOS runners are scarce: on every change a job often
-# waited 15 minutes without getting one and was cancelled, turning CI red with nothing broken. So macOS runs here,
-# once a day on main, for each published release, and by hand (Actions → macos → Run workflow); a job that finds
-# no runner tries again the next day, and GitHub emails when one fails.
+# Everything on macOS: the tests and a real render. GitHub's macOS runners are scarce: a job often waits a long
+# time for one, and then takes about ten minutes, so it only runs by hand (Actions → macos → Run workflow), for
+# instance before a release that touches capture, ffmpeg or the install.
 name: macos
 on:
-  schedule:
-    - cron: "0 6 * * *"
-  release:
-    types: [published]
   workflow_dispatch:
 jobs:
   test:

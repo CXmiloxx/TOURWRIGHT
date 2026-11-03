@@ -7,8 +7,8 @@ vulnerabilities to [SECURITY.md](SECURITY.md), never a public issue.
 ## Setup
 
 Node.js 22+ on Linux, macOS or Windows. CI runs the tests and a real render on Linux and Windows for every change;
-macOS (tests and render) runs once a day and for each release, because GitHub's macOS runners are too scarce to
-wait for on every change, and anyone can start it from Actions → macos → Run workflow.
+macOS (tests and render) runs only by hand, from Actions → macos → Run workflow, because GitHub's macOS runners
+are too scarce to wait for on every change or every day.
 
 ```bash
 git clone https://github.com/CXmiloxx/tourwright && cd tourwright

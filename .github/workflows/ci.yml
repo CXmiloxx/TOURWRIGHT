@@ -23,8 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         # macOS is not here: GitHub's macOS runners are so scarce that a job often waits 15 minutes for one and is
-        # cancelled without running, turning a good change red. macos.yml tests and renders on macOS every day and
-        # for each release
+        # cancelled without running, turning a good change red. macos.yml tests and renders on macOS, run by hand
         os: [ubuntu-latest, windows-latest]
         node: [22, 24, 26]
     steps:
@@ -42,7 +41,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./
         with: { scripts: examples/example-com.yaml, command: check, voices: en_US-lessac-medium }
-  # A real install and real videos on Linux and Windows (render.yml); macOS runs daily and for releases (macos.yml)
+  # A real install and real videos on Linux and Windows (render.yml); macOS runs by hand (macos.yml)
   render:
     strategy:
       fail-fast: false
