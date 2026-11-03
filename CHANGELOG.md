@@ -15,6 +15,8 @@ All notable changes to this project are documented here. The format follows
 - Faster renders with a new script: every line a walkthrough says is made ahead, several at once, while the
   browser starts and logs in, instead of one by one during the recording. With an online voice the demo app
   went from 108 s to 74 s. Slides make their narration in parallel too.
+- A page still loading after `goto`, `back` or `reload` is cut from the video (unless the voice is speaking),
+  and an app that never goes quiet (polling, live events) waits 10 s at most instead of 30 s, on camera.
 - The review of the finished video (blank or black screens) runs both passes at once on a small picture:
   about 3× faster.
 - The length of each narration is read from its WAV header instead of starting `ffprobe` every time.
