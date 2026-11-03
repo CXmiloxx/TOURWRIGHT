@@ -5,3 +5,10 @@ videos
 test
 .env
 .env.*
+# Not needed to render: voice samples and the demo (for the README and the project page), the page, the brand
+docs/voices
+docs/demo
+site
+brand
+claude-plugin
+.claude-plugin
