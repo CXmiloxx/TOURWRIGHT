@@ -4,7 +4,10 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.2.0]
+
+A Docker image whose Redis queue works and whose voice is twice as fast, images tagged with each version, and
+MCP tools that say what they touch.
 
 ### Added
 
