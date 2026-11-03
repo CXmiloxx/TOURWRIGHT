@@ -14,6 +14,7 @@
 //             offline) the system's Python makes the environment instead.
 //   Chromium  a Chrome, Edge or Chromium already on the system; Playwright's build only when there is none.
 import { spawn } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { chmodSync, copyFileSync, createWriteStream, existsSync, mkdirSync, mkdtempSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { arch, platform } from 'node:os'
@@ -70,11 +71,29 @@ const UV = {
   'win32-arm64': 'uv-aarch64-pc-windows-msvc.zip',
 }
 
+// SHA-256 of every archive from a fixed release: a file that changed upstream (a replaced or tampered asset)
+// is refused instead of run. uv: its release's sha256.sum. Piper publishes none: hashed from the release
+// assets when PIPER_RELEASE was pinned. A new release pinned above needs its hashes here too.
+export const SHA256 = {
+  [`${PIPER_RELEASE}/piper_linux_x86_64.tar.gz`]: 'a50cb45f355b7af1f6d758c1b360717877ba0a398cc8cbe6d2a7a3a26e225992',
+  [`${PIPER_RELEASE}/piper_linux_aarch64.tar.gz`]: 'fea0fd2d87c54dbc7078d0f878289f404bd4d6eea6e7444a77835d1537ab88eb',
+  [`${PIPER_RELEASE}/piper_linux_armv7l.tar.gz`]: 'c6946fcd57c705ed1d4666ea880f80ba0bbbd14de62ecbdd13460baf3bac8e37',
+  [`${PIPER_RELEASE}/piper_windows_amd64.zip`]: 'f3c58906402b24f3a96d92145f58acba6d86c9b5db896d207f78dc80811efcea',
+  [`${UV_RELEASE}/uv-x86_64-unknown-linux-gnu.tar.gz`]: 'f29c3e94ffabd7e6f3ba521dba169a9b7ec12100bf3257087f0f24f6123f3645',
+  [`${UV_RELEASE}/uv-aarch64-unknown-linux-gnu.tar.gz`]: '229e194255c7958d86d56e8790d969a6f74736592133f0dfd0076f754c642c1d',
+  [`${UV_RELEASE}/uv-armv7-unknown-linux-gnueabihf.tar.gz`]: 'd00cd4949c4524c934afcfee1aedfa9d337cf4e43be4d6b692ad8d74d0a65562',
+  [`${UV_RELEASE}/uv-x86_64-apple-darwin.tar.gz`]: '63ba17fdda55ad1a230d4b37fc6017ffa10c23688c83818bd3bfdf914c652a02',
+  [`${UV_RELEASE}/uv-aarch64-apple-darwin.tar.gz`]: '60fbd5c8a1ed681845eea28d9d622fcde03c51e91a43465b64a1e17db1ed3472',
+  [`${UV_RELEASE}/uv-x86_64-pc-windows-msvc.zip`]: 'a2a8820d5eea32f08ef467ef3b7f66883a9b076d5737a2fc2fbb5f458d1bb50f',
+  [`${UV_RELEASE}/uv-aarch64-pc-windows-msvc.zip`]: 'c2426c0c8e28b53d8c440e47a18d96ad4db51e159866c0e81435b196d7f0081c',
+}
+
 const exe = name => (isWindows ? `${name}.exe` : name)
 
 // A cut download leaves a file that looks fine but is not ("Protobuf parsing failed" for a voice): check
-// the size against content-length, retry, and only then put the file in place.
-export const download = async (url, target, attempts = 3) => {
+// the size against content-length, retry, and only then put the file in place. `sha256`: the file must have
+// that hash (a mismatch is not retried: the same server would send the same file).
+export const download = async (url, target, attempts = 3, sha256 = SHA256[url]) => {
   const partial = `${target}.part`
   mkdirSync(dirname(target), { recursive: true })
   for (let attempt = 1; ; attempt++) {
@@ -85,9 +104,14 @@ export const download = async (url, target, attempts = 3) => {
       // A site that moved or blocks the download answers with a web page and 200: not the file
       if (/^text\/html/i.test(response.headers.get('content-type') ?? '')) throw new UserError(`${url} answered with a web page instead of the file`)
       const expected = Number(response.headers.get('content-length'))
-      await pipeline(Readable.fromWeb(/** @type {any} */ (response.body)), createWriteStream(partial))
+      const hash = createHash('sha256')
+      const body = Readable.fromWeb(/** @type {any} */ (response.body))
+      body.on('data', chunk => hash.update(chunk))
+      await pipeline(body, createWriteStream(partial))
       const got = statSync(partial).size
       if (expected && got !== expected) throw new Error(`incomplete download: ${got} of ${expected} bytes`)
+      const digest = hash.digest('hex')
+      if (sha256 && digest !== sha256) throw new UserError(`checksum mismatch (sha256 ${digest}, expected ${sha256}): the file was not installed`)
       renameSync(partial, target)
       return
     } catch (error) {

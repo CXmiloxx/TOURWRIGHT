@@ -16,9 +16,6 @@
     "!docs/voices",
     "!docs/demo",
     "examples",
-    "scripts",
-    "!scripts/check-schema.js",
-    "!scripts/docker-deps.js",
     "README.md",
     "README.es.md",
     "LICENSE"
