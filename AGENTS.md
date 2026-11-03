@@ -26,7 +26,7 @@ about changing Tourwright itself.
 | `src/server/http.js` | HTTP API |
 | `examples/app/` | A demo app with no dependencies (2FA login, personal data, upload, long process, live notice) that CI films |
 | `src/mcp.js` | MCP server |
-| `server.json` | The MCP server's entry in the official MCP Registry (version and `mcpName` in `package.json` must match) |
+| `server.json`, `glama.json` | The MCP server's entry in the official MCP Registry (version and `mcpName` in `package.json` must match); `glama.json` names the maintainers on Glama |
 | `.claude-plugin/`, `claude-plugin/` | Claude Code marketplace and plugin: the MCP server and the `make-tour` skill |
 | `.github/workflows/image.yml` | The Docker image: `latest` from `main`, `X.Y.Z`, `X.Y` and `X` for each release tag |
 | `action.yml` | The GitHub Action (`uses: CXmiloxx/tourwright@v2`): render or check scripts in CI |
