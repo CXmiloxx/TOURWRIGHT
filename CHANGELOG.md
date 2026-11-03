@@ -4,7 +4,10 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.1.0]
+
+Faster renders, a progress line, Tourwright for Claude Code and GitHub Actions, a logo and a project page, and a
+plain install without the Redis queue or the Claude SDK.
 
 ### Added
 
