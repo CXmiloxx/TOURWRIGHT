@@ -1,2 +1,3 @@
 node_modules/
-styles.css
+# The compiled CSS (npm run build); its source, src/styles.css, is versioned
+/styles.css

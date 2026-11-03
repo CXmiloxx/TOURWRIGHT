@@ -1,0 +1,141 @@
+/* The project page's styles: Tailwind v4, built by `npm run build` here and by the Pages workflow into site/styles.css */
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ── Brand palette ──────────────────────────────────────────────────────────────────
+   Signal: the amber of Tourwright's focus ring. Ink: the night of the editing room, blue-tinted neutrals.
+   Paper: the warm light background. Every text pair below is WCAG AA (4.5:1) or better. */
+@theme {
+  --color-signal-50: #fff8eb;
+  --color-signal-100: #feebc6;
+  --color-signal-200: #fdd688;
+  --color-signal-300: #fbbf4d;
+  --color-signal-400: #f5a524;
+  --color-signal-500: #e8920c;
+  --color-signal-600: #c47208;
+  --color-signal-700: #9a4f07;
+  --color-signal-800: #7c3f0b;
+  --color-signal-900: #66340d;
+
+  --color-ink-50: #f5f7fb;
+  --color-ink-100: #eef1f7;
+  --color-ink-200: #e0e3eb;
+  --color-ink-300: #c3c9d8;
+  --color-ink-400: #98a2bb;
+  --color-ink-500: #6b7591;
+  --color-ink-600: #46516e;
+  --color-ink-700: #2a3553;
+  --color-ink-800: #1b2540;
+  --color-ink-900: #111a2e;
+  --color-ink-950: #0b1120;
+
+  --color-paper: #f7f5f0;
+  --color-paper-2: #efece4;
+
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+/* ── Semantic tokens: what components use; each theme maps them to the palette ──────────────────────── */
+:root {
+  --bg: var(--color-paper);
+  --surface: #ffffff;
+  --surface-2: var(--color-paper-2);
+  --fg: var(--color-ink-950);           /* 17.3:1 on bg */
+  --muted: var(--color-ink-600);        /* 7.2:1 */
+  --subtle: var(--color-ink-500);       /* 4.2:1: large or decorative text only */
+  --border: rgb(11 17 32 / 0.12);
+  --brand: var(--color-signal-700);     /* brand text, icons and borders: 5.5:1 */
+  --brand-fill: var(--color-signal-500);/* buttons, with ink text on them: 7.7:1 */
+  --on-brand: var(--color-ink-950);
+  --ring: var(--color-signal-600);
+  --glow: rgb(232 146 12 / 0.2);
+  --success: #15803d;
+  --danger: #b91c1c;
+}
+[data-theme="dark"] {
+  --bg: var(--color-ink-950);
+  --surface: var(--color-ink-900);
+  --surface-2: #0e1628;
+  --fg: var(--color-ink-100);           /* 16.6:1 */
+  --muted: var(--color-ink-400);        /* 7.4:1 */
+  --subtle: var(--color-ink-500);       /* 4.1:1: large or decorative text only */
+  --border: rgb(255 255 255 / 0.09);
+  --brand: var(--color-signal-400);     /* 9.2:1 */
+  --brand-fill: var(--color-signal-400);
+  --on-brand: var(--color-ink-950);     /* 9.2:1 */
+  --ring: var(--color-signal-400);
+  --glow: rgb(245 165 36 / 0.2);
+  --success: #4ade80;
+  --danger: #f87171;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-brand: var(--brand);
+  --color-brand-fill: var(--brand-fill);
+  --color-on-brand: var(--on-brand);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body { @apply bg-bg text-fg font-sans antialiased; }
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+  button, [role="tab"], summary { cursor: pointer; }
+  ::selection { background: var(--color-signal-400); color: var(--color-ink-950); }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; border-radius: 6px; }
+}
+
+@layer components {
+  /* Film grain, faint, over everything: the editing-room feel without an image */
+  .grain::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: 0.045; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* The spotlight of the product: everything dims around one bright spot */
+  .spot { background: radial-gradient(min(60rem, 140vw) 32rem at 72% -12%, var(--glow), transparent 65%), radial-gradient(40rem 26rem at 0% 8%, rgb(99 102 241 / 0.07), transparent 70%); }
+
+  .btn-primary, .btn-ghost { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-[15px] font-semibold transition duration-200 ease-out; }
+  .btn-primary { @apply bg-brand-fill text-on-brand shadow-[0_10px_30px_-12px_var(--brand-fill)] hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-12px_var(--brand-fill)] active:translate-y-0; }
+  .btn-ghost { @apply border border-border text-fg hover:border-brand hover:text-brand; }
+  .kicker { @apply font-mono text-[12px] font-medium tracking-[0.18em] uppercase text-brand; }
+  .h2 { @apply font-display text-[clamp(30px,5.2vw,52px)] leading-[1.04] font-bold tracking-[-0.02em]; }
+  .card { @apply min-w-0 rounded-2xl border border-border bg-surface p-5 sm:p-6; }
+  .section { @apply mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24; }
+
+  /* Code is always on ink, in both themes */
+  .code { @apply rounded-2xl bg-ink-950 text-ink-200 font-mono text-[13px] leading-[1.75] ring-1 ring-white/10; }
+  .code .k { color: var(--color-signal-400); }
+  .code .s { color: #9fe3b4; }
+  .code .c { color: #7a86a3; }
+  .code .p { color: #7dd3fc; }
+
+  /* The script next to the video: lines wrap with a hanging indent; the line being filmed wears the focus ring */
+  .ln { @apply relative block cursor-pointer rounded-md py-0.5 pr-3 whitespace-pre-wrap break-words transition-[background,opacity] duration-300;
+    padding-left: calc(0.75rem + 6ch); text-indent: -6ch; opacity: 0.68; }
+  .ln:hover { opacity: 0.95; background: rgb(255 255 255 / 0.04); }
+  .ln.is-past { opacity: 0.82; }
+  .ln.is-on { opacity: 1; background: rgb(245 165 36 / 0.1); box-shadow: inset 3px 0 0 var(--color-signal-400), 0 0 0 1px rgb(245 165 36 / 0.35); }
+  .ln.is-plain { cursor: default; }
+  .ln.is-plain:hover { background: none; }
+
+  .reveal { animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 90ms); }
+}
+
+@keyframes rise { from { opacity: 0; transform: translateY(18px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { animation: none; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+}
