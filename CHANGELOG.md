@@ -13,6 +13,11 @@ All notable changes to this project are documented here. The format follows
 - The Docker image is tagged with each release (`2.1.0`, `2.1`, `2`) besides `latest`, so a server or a Kubernetes
   deployment can pin a version; the Kubernetes manifest and the deployment guide use `:2`.
 
+### Fixed
+
+- The 2.1.0 Docker image came without BullMQ, ioredis and the Claude SDK, so its Redis queue (the one
+  `docker compose` uses) and `narrate` with Claude did not start. They are installed from the lockfile again.
+
 ## [2.1.0]
 
 Faster renders, a progress line, Tourwright for Claude Code and GitHub Actions, a logo and a project page, and a
