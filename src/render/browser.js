@@ -224,8 +224,11 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     }
     const clickSound = audio.clicks && !dryRun ? await soundFile(audio.clicks === true ? 'click' : audio.clicks) : null
     const effect = (file, volume = 1) => effects.push({ at: now(), file, volume: volume * effectsVolume })
+    // A page still loading is cut from the video, except while the voice speaks (the cut would shorten what
+    // follows it and the next line would overlap). An app that never goes quiet (polling, live events) waits 10 s.
     const settle = async () => {
-      await page.waitForLoadState('networkidle', { timeout: 30_000 }).catch(() => {})
+      const idle = () => page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {})
+      await (now() < voiceEnd ? idle() : offClock(idle))
       await cursor.restore()
     }
 
