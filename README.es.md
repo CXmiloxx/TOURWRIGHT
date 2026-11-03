@@ -1,10 +1,25 @@
-# Tourwright
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="brand/logo-horizontal-dark.svg">
+    <img src="brand/logo-horizontal.svg" alt="Tourwright" height="56">
+  </picture>
+</h1>
+
+[![npm](https://img.shields.io/npm/v/tourwright)](https://www.npmjs.com/package/tourwright)
+[![CI](https://github.com/CXmiloxx/tourwright/actions/workflows/ci.yml/badge.svg)](https://github.com/CXmiloxx/tourwright/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![MCP](https://img.shields.io/badge/MCP-server-8a2be2)](docs/AGENTS.md)
 
 **Recorridos guiados y narrados, a partir de un guion.** Escribes lo que pasa en pantalla y lo que se dice;
 Tourwright graba un navegador de verdad (o arma diapositivas), lleva la mirada a cada elemento, sintetiza la
 voz y entrega un `.mp4` con subtítulos, capítulos y miniatura. Hecho para personas *y* para agentes de IA, en cualquier servidor: de un portátil a un clúster.
 
 *[Read in English](README.md)*
+
+<p align="center">
+  <a href="docs/demo/demo.mp4"><img src="docs/demo/demo.gif" alt="Un video de Tourwright: login con 2FA, foco guiado en cada campo, datos inventados en lugar de clientes reales, una carga de archivo y un aviso en vivo" width="800"></a>
+  <br><sub>Hecho por Tourwright a partir de <a href="examples/app.yaml">examples/app.yaml</a>, sin nadie en el teclado. <a href="docs/demo/demo.mp4">▶ Verlo con sonido</a> (52 s)</sub>
+</p>
 
 ```yaml
 # recorrido.yaml
@@ -23,6 +38,21 @@ steps:
 ```bash
 tourwright render recorrido.yaml   # → videos/recorrido.mp4 (+ .srt .vtt .jpg .json)
 ```
+
+## Por qué Tourwright
+
+Los grabadores de pantalla (Loom) y las herramientas de demos interactivas (Arcade, Supademo, Scribe) necesitan
+a alguien que grabe, y cada rediseño obliga a grabar otra vez. Los videos de Tourwright son **código**:
+
+| | Grabador de pantalla | SaaS de demos | **Tourwright** |
+|---|---|---|---|
+| Volver a grabar tras un cambio de la interfaz | a mano | a mano | `tourwright render` |
+| Sabe cuándo un video quedó desactualizado | no | no | `tourwright check` en CI dice qué paso se rompió y el arreglo |
+| Narración | tu voz, varias tomas | ninguna o aparte | voz sintética, muchas voces, con o sin internet |
+| El mismo recorrido para 50 clientes o idiomas | 50 grabaciones | 50 demos | un guion con `{{variables}}` |
+| Datos personales en pantalla | editarlos | editarlos | `mask` los cambia por datos inventados |
+| Dónde vive | la nube de un proveedor | la nube de un proveedor | tu repositorio y tus servidores; MIT |
+| Un agente de IA puede hacerlo | no | no | servidor MCP y plugin de Claude Code |
 
 ## Qué hace
 

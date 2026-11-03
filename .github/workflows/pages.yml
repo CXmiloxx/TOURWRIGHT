@@ -1,0 +1,33 @@
+# The project page (site/): its CSS compiled with Tailwind, next to the brand icons, the demo video and the voice
+# samples. https://cxmiloxx.github.io/tourwright/
+name: pages
+on:
+  push:
+    branches: [main]
+    paths: [site/**, brand/**, docs/demo/**, docs/voices/**, .github/workflows/pages.yml]
+  workflow_dispatch:
+permissions: { contents: read, pages: write, id-token: write }
+concurrency: { group: pages, cancel-in-progress: true }
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: "${{ steps.deploy.outputs.page_url }}" }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm, cache-dependency-path: site/package-lock.json }
+      - working-directory: site
+        run: npm ci && npm run build
+      - name: Put the page together
+        run: |
+          mkdir -p _site
+          cp site/index.html site/styles.css _site/
+          cp -r docs/demo _site/demo && cp docs/demo/social-preview.png _site/
+          cp -r docs/voices _site/voices
+          cp brand/web/favicon.ico brand/web/favicon.svg brand/web/apple-touch-icon.png brand/web/icon-*.png \
+             brand/web/maskable-512.png brand/web/site.webmanifest _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: _site }
+      - id: deploy
+        uses: actions/deploy-pages@v4

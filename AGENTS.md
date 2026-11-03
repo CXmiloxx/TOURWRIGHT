@@ -29,6 +29,8 @@ about changing Tourwright itself.
 | `server.json` | The MCP server's entry in the official MCP Registry (version and `mcpName` in `package.json` must match) |
 | `.claude-plugin/`, `claude-plugin/` | Claude Code marketplace and plugin: the MCP server and the `make-tour` skill |
 | `action.yml` | The GitHub Action (`uses: CXmiloxx/tourwright@v2`): render or check scripts in CI |
+| `site/`, `docs/demo/` | The project page (GitHub Pages, `pages.yml`; Tailwind v4 in `site/src/styles.css`, built with `npm run build` inside `site/`, its own `package.json`) and the demo video, GIF and social preview |
+| `brand/` | The logo (light and dark) and the web icons: use these files, never redraw the mark |
 
 ## Rules
 
