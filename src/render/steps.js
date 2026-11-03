@@ -84,7 +84,10 @@ export const runSteps = async (steps, v, page, top = true, offset = 0) => {
   const failures = []
   for (const [index, step] of steps.entries()) {
     // Which step of the script is on screen: findings of the review name it
-    if (top) v.step = index + offset + 1
+    if (top) {
+      v.step = index + offset + 1
+      v.progress?.(v.step)
+    }
     // `tourwright guide`: a screenshot before the step, with its element marked
     if (top && v.onStep) await v.onStep(step)
     try {

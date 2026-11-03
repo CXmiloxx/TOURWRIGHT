@@ -475,6 +475,9 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       const n = await synth(text, prosody)
       if (n) play(n)
     }
+    // Which step is being filmed, for the CLI and the job's progress
+    const total = opts.steps ? opts.steps[1] : script.steps.length
+    v.progress = step => progress({ stage: 'recording', step, steps: total })
     // Spanish names for the helpers of JavaScript scripts
     Object.assign(v, { ir: v.goto, titulo: v.title, leyenda: (h, o) => v.say(h, o && typeof o === 'object' && 'dice' in o ? { ...o, speak: o.dice } : o),
       clic: v.click, escribir: v.type, resaltar: v.highlight, acercar: v.zoom, ocultar: v.blur, bajarHasta: v.scrollTo, fueraDeCamara: v.offCamera, subir: v.upload })

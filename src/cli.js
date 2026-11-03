@@ -14,7 +14,7 @@ import { jsonSchema } from './script/schema.js'
 import { checkScript, markdownReport, textReport, writeFixes } from './repair.js'
 import { listSettings, setSetting, unsetSetting } from './settings.js'
 import { clearSecrets, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret } from './secrets.js'
-import { log, openPath, UserError } from './util.js'
+import { log, openPath, setStatus, UserError } from './util.js'
 import { listVoices, narrate, recordSamples, SAMPLES_DIR, SAMPLES_URL } from './voice/index.js'
 
 const HELP = `tourwright — scripts into narrated videos
@@ -119,6 +119,26 @@ steps:
   - say: null
 `
 
+// A render's progress on stderr: a line that updates itself in a terminal (stage, step, time so far), one
+// line per stage elsewhere (CI logs, pipes)
+const progressLine = () => {
+  const started = Date.now()
+  const live = process.stderr.isTTY && process.env.TOURWRIGHT_LOG_FORMAT !== 'json'
+  let stage = ''
+  return {
+    onProgress: p => {
+      if (!live) {
+        if (p.stage !== stage) log.info(`${p.stage}…`)
+        stage = p.stage
+        return
+      }
+      const s = Math.round((Date.now() - started) / 1000)
+      setStatus(`[tourwright] ${p.stage}${p.step ? ` · step ${p.step}/${p.steps}` : ''} · ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`)
+    },
+    done: () => live && setStatus(''),
+  }
+}
+
 export const doctor = async (config = loadConfig()) => {
   const checks = []
   const add = (name, ok, detail) => checks.push({ name, ok: Boolean(ok), detail })
@@ -217,6 +237,7 @@ export const main = async argv => {
     case 'render': {
       if (!positionals[0]) throw new UserError('usage: tourwright render <script>')
       const loaded = await loadFile(positionals[0], { vars })
+      const progress = progressLine()
       const result = await render(loaded, {
         out: values.out,
         voice: values.voice,
@@ -229,8 +250,8 @@ export const main = async argv => {
         height: values.height ? Number(values.height) : undefined,
         fresh: values.fresh,
         export: values.export?.split(',').map(e => e.trim()).filter(Boolean),
-        onProgress: p => log.info(`${p.stage}…`),
-      }, config)
+        onProgress: progress.onProgress,
+      }, config).finally(progress.done)
       if (values.json) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
       else if (result.dryRun) log.info(`dry run: script ran to the end in ${result.seconds} s`)
       else {

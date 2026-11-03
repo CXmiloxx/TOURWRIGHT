@@ -125,6 +125,16 @@ export const redact = text => {
 const LEVELS = { debug: 10, info: 20, warn: 30, error: 40, silent: 99 }
 const threshold = () => LEVELS[process.env.TOURWRIGHT_LOG_LEVEL ?? 'info'] ?? 20
 // Logs go to stderr so stdout stays clean for machine-readable output (JSON, MCP stdio).
+// A line at the bottom of the terminal that updates itself (a render's progress); log lines go above it.
+// '' ends it, keeping its last text on screen.
+let status = ''
+/** @param {string} text */
+export const setStatus = text => {
+  if (!text && status) process.stderr.write('\n')
+  else if (text) process.stderr.write(`\r\x1b[2K${text}`)
+  status = text
+}
+
 export const log = Object.fromEntries(
   Object.entries(LEVELS)
     .filter(([level]) => level !== 'silent')
@@ -136,7 +146,8 @@ export const log = Object.fromEntries(
         if (process.env.TOURWRIGHT_LOG_FORMAT === 'json') {
           process.stderr.write(`${JSON.stringify({ level, time: new Date().toISOString(), msg })}\n`)
         } else {
-          process.stderr.write(`[tourwright] ${level === 'info' ? '' : `${level}: `}${msg}\n`)
+          // Above the status line, which is drawn again below it
+          process.stderr.write(`${status ? '\r\x1b[2K' : ''}[tourwright] ${level === 'info' ? '' : `${level}: `}${msg}\n${status}`)
         }
       },
     ])
