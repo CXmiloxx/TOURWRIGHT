@@ -5,9 +5,9 @@ import { spawn } from 'node:child_process'
 import { existsSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { loadConfig } from './config.js'
-import { UserError } from './util.js'
 import { chaptersFrom, cutFilter, normalizeCuts, toFfmetadata, toOutput, toSrt, toVtt } from './timeline.js'
-import { polishFilter } from './voice/index.js'
+import { LOUDNESS, polishTone } from './voice/index.js'
+import { mapLimit, UserError } from './util.js'
 
 export const QUALITIES = {
   sd: { width: 854, height: 480, crf: '26', preset: 'medium' },
@@ -34,6 +34,39 @@ export const ffmpeg = (args, config = loadConfig()) =>
     child.on('error', reject)
     child.on('exit', code => (code === 0 ? resolve(undefined) : reject(new Error(`ffmpeg failed (${code}): ${stderr.trim()}`))))
   })
+
+// ffmpeg's report on stderr (loudnorm's measure is printed at info level)
+const ffmpegReport = (args, config) =>
+  new Promise((resolve, reject) => {
+    if (!config.ffmpeg) return reject(new Error('ffmpeg not found (install ffmpeg or set TOURWRIGHT_FFMPEG)'))
+    const child = spawn(config.ffmpeg, ['-hide_banner', '-nostats', ...args], { stdio: ['ignore', 'ignore', 'pipe'] })
+    let stderr = ''
+    child.stderr.on('data', c => (stderr = (stderr + c).slice(-8000)))
+    child.on('error', reject)
+    child.on('exit', code => (code === 0 ? resolve(stderr) : reject(new Error(`ffmpeg failed (${code}): ${stderr.trim().slice(-600)}`))))
+  })
+
+/**
+ * One sentence of narration with its tone and at the target loudness: measured first, then a linear gain, the way
+ * a sound engineer levels each take. Every sentence ends up as loud as the others. A sentence too short to
+ * measure keeps the tone and a one-pass level.
+ */
+export const levelClip = async (file, out, tone, config = loadConfig()) => {
+  const target = `I=${LOUDNESS.I}:TP=${LOUDNESS.TP}:LRA=${LOUDNESS.LRA}`
+  const chain = f => [tone, f, 'aresample=48000', 'aformat=channel_layouts=stereo'].filter(Boolean).join(',')
+  let pass2 = `loudnorm=${target}`
+  try {
+    const report = await ffmpegReport(['-i', file, '-af', [tone, `loudnorm=${target}:print_format=json`].filter(Boolean).join(','), '-f', 'null', '-'], config)
+    const m = JSON.parse(report.slice(report.lastIndexOf('{'), report.lastIndexOf('}') + 1))
+    if (Number.isFinite(Number(m.input_i)) && Number(m.input_i) > -70) {
+      pass2 = `loudnorm=${target}:measured_I=${m.input_i}:measured_TP=${m.input_tp}:measured_LRA=${m.input_lra}:measured_thresh=${m.input_thresh}:offset=${m.target_offset}:linear=true`
+    }
+  } catch {
+    // Unmeasurable (silence, a click): the one-pass level is enough
+  }
+  await ffmpeg(['-i', file, '-af', chain(pass2), '-c:a', 'pcm_s16le', out], config)
+  return out
+}
 
 const LANGUAGES = { es: 'spa', en: 'eng', pt: 'por', fr: 'fra', de: 'deu', it: 'ita' }
 
@@ -81,12 +114,19 @@ export const compose = async (p, config = loadConfig()) => {
   const voices = (p.narrations ?? []).filter(n => existsSync(n.file))
   let voiceBus = null
   if (voices.length) {
+    // Each sentence gets its tone and is leveled on its own (a few at a time); `none` leaves them as the engine made them
+    const preset = p.polish ?? config.tts.polish
+    const tone = polishTone(config, p.polish)
+    const leveled = !preset || preset !== 'none'
+    const files = leveled
+      ? await mapLimit(voices, 4, (n, i) => levelClip(n.file, join(p.workDir, `voice-${i}.wav`), tone, config))
+      : voices.map(n => n.file)
     voices.forEach((n, i) => {
-      inputs.push('-i', n.file)
+      inputs.push('-i', files[i])
       filters.push(`[${next++}:a]aresample=48000,aformat=channel_layouts=stereo,adelay=${Math.round(at(n.at) * 1000)}:all=1[a${i}]`)
     })
-    const polish = polishFilter(config, p.polish)
-    filters.push(`${voices.map((_, i) => `[a${i}]`).join('')}amix=inputs=${voices.length}:normalize=0:duration=longest${polish ? `,${polish}` : ''},aresample=48000,apad[voice]`)
+    // The sentences are already level: only a limiter on the sum, for the rare overlap
+    filters.push(`${voices.map((_, i) => `[a${i}]`).join('')}amix=inputs=${voices.length}:normalize=0:duration=longest${leveled ? ',alimiter=limit=0.84:attack=5:release=50:level=false' : ''},aresample=48000,apad[voice]`)
     voiceBus = '[voice]'
   }
   if (p.music?.file) {

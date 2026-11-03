@@ -482,12 +482,16 @@ music: { file: music.mp3, volume: 0.12, fadeIn: 2, fadeOut: 3 }   # looped, lowe
 
 | `polish` | Sound |
 |---|---|
-| `default` | Warmth, presence, gentle compression, a small room, loudness at -16 LUFS |
+| `default` | Clear and close: warmth, presence where the consonants are, softer "s", gentle compression, no room |
 | `clean` | The voice as the engine made it, at even loudness |
-| `warm` | Closer and rounder, no room |
+| `warm` | Closer and rounder |
 | `radio` | Telephone band, compressed |
-| `podcast` | Dense and upfront |
-| `none` | No processing |
+| `podcast` | Dense and upfront, with a hint of room |
+| `none` | No processing, not even the leveling |
+
+Every preset but `none` levels each sentence on its own: it is measured, then brought to -16 LUFS (the web and
+podcast standard, peaks under -1.5 dB) with a plain gain, so every sentence is as loud as the others and nothing
+swells in the pauses.
 
 Sound effects (`sound`, clicks, typing) are mixed apart from the voice: they are not processed and do not
 lower the music.

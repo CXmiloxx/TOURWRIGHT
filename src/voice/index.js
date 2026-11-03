@@ -57,35 +57,48 @@ export const ALIASES = {
   ryan: 'piper:en_US-ryan-high',
 }
 
-// Warmth in the lows, a bit of presence, gentle compression, a small room and loudness normalized to
-// -16 LUFS (web/podcast standard): removes the dry edge of synthetic speech.
+// The sound of each preset, without the loudness: compose() levels every sentence to the same loudness on its
+// own (two passes, linear gain), so no sentence comes out louder than the next and nothing pumps in the silences.
+// default: clear and close, the way people expect a narrator: warmth in the lows, presence where consonants live,
+// softer "s", gentle compression. No room: an echo blurs the words.
 export const POLISH_DEFAULT =
-  'highpass=f=80,equalizer=f=180:t=q:w=1:g=2,equalizer=f=4000:t=q:w=1.5:g=1.5,' +
-  'acompressor=threshold=-20dB:ratio=2.5:attack=10:release=150,' +
-  'aecho=0.85:0.6:35|60:0.12|0.07,loudnorm=I=-16:TP=-1.5:LRA=11'
+  'highpass=f=80,equalizer=f=180:t=q:w=1:g=1.5,equalizer=f=3200:t=q:w=1.2:g=2.5,deesser=i=0.35,' +
+  'acompressor=threshold=-20dB:ratio=2.5:attack=8:release=140'
 
 // Named sounds for the narration. Scripts pick one by name; only the server config takes a raw filter.
 export const POLISH_PRESETS = {
   default: POLISH_DEFAULT,
   // Just even loudness: the voice as the engine made it
-  clean: 'highpass=f=60,loudnorm=I=-16:TP=-1.5:LRA=11',
-  // Closer and rounder, no room
+  clean: 'highpass=f=60',
+  // Closer and rounder
   warm: 'highpass=f=70,equalizer=f=150:t=q:w=1:g=3.5,equalizer=f=3000:t=q:w=2:g=-1,equalizer=f=8000:t=q:w=2:g=-2,' +
-    'acompressor=threshold=-22dB:ratio=3:attack=10:release=200,loudnorm=I=-16:TP=-1.5:LRA=9',
+    'acompressor=threshold=-22dB:ratio=3:attack=10:release=200',
   // Telephone / walkie-talkie band
-  radio: 'highpass=f=300,lowpass=f=3400,equalizer=f=1800:t=q:w=1:g=4,acompressor=threshold=-25dB:ratio=6:attack=5:release=100,' +
-    'loudnorm=I=-16:TP=-1.5:LRA=7',
-  // Dense and upfront, like a podcast host
-  podcast: 'highpass=f=80,equalizer=f=200:t=q:w=1:g=2,equalizer=f=5000:t=q:w=1.5:g=2.5,' +
-    'acompressor=threshold=-24dB:ratio=4:attack=5:release=120:makeup=2,aecho=0.9:0.7:20:0.05,loudnorm=I=-16:TP=-1.5:LRA=7',
+  radio: 'highpass=f=300,lowpass=f=3400,equalizer=f=1800:t=q:w=1:g=4,acompressor=threshold=-25dB:ratio=6:attack=5:release=100',
+  // Dense and upfront, like a podcast host, with a hint of room
+  podcast: 'highpass=f=80,equalizer=f=200:t=q:w=1:g=2,equalizer=f=5000:t=q:w=1.5:g=2.5,deesser=i=0.4,' +
+    'acompressor=threshold=-24dB:ratio=4:attack=5:release=120:makeup=2,aecho=0.9:0.7:20:0.05',
   none: null,
 }
 
-// The script's preset wins over the server's; the server may also set a raw ffmpeg filter.
-export const polishFilter = (config = loadConfig(), preset) => {
+// Where every sentence lands: -16 LUFS (web and podcast standard), peaks under -1.5 dB
+export const LOUDNESS = { I: -16, TP: -1.5, LRA: 7 }
+const LOUDNORM = `loudnorm=I=${LOUDNESS.I}:TP=${LOUDNESS.TP}:LRA=${LOUDNESS.LRA}`
+
+/** The tone of a preset only (or the server's raw filter, as it is); null for none */
+export const polishTone = (config = loadConfig(), preset) => {
   const p = preset ?? config.tts.polish
   if (!p || p === 'none') return null
   return Object.hasOwn(POLISH_PRESETS, p) ? POLISH_PRESETS[p] : p
+}
+
+// The script's preset wins over the server's; the server may also set a raw ffmpeg filter.
+// One filter for a single clip (voice samples): the tone, then the loudness. A raw server filter goes as it is.
+export const polishFilter = (config = loadConfig(), preset) => {
+  const p = preset ?? config.tts.polish
+  const tone = polishTone(config, preset)
+  if (!tone) return null
+  return Object.hasOwn(POLISH_PRESETS, p) ? `${tone},${LOUDNORM}` : tone
 }
 
 const TRIM =
