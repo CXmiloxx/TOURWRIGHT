@@ -639,22 +639,30 @@ tourwright render video.yaml --step 7-9
 
 The preview is saved as `<name>-step7.mp4`, next to the full video, which it never replaces.
 
-### Writing a script by doing the tour
+### From doing the tour to the video, in one command
 
 ```bash
 tourwright record https://app.example.com/login --out tour.yaml
 ```
 
-A browser window opens: do the tour by hand and close it. No programming: each click, field and choice becomes
+A browser window opens: do the tour by hand and close it. You get the script **and the narrated video**, with
+nothing to write: the user and password you typed are saved as secrets (encrypted on this machine, never in the
+script), the AI rewrites the narration when one is set up (below), and the video has the studio look: the app
+in a window in its own main color, a gentle zoom on each field, a pulse on the button that saves or sends and a
+closing card. `--no-video` stops after the script, to edit it first; `--plain` leaves out the studio look. A
+login with a 2FA code needs the authenticator key once (`tourwright secret set FACTURERO_TOTP`): the code you typed
+is no longer valid.
+
+No programming: each click, field and choice becomes
 a step with a stable target (role and name, label, placeholder — what a screen reader says about it) and a
 first narration that knows where the element is:
 
 ```yaml
   - chapter: Iniciar sesión
   - focus: { target: { placeholder: Tu usuario o tu correo }, say: "Escribe tu {usuario o tu correo}." }
-  - type: { target: { placeholder: Tu usuario o tu correo }, text: "${secret:ACME_USER}" }
+  - type: { target: { placeholder: Tu usuario o tu correo }, text: "${secret:FACTURERO_USER}" }
   - focus: { target: { label: Código de verificación }, say: "Escribe el {código} de tu aplicación de autenticación." }
-  - type: { target: { label: Código de verificación }, text: "${totp:ACME_TOTP}" }
+  - type: { target: { label: Código de verificación }, text: "${totp:FACTURERO_TOTP}" }
   - chapter: Clientes
   - focus: { target: { role: link, name: Facturas }, say: "Abre {Facturas} en el menú.", click: true }
   - focus: { target: { placeholder: Documento o celular }, say: "Para buscar, escribe en {documento o celular}." }

@@ -50,8 +50,12 @@ Usage:
       --login setup|camera                    the draft logs in off camera (setup, default) or on camera
       --fresh                                 log in again instead of reusing the saved session
       --json                                  the report as JSON on stdout
-  tourwright record <url> [--out f.yaml]      do the tour by hand in a browser window: each click and field
-                                              becomes a step with a first narration (--language es|en)
+  tourwright record <url> [--out f.yaml]      do the tour by hand in a browser window, close it, and get the
+                                              script and the narrated video: what you typed in the login is
+                                              saved as secrets, the AI writes the narration when one is set up
+      --no-video                              only the script, to edit before rendering
+      --plain                                 without the studio look (window frame, zoom, closing card)
+      --language es|en                        language of the narration
   tourwright validate <script> [--var n=v]    check a script without running it (and its secrets)
   tourwright guide <script> [--out d] [--open] the script as a step-by-step guide with screenshots: one HTML file
                                               to send or print as PDF, and Markdown with its images
@@ -200,6 +204,8 @@ export const main = async argv => {
       voices: { type: 'string' },
       'no-edge': { type: 'boolean' },
       'no-chromium': { type: 'boolean' },
+      'no-video': { type: 'boolean' },
+      plain: { type: 'boolean' },
       'voice-cache': { type: 'boolean' },
       pocket: { type: 'boolean' },
       whisper: { type: 'boolean' },
@@ -447,11 +453,11 @@ export const main = async argv => {
       return
     }
     case 'record': {
-      if (!positionals[0]) throw new UserError('usage: tourwright record <url> [--out script.yaml] [--language es|en]')
+      if (!positionals[0]) throw new UserError('usage: tourwright record <url> [--out script.yaml] [--language es|en] [--no-video] [--plain]')
       const { record } = await import('./record.js')
       const out = values.out ?? 'recorded.yaml'
       if (existsSync(out) && !values.yes) throw new UserError(`${out} already exists: choose another --out (or --yes to replace it)`)
-      await record(positionals[0], { out, language: values.language ?? 'es' }, config)
+      await record(positionals[0], { out, language: values.language ?? 'es', video: !values['no-video'], studio: !values.plain }, config)
       return
     }
     case 'guide': {

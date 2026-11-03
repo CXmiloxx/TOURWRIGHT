@@ -49,3 +49,29 @@ test('the narration says where the element is, and logins keep nothing personal'
   const typed = steps.filter(s => s.type).map(s => s.type.text)
   assert.deepEqual(typed, ['${secret:APP_USER}', '${totp:APP_TOTP}', 'PEDRO'])
 })
+
+test('the studio look: zoom on fields, a pulse on the button that sends, the theme and a closing card', async () => {
+  const { stepsFrom, recordedScript, outroStep, studioTheme, secretsTyped } = await import('../src/record.js')
+  const events = [
+    { action: 'goto', url: 'https://app.acme.test/login' },
+    { action: 'look', accent: '#2563eb' },
+    { action: 'type', target: { label: 'Usuario' }, text: 'ana@acme.test', where: 'user', screen: 'Ingresar' },
+    { action: 'type', target: { label: 'Contraseña' }, text: 's3cret', password: true, where: 'password', screen: 'Ingresar' },
+    { action: 'click', target: { role: 'button', name: 'Ingresar' }, where: 'submit', screen: 'Ingresar' },
+  ]
+  const steps = stepsFrom(events, { secret: 'ACME', studio: true })
+  const focus = steps.filter(s => s.focus).map(s => s.focus)
+  assert.deepEqual(focus.map(f => f.zoom), [1.3, 1.3, undefined])
+  assert.equal(focus[2].pulse, true)
+  assert.ok(!steps.some(s => s.look), 'the color is not a step')
+  // Without the studio look nothing changes
+  assert.ok(stepsFrom(events, { secret: 'ACME' }).every(s => !s.focus?.zoom && !s.focus?.pulse))
+  assert.deepEqual(secretsTyped(events, 'ACME'), { ACME_USER: 'ana@acme.test', ACME_PASSWORD: 's3cret' })
+  const yaml = recordedScript({ title: 'Acme', language: 'es', url: 'https://app.acme.test/login', steps: [...steps, outroStep('Acme')], theme: studioTheme('#2563eb'), audio: { clicks: true } })
+  assert.match(yaml, /^theme: \{ frame: window, accent: "#2563eb", titleBackground: aurora \}$/m)
+  assert.match(yaml, /^audio: \{ clicks: true \}$/m)
+  assert.match(yaml, /title: \{ text: ¡Listo!, subtitle: Ya sabes usar Acme, animation: zoom \}/)
+  assert.ok(!yaml.includes('s3cret') && !yaml.includes('ana@acme.test'), 'what was typed in the login stays out of the script')
+  const { fromData, parseText } = await import('../src/script/load.js')
+  assert.ok(fromData(parseText(yaml)).script.theme.frame === 'window')
+})

@@ -106,7 +106,7 @@ npm install -g tourwright
 tourwright install                    # ffmpeg, Piper + voices, edge-tts, Chromium (no root)
 tourwright install --plan             # only show what it would use from this PC and what it would download
 tourwright config set quality fullhd  # your own defaults: quality, voice, fps… (tourwright config lists them)
-tourwright record https://app.example.com --out tour.yaml   # do the tour by hand: it writes the script
+tourwright record https://app.example.com --out tour.yaml   # do the tour by hand: you get the script and the video
 tourwright guide tour.yaml --open     # the same tour as a step-by-step guide with screenshots (HTML, PDF, Markdown)
 tourwright narrate tour.yaml --write  # your AI (Claude, OpenAI, Ollama) rewrites the narration from the screens
 tourwright check videos/*.yaml        # which videos broke after a deploy, at which step, and the fix

@@ -68,6 +68,24 @@ export const LISTEN = () => {
     delete event.el
     window.__twRecord?.({ ...event, where: el ? whereOf(el) : undefined, screen: screen() })
   }
+  // The app's own main color, for the video's accent: the first strongly colored button (plain or gradient)
+  const accentOf = () => {
+    for (const b of document.querySelectorAll('button, [role=button], input[type=submit], a')) {
+      const box = b.getBoundingClientRect()
+      if (box.width < 40 || box.height < 24) continue
+      const style = getComputedStyle(b)
+      for (const m of `${style.backgroundColor} ${style.backgroundImage}`.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/g)) {
+        if (m[4] !== undefined && Number(m[4]) < 0.6) continue
+        const rgb = [Number(m[1]), Number(m[2]), Number(m[3])]
+        if (Math.max(...rgb) - Math.min(...rgb) > 70 && Math.max(...rgb) > 90) return `#${rgb.map(x => x.toString(16).padStart(2, '0')).join('')}`
+      }
+    }
+    return null
+  }
+  window.addEventListener('load', () => {
+    const accent = accentOf()
+    if (accent) window.__twRecord?.({ action: 'look', accent })
+  })
   document.addEventListener('click', e => {
     const el = /** @type {Element} */ (e.target)
     if (!(el instanceof Element)) return
@@ -126,6 +144,7 @@ const WORDS = {
     upload: n => `Sube el archivo en {${n.toLowerCase()}}.`,
     screen: s => `Esta es la pantalla de ${s}.`,
     intro: t => `Así se usa ${t}.`,
+    outro: t => ({ text: '¡Listo!', subtitle: `Ya sabes usar ${t}` }),
   },
   en: {
     click: {
@@ -148,6 +167,7 @@ const WORDS = {
     upload: n => `Upload the file in {${n.toLowerCase()}}.`,
     screen: s => `This is the ${s} screen.`,
     intro: t => `This is how ${t} works.`,
+    outro: t => ({ text: 'All set!', subtitle: `Now you know how to use ${t}` }),
   },
 }
 
@@ -155,17 +175,20 @@ const nameOf = t => t.name ?? t.label ?? t.placeholder ?? t.text ?? null
 
 /**
  * The steps a recording becomes: a chapter per screen, a focus with a first narration before each action, the
- * field values typed, passwords as secrets. Typing in a field again replaces the earlier value.
+ * field values typed, passwords as secrets. Typing in a field again replaces the earlier value. `studio`: the
+ * camera pushes in on each field and the button that saves or sends pulses.
  * @param {{ action: string, target?: any, text?: string, password?: boolean, value?: string, key?: string, files?: string[], url?: string, where?: string, screen?: string }[]} events
  */
-export const stepsFrom = (events, { language = 'es', secret = 'APP' } = {}) => {
+export const stepsFrom = (events, { language = 'es', secret = 'APP', studio = false } = {}) => {
   const words = WORDS[language === 'en' ? 'en' : 'es']
   const steps = []
   let last = null
   // The last field typed in, until something else is done
   let typed = null
   let screen = null
+  const zoom = studio ? { zoom: 1.3 } : {}
   for (const e of events) {
+    if (e.action === 'look') continue
     if (e.action === 'goto') {
       steps.push({ goto: e.url })
       last = null
@@ -198,7 +221,7 @@ export const stepsFrom = (events, { language = 'es', secret = 'APP' } = {}) => {
     if (e.action === 'type' && sameField(typed) && typed.text === value) continue
     if (e.action === 'type') {
       const how = words.type[e.password ? 'password' : e.where] ?? words.type.field
-      if (name) steps.push({ focus: { target: e.target, say: how(name) } })
+      if (name) steps.push({ focus: { target: e.target, say: how(name), ...zoom } })
       last = { type: { target: e.target, text: value } }
       typed = last.type
       steps.push(last)
@@ -207,15 +230,16 @@ export const stepsFrom = (events, { language = 'es', secret = 'APP' } = {}) => {
     typed = null
     if (e.action === 'click') {
       const kind = e.where && e.where !== 'other' ? e.where : e.target.role === 'link' ? 'link' : 'other'
-      steps.push(name ? { focus: { target: e.target, say: (words.click[kind] ?? words.click.other)(name), click: true } } : { click: e.target })
+      const pulse = studio && (kind === 'save' || kind === 'submit') ? { pulse: true } : {}
+      steps.push(name ? { focus: { target: e.target, say: (words.click[kind] ?? words.click.other)(name), ...pulse, click: true } } : { click: e.target })
     } else if (e.action === 'select') {
-      if (name) steps.push({ focus: { target: e.target, say: words.select(name) } })
+      if (name) steps.push({ focus: { target: e.target, say: words.select(name), ...zoom } })
       steps.push({ select: { target: e.target, value: e.value } })
     } else if (e.action === 'check' || e.action === 'uncheck') {
       if (name && e.action === 'check') steps.push({ focus: { target: e.target, say: words.check(name) } })
       steps.push({ [e.action]: e.target })
     } else if (e.action === 'upload') {
-      if (name) steps.push({ focus: { target: e.target, say: words.upload(name) } })
+      if (name) steps.push({ focus: { target: e.target, say: words.upload(name), ...zoom } })
       steps.push({ upload: { target: e.target, files: e.files } })
     }
     last = null
@@ -226,14 +250,22 @@ export const stepsFrom = (events, { language = 'es', secret = 'APP' } = {}) => {
 /** The title card that opens a recorded video */
 export const introStep = (title, language = 'es') => ({ title: { text: title, say: WORDS[language === 'en' ? 'en' : 'es'].intro(title) } })
 
+/** The card that closes it */
+export const outroStep = (title, language = 'es') => ({ title: { ...WORDS[language === 'en' ? 'en' : 'es'].outro(title), animation: 'zoom' } })
+
+/** The studio look: the app in a window, in its own main color */
+export const studioTheme = accent => ({ frame: 'window', ...(accent ? { accent } : {}), titleBackground: 'aurora' })
+
 /** The script as YAML: one step per line, like the ones `explore` writes */
-export const recordedScript = ({ title, language, url, steps }) => {
+export const recordedScript = ({ title, language, url, steps, theme = undefined, audio = undefined, voice = undefined }) => {
   const flow = v => YAML.stringify(v, { collectionStyle: 'flow', lineWidth: 0 }).trim()
-  const head = YAML.stringify({ title, language, voice: undefined }, { lineWidth: 0 }).trim()
+  const head = YAML.stringify({ title, language, voice }, { lineWidth: 0 }).trim()
   return [
     '# Recorded with `tourwright record`: each action you did, with a first narration to rewrite in your own words.',
     `# Started at ${url}. Check it fast with: tourwright render <this file> --dry-run`,
     head,
+    ...(theme ? [`theme: ${flow(theme)}`] : []),
+    ...(audio ? [`audio: ${flow(audio)}`] : []),
     'steps:',
     ...steps.map(s => `  - ${Object.keys(s)[0]}: ${flow(Object.values(s)[0])}`),
     '  - say: null',
@@ -242,15 +274,22 @@ export const recordedScript = ({ title, language, url, steps }) => {
 }
 
 /**
- * Opens the browser and records until its window is closed.
+ * Opens the browser and records until its window is closed, then writes the script and, unless `video` is
+ * false, makes the narrated video at once: what was typed in the login is saved as secrets (encrypted on this
+ * machine), the narration is rewritten by the AI when one is set up, and the video gets the studio look.
  * @param {string} url
- * @param {{ out: string, language?: string, width?: number, height?: number }} options
+ * @param {{ out: string, language?: string, width?: number, height?: number, video?: boolean, studio?: boolean }} options
  */
-export const record = async (url, { out, language = 'es', width = 1280, height = 720 }, config) => {
+export const record = async (url, { out, language = 'es', width = 1280, height = 720, video = true, studio = true }, config) => {
   const browser = await launch({ headless: false, display: null, width, height, locale: language === 'en' ? 'en-US' : 'es-CO' }, config)
   const context = await browser.newContext({ viewport: { width, height } })
   const events = [{ action: 'goto', url }]
+  let accent = null
   await context.exposeBinding('__twRecord', (_, event) => {
+    if (event.action === 'look') {
+      accent ??= event.accent
+      return
+    }
     events.push(event)
     const what = event.target ? asTarget(event.target) : (event.key ?? '')
     log.info(`recorded: ${event.action} ${what}${event.action === 'type' && !event.password ? ` "${event.text}"` : ''}`)
@@ -275,10 +314,59 @@ export const record = async (url, { out, language = 'es', width = 1280, height =
   await browser.close().catch(() => {})
   const host = new URL(url).hostname
   const title = pageTitle || host
-  const recorded = stepsFrom(events, { language, secret: secretPrefix(host) })
-  // The title card goes right after the first page opens
-  const steps = [recorded[0], introStep(title, language), ...recorded.slice(1)]
-  writeFileSync(out, recordedScript({ title, language, url, steps }))
-  log.info(`${out}: ${steps.length} steps. Rewrite the narration, then: tourwright render ${out} --dry-run`)
-  return { out, steps: steps.length }
+  const prefix = secretPrefix(host)
+  const recorded = stepsFrom(events, { language, secret: prefix, studio })
+  // The title card goes right after the first page opens; with the studio look a closing card ends it
+  const steps = [recorded[0], introStep(title, language), ...recorded.slice(1), ...(studio ? [outroStep(title, language)] : [])]
+  // No voice in the script: each render picks the most natural one where it runs (autoVoice)
+  writeFileSync(out, recordedScript({ title, language, url, steps, theme: studio ? studioTheme(accent) : undefined, audio: studio ? { clicks: true } : undefined }))
+  log.info(`${out}: ${steps.length} steps`)
+  if (!video) {
+    log.info(`rewrite the narration if you like, then: tourwright render ${out}`)
+    return { out, steps: steps.length }
+  }
+  return { out, steps: steps.length, ...(await finish(out, { events, prefix }, config)) }
+}
+
+// What the person typed in the login is what the video types: saved as secrets, never in the script
+export const secretsTyped = (events, prefix) => {
+  const found = {}
+  for (const e of events) {
+    if (e.action !== 'type' || !e.text) continue
+    if (e.password) found[`${prefix}_PASSWORD`] = e.text
+    else if (e.where === 'user') found[`${prefix}_USER`] = e.text
+  }
+  return found
+}
+
+const finish = async (out, { events, prefix }, config) => {
+  const { getSecret, setSecret } = await import('./secrets.js')
+  for (const [name, value] of Object.entries(secretsTyped(events, prefix))) {
+    setSecret(config, name, value)
+    log.info(`saved ${name} (encrypted on this machine): the video logs in with it`)
+  }
+  // A one-time code cannot be typed again: the video needs the key the authenticator app was set up with
+  if (events.some(e => e.where === 'otp') && !getSecret(config, `${prefix}_TOTP`)) {
+    log.warn(`the login asks for a 2FA code: save the key of your authenticator app once with
+    tourwright secret set ${prefix}_TOTP
+  and then make the video with: tourwright render ${out}`)
+    return { video: null }
+  }
+  const { loadFile } = await import('./script/load.js')
+  if (config.ai?.provider) {
+    try {
+      const { proposeNarration, writeNarration } = await import('./narrate.js')
+      log.info(`the AI (${config.ai.provider}) is rewriting the narration from what each screen shows…`)
+      const changed = writeNarration(out, await proposeNarration(await loadFile(out), config))
+      log.info(`narration: ${changed?.applied ?? 0} lines rewritten in ${out}`)
+    } catch (error) {
+      log.warn(`narration kept as recorded: ${error.message}`)
+    }
+  } else log.info('tip: tourwright config set ai anthropic|openai|ollama, and the AI writes the narration next time')
+  const { outputBase, render } = await import('./render/index.js')
+  const loaded = await loadFile(out)
+  log.info('making the video…')
+  const result = await render(loaded, { out: outputBase(undefined, loaded.name) }, config)
+  log.info(`video: ${result.paths?.video ?? '(see the output folder)'}`)
+  return { video: result.paths?.video ?? null }
 }
