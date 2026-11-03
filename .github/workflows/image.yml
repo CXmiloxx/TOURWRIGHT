@@ -1,0 +1,44 @@
+# The Docker image (ghcr.io/cxmiloxx/tourwright), for linux/amd64 and linux/arm64.
+#   push to main     → :latest
+#   tag vX.Y.Z       → :X.Y.Z, :X.Y and :X, so a deploy can pin a release (`:2` takes fixes, never a major change)
+#   run it by hand   → those same tags for a version already released (Actions → image → Run workflow)
+name: image
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release to tag the image with, built from the current main (e.g. 2.1.0)
+        required: true
+concurrency:
+  group: image-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    permissions: { contents: read, packages: write }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          # Image names must be lowercase, whatever the case of the repository's name
+          images: ghcr.io/${{ github.repository }}
+          flavor: latest=false
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+            type=semver,pattern={{version}},value=${{ inputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.version }}
+            type=semver,pattern={{major}},value=${{ inputs.version }}
+      - uses: docker/build-push-action@v7
+        with:
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

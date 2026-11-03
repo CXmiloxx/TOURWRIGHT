@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/cxmiloxx/tourwright:latest
+          image: ghcr.io/cxmiloxx/tourwright:2
           args: ["serve"]
           envFrom: [{ secretRef: { name: tourwright } }]
           ports: [{ containerPort: 4700 }]
@@ -59,7 +59,7 @@ spec:
       terminationGracePeriodSeconds: 1800
       containers:
         - name: worker
-          image: ghcr.io/cxmiloxx/tourwright:latest
+          image: ghcr.io/cxmiloxx/tourwright:2
           args: ["worker"]
           envFrom: [{ secretRef: { name: tourwright } }]
           env: [{ name: TOURWRIGHT_CONCURRENCY, value: "1" }, { name: TOURWRIGHT_FFMPEG_THREADS, value: "2" }]
