@@ -12,9 +12,11 @@ on:
       version:
         description: Release to tag the image with, built from the current main (e.g. 2.1.0)
         required: true
+# One group per kind of build: a manual run for a release never cancels the `latest` of a push to main, nor the
+# other way round. Only a newer push to main replaces an older `latest` still building
 concurrency:
-  group: image-${{ github.ref }}
-  cancel-in-progress: true
+  group: image-${{ github.event_name }}-${{ github.ref }}-${{ inputs.version }}
+  cancel-in-progress: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 jobs:
   image:
     runs-on: ubuntu-latest
