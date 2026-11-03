@@ -9,8 +9,8 @@
 #   tourwright render examples/app.yaml --open
 title: Facturero en un minuto
 language: es
-# A neural voice (Microsoft Edge, needs internet). Offline and as natural: pocket:lola after tourwright install --pocket
-voice: salome
+# No voice: each machine uses its most natural one for Spanish (Salomé with internet, Pocket TTS's Lola once
+# installed, else Piper), so the same script renders anywhere, CI included
 baseUrl: http://127.0.0.1:4800
 # Emails, phones and ID numbers on screen become invented ones (the same real value, the same invented one)
 mask:
