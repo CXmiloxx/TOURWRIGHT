@@ -36,10 +36,12 @@ No MCP? Use the HTTP API ([API.md](API.md)) or the CLI (`tourwright render scrip
 |---|---|
 | `tourwright_guide` | The full script format. Call it first |
 | `tourwright_voices` | Voices that work on the server |
-| `tourwright_validate` | Check a script; returns precise errors (`steps.3.click: …`) |
+| `tourwright_validate` | Check a script's structure, offline; returns precise errors (`steps.3.click: …`) |
 | `tourwright_check` | Run a script fast against the real site: every broken step, the targets its page offers, the likely fix and the fixed script (local server only) |
 | `tourwright_render` | Render; waits by default and returns links, local paths, duration, chapters, captions |
 | `tourwright_job` | Status of a job started with `wait: false` |
+| `tourwright_jobs` | Jobs on the server, newest first, with the links of finished videos (filter by `status`) |
+| `tourwright_delete_job` | Delete a finished job and its files |
 | `tourwright_render_file` | Render a file from disk (only with `TOURWRIGHT_MCP_ALLOW_FILES=true`) |
 
 ## A good loop

@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os'
 import { z } from 'zod'
 import { openBlobs } from './jobs/blobs.js'
 import { linkSigner } from './jobs/links.js'
-import { createJob, resultWithLinks } from './jobs/service.js'
+import { createJob, deleteJobFiles, resultWithLinks } from './jobs/service.js'
 import { createBackend, publicJob } from './jobs/store.js'
 import { loadPlugins } from './plugins.js'
 import { applyFixes, checkScript } from './repair.js'
@@ -35,7 +35,12 @@ const remoteClient = (base, token) => {
     voices: () => call('GET', '/v1/voices'),
     validate: body => call('POST', '/v1/validate', body),
     create: body => call('POST', '/v1/jobs', body),
-    job: id => call('GET', `/v1/jobs/${id}`),
+    job: id => call('GET', `/v1/jobs/${encodeURIComponent(id)}`),
+    jobs: ({ status, limit }) => call('GET', `/v1/jobs?${new URLSearchParams({ limit: String(limit), ...(status ? { status } : {}) })}`),
+    remove: async id => {
+      await call('DELETE', `/v1/jobs/${encodeURIComponent(id)}`)
+      return { deleted: id }
+    },
   }
 }
 
@@ -64,6 +69,16 @@ const localClient = async config => {
       const job = await backend.store.get(id)
       if (!job) throw new UserError(`job ${id} not found`)
       return view(job)
+    },
+    jobs: async ({ status, limit }) => ({ jobs: await Promise.all((await backend.store.list({ limit, status })).map(view)) }),
+    // The same rule as the API: a job still queued or rendering is not deleted
+    remove: async id => {
+      const job = await backend.store.get(id)
+      if (!job) throw new UserError(`job ${id} not found`)
+      if (job.status === 'running' || job.status === 'queued') throw new UserError(`job ${id} is ${job.status}: wait until it ends`)
+      await deleteJobFiles(job, blobs)
+      await backend.store.remove(job.id)
+      return { deleted: id }
     },
   }
 }
@@ -105,7 +120,7 @@ export const startMcp = async config => {
 
   server.registerTool('tourwright_validate', {
     title: 'Validate a script',
-    description: 'Check a script without rendering it. Returns { ok } or the list of errors to fix.',
+    description: 'Check the structure of a script (fields, actions, variables) without opening any website: fast, offline. Returns { ok } or the list of errors to fix. To know whether its targets still exist on the live site, use tourwright_check.',
     inputSchema: { script: scriptInput, vars: varsInput },
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   }, safe(async ({ script, vars }) => text(await client.validate({ script, vars }))))
@@ -145,11 +160,28 @@ export const startMcp = async config => {
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   }, safe(async ({ id }) => text(await client.job(id))))
 
+  server.registerTool('tourwright_jobs', {
+    title: 'List jobs',
+    description: 'The render jobs on this server, newest first: id, status, progress and, for finished ones, the links to their videos. Use it to find a video rendered earlier or a job id to delete.',
+    inputSchema: {
+      status: z.enum(['queued', 'running', 'done', 'failed']).optional().describe('Only jobs with this status'),
+      limit: z.number().int().min(1).max(200).optional().describe('How many jobs at most (default 20)'),
+    },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  }, safe(async ({ status, limit = 20 }) => text(await client.jobs({ status, limit }))))
+
+  server.registerTool('tourwright_delete_job', {
+    title: 'Delete a job',
+    description: 'Delete a finished (done or failed) job and its files: the video, subtitles, poster and manifest. A job that is queued or rendering cannot be deleted.',
+    inputSchema: { id: z.string().describe('The job id, from tourwright_render or tourwright_jobs') },
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
+  }, safe(async ({ id }) => text(await client.remove(id))))
+
   // Runs a script as a dry run in this process: every broken step, the elements on its page and a proposed fix
   if (!remote) {
     server.registerTool('tourwright_check', {
       title: 'Check a script and propose fixes',
-      description: 'Run a script fast, without voice or video, against the real site. Returns every step that failed (the target it looked for, the page, the targets that page offers) and, when it can tell, the new target for it. For a YAML script given as text it also returns `fixed`: the same text with those targets replaced (comments kept). Use it after the site changed, then validate and render.',
+      description: 'Run a script fast, without voice or video, against the real site (validate only checks its structure). Returns every step that failed (the target it looked for, the page, the targets that page offers) and, when it can tell, the new target for it. For a YAML script given as text it also returns `fixed`: the same text with those targets replaced (comments kept). Use it after the site changed, then validate and render.',
       inputSchema: { script: scriptInput, vars: varsInput },
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     }, safe(async ({ script, vars }) => {

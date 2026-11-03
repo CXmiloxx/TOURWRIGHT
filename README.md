@@ -210,7 +210,8 @@ Any other MCP client (Claude Desktop, Cursor, VS Code…):
 { "mcpServers": { "tourwright": { "command": "tourwright", "args": ["mcp"] } } }
 ```
 
-Tools: `tourwright_guide`, `tourwright_voices`, `tourwright_validate`, `tourwright_render`, `tourwright_job` (and
+Tools: `tourwright_guide`, `tourwright_voices`, `tourwright_validate`, `tourwright_check`, `tourwright_render`, `tourwright_job`,
+`tourwright_jobs`, `tourwright_delete_job` (and
 `tourwright_render_file` with `TOURWRIGHT_MCP_ALLOW_FILES=true`). Point it at a remote API with `TOURWRIGHT_API_URL`
 and `TOURWRIGHT_API_TOKEN`. Details: [docs/AGENTS.md](docs/AGENTS.md).
 
