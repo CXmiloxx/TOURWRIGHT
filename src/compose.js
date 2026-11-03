@@ -6,6 +6,7 @@ import { existsSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { loadConfig } from './config.js'
 import { chaptersFrom, cutFilter, normalizeCuts, toFfmetadata, toOutput, toSrt, toVtt } from './timeline.js'
+import { frameFilter } from './render/frame.js'
 import { LOUDNESS, polishTone } from './voice/index.js'
 import { mapLimit, UserError } from './util.js'
 
@@ -90,6 +91,8 @@ const LANGUAGES = { es: 'spa', en: 'eng', pt: 'por', fr: 'fra', de: 'deu', it: '
  * @param {string} [p.language]   'es', 'en'…
  * @param {Record<string, any>} p.quality { crf, preset }
  * @param {string} p.workDir
+ * @param {{ background: string, mask: string, x: number, y: number, width: number, height: number } | null} [p.frame]
+ *                                the studio frame (render/frame.js): the recording goes inside its window
  */
 export const compose = async (p, config = loadConfig()) => {
   const cuts = normalizeCuts(p.cuts ?? [])
@@ -106,9 +109,14 @@ export const compose = async (p, config = loadConfig()) => {
   writeFileSync(metaFile, toFfmetadata(p.title, chapters))
 
   const inputs = ['-i', p.video]
-  const filters = [`[0:v]${cutFilter(cuts, p.fps)}[vout]`]
+  const filters = [`[0:v]${cutFilter(cuts, p.fps)}${p.frame ? '[cut]' : '[vout]'}`]
   const maps = ['-map', '[vout]']
   let next = 1
+  if (p.frame) {
+    inputs.push('-loop', '1', '-framerate', String(p.fps), '-i', p.frame.background, '-loop', '1', '-i', p.frame.mask)
+    filters.push(frameFilter(p.frame, next, next + 1))
+    next += 2
+  }
   // Three buses mixed at the end: the voice, the music (ducked under the voice) and sound effects
   const buses = []
   const voices = (p.narrations ?? []).filter(n => existsSync(n.file))

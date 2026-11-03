@@ -20,8 +20,9 @@ import { maskInPage } from './mask.js'
 import { clickWithEffect, reportFindings, reviewVideo, watchPage } from './review.js'
 import { markOffered, resolveTarget } from './targets.js'
 import { guideEntry, writeGuide } from '../guide.js'
+import { drawFrame } from './frame.js'
 import { resolveTheme, safePath, themeCss, titleHtml } from './theme.js'
-import { callout, camera, focusOff, focusOn, frame, hideTitle, setCaption, showTitle, spotlight } from './visuals.js'
+import { callout, camera, cameraOut, filePicker, focusOff, focusOn, frame, hideTitle, setCaption, showTitle, spotlight, tap } from './visuals.js'
 
 // A local script may point baseUrl at a folder or file next to it ("./site/"): pages without a server.
 // A scheme needs two letters at least, so Windows' "C:\\" is a path.
@@ -77,6 +78,11 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   const voiceSpec = opts.voice ?? script.voice ?? (dryRun ? config.tts.defaultVoice : await autoVoice(script.language, config))
   const voice = dryRun || voiceSpec === 'none' ? null : voiceSpec
   const mode = dryRun ? 'dry' : pickCapture(opts.capture ?? config.render.capture, config)
+  // A vertical video is filmed the way a phone shows the app: half as wide in CSS pixels at twice the density, so
+  // the app uses its own mobile layout, big and sharp. The frames still come out at width x height.
+  // (The virtual display of capture "screen" draws at 1x: there it stays as it is.)
+  const density = height > width && mode !== 'screen' ? 2 : 1
+  const pageSize = { width: Math.round(width / density), height: Math.round(height / density), scale: density }
   const work = opts.workDir
   const theme = resolveTheme(script.theme, config.theme, dir, { sandboxed })
   const audio = script.audio ?? {}
@@ -120,7 +126,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     const locale = script.language === 'en' ? 'en-US' : script.language ?? 'es-CO'
     browser = await launch({ headless: mode !== 'screen', display: display?.display, width, height, locale }, config)
     const common = {
-      ...(mode === 'screen' ? { viewport: null } : { viewport: { width, height }, deviceScaleFactor: 1 }),
+      ...(mode === 'screen' ? { viewport: null } : { viewport: { width: pageSize.width, height: pageSize.height }, deviceScaleFactor: pageSize.scale }),
       locale,
       timezoneId: opts.timezone ?? process.env.TZ ?? 'UTC',
       serviceWorkers: /** @type {'block'} */ ('block'),
@@ -203,7 +209,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       if (left > 0 && !dryRun) await page.waitForTimeout(left * 1000)
     }
 
-    const cursor = createCursor(page, { width, height, dryRun })
+    const cursor = createCursor(page, { width: pageSize.width, height: pageSize.height, dryRun })
     const moveTo = cursor.moveTo
     const center = locator => centerOf(page, locator, dryRun)
 
@@ -233,6 +239,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       await cursor.restore()
     }
 
+    // The camera stays close after a zoomed focus, until a step that needs the whole page (steps.js)
+    let cameraHeld = false
     const v = {
       page,
       context,
@@ -253,7 +261,9 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         await settle()
       },
       // look: { kicker, animation, background }; the theme's titleAnimation and titleBackground are the defaults
-      title: async (text, subtitle = '', ms = 3500, speak, prosody, look = {}) => {
+      // With a voice the card only holds a beat after it: the viewer has just heard what it says
+      title: async (text, subtitle = '', ms = undefined, speak = undefined, prosody = undefined, look = {}) => {
+        ms ??= speak ? 700 : 2500
         await waitVoice()
         await showTitle(page, titleHtml({ text, subtitle, kicker: look.kicker, animation: look.animation ?? theme.titleAnimation, background: look.background ?? theme.titleBackground, logo: theme.logo }))
         await page.waitForTimeout(150)
@@ -265,7 +275,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         }
         await wait(ms)
         await hideTitle(page)
-        await wait(600)
+        await wait(450)
       },
       // A chapter of the video starting here, with nothing on screen
       chapter: async name => {
@@ -373,12 +383,13 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         if (hold) await wait((await durationOf(path, config)) * 1000)
       },
       zoom: async (locator, ms = 2500, scale = 1.6) => {
+        await v.releaseCamera()
         locator = locator.first()
         await locator.scrollIntoViewIfNeeded()
         const b = await locator.boundingBox()
         if (!b) return
         // The element fits whole, and never less than a noticeable zoom
-        const e = Math.max(1.15, Math.min(scale, (width * 0.85) / b.width, (height * 0.7) / b.height))
+        const e = Math.max(1.15, Math.min(scale, (pageSize.width * 0.85) / b.width, (pageSize.height * 0.7) / b.height))
         await camera(locator, e)
         await wait(900 + ms)
         await camera(locator, 1)
@@ -386,8 +397,14 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       },
       focus: async (locator, options = {}) => {
         // The hold after the voice is short: a long silence before the next action loses the viewer
-        const { text, say, caption, step, zoom, pulse, click, ms = click ? 150 : 600, position, ...prosody } = options
+        const { text, say, caption, step, zoom: asked, pulse, click, ms = click ? 150 : 600, position, ...prosody } = options
         locator = locator.first()
+        // Never closer than the element fits whole, with a margin: a wide field on a phone is not cut by the camera
+        const size = asked && asked > 1 ? await locator.evaluate(el => { const r = el.getBoundingClientRect(); return { w: r.width, h: r.height } }).catch(() => null) : null
+        const fits = size ? Math.min((pageSize.width * 0.9) / Math.max(1, size.w), (pageSize.height * 0.6) / Math.max(1, size.h)) : 1
+        const zoom = asked && asked > 1 ? Math.min(asked, fits) : asked
+        // Under a gentle 8 %, a push in is not worth the movement
+        const zoomed = Boolean(zoom && zoom >= 1.08)
         await waitVoice()
         // "{Pay}" marks the word the focus lands on. Its time is the length of what is said before it
         // (synthesized on its own; cached like any sentence), a little early as the eye needs it.
@@ -395,6 +412,11 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         const narration = spoken ? await synth(plainText(spoken), prosody) : null
         const lead = narration && /[\p{L}\p{N}]/u.test(before ?? '') ? await synth(plainText(before), prosody) : null
         const at = lead ? Math.max(0, lead.duration - 0.25) : 0
+        // Held close from the focus before: a zoomed focus glides there, any other goes back to the whole page first
+        if (cameraHeld && zoomed) {
+          await camera(locator, zoom)
+          await wait(dryRun ? 0 : 700)
+        } else await v.releaseCamera()
         // The voice starts and the cursor glides there meanwhile: no silence while it travels
         const { x, y } = await center(locator)
         const shown = caption ?? (spoken || null)
@@ -410,28 +432,24 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         await moveTo(x, y)
         const left = at - (now() - started)
         if (left > 0) await wait(left * 1000)
-        if (zoom && zoom > 1) {
+        if (zoomed && !cameraHeld) {
           // The focus lands once the camera has done most of its move: a layer chasing a fast element lags
           await camera(locator, zoom)
-          await wait(550)
+          await wait(450)
         }
-        await focusOn(locator, { html: text, step, pulse, position, zoom })
-        if (zoom && zoom > 1) {
+        await focusOn(locator, { html: text, step, pulse, position, zoom: zoomed ? zoom : 1 })
+        if (zoomed) {
           // The element moved under the camera: the cursor follows it
-          await wait(350)
+          await wait(250)
           const box = await locator.boundingBox()
           if (box) await moveTo(box.x + box.width / 2, box.y + box.height / 2)
         }
         await waitSpeech()
         await wait(ms)
-        // The focus fades out first, then the camera pulls back. Without a camera move the next action
-        // starts while it fades (`type` right after a focus on the field: no gap)
+        // The focus fades out and the camera stays close: what comes next (typing in the field, the click) is seen
+        // up close, and the next zoomed focus glides from here. Other steps take it back (releaseCamera).
         await focusOff(page)
-        if (zoom && zoom > 1) {
-          await wait(500)
-          await camera(locator, 1)
-          await wait(900)
-        }
+        cameraHeld = Boolean(zoomed)
         if (click) await v.click(locator)
       },
       scrollTo: async locator => {
@@ -454,10 +472,58 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         }
       },
       blur: locator => locator.evaluateAll(els => els.forEach(el => el.classList.add('tw-blur'))),
+      // The real chooser of the system never shows in a recording: the cursor clicks where the file goes, a drawn
+      // chooser picks the files, and they are put in the field
       upload: async (locator, files) => {
         const paths = files.map(f => safePath(f, dir, sandboxed))
         for (const p of paths) uploads.set(basename(p), p)
+        locator = locator.first()
+        if (!dryRun) {
+          // A file field is often hidden behind its label (a drop zone): the cursor goes to what is seen
+          const box = await locator.evaluate(el => {
+            const seen = e => e && e.getBoundingClientRect().width > 20 && e.getBoundingClientRect().height > 12
+            const host = [el, /** @type {HTMLInputElement} */ (el).labels?.[0], el.closest('label'), el.parentElement].find(seen)
+            if (!host) return null
+            host.scrollIntoView({ block: 'center', behavior: 'smooth' })
+            return true
+          })
+          if (box) {
+            await wait(300)
+            const r = await locator.evaluate(el => {
+              const seen = e => e && e.getBoundingClientRect().width > 20 && e.getBoundingClientRect().height > 12
+              const host = [el, /** @type {HTMLInputElement} */ (el).labels?.[0], el.closest('label'), el.parentElement].find(seen)
+              const b = host.getBoundingClientRect()
+              return { x: b.left + b.width / 2, y: b.top + b.height / 2 }
+            })
+            await moveTo(r.x, r.y)
+            await wait(200)
+            if (clickSound) effect(clickSound)
+            await tap(page, r.x, r.y)
+            await wait(250)
+          }
+          const en = (script.language ?? 'es').startsWith('en')
+          await filePicker(page, paths.map(p => basename(p)), en ? { title: 'Open file', open: 'Open', folder: 'Documents' } : { title: 'Abrir archivo', open: 'Abrir', folder: 'Documentos' })
+          if (clickSound) effect(clickSound)
+        }
         await locator.setInputFiles(paths)
+        await wait(450)
+      },
+      releaseCamera: async () => {
+        if (!cameraHeld) return
+        cameraHeld = false
+        if (await cameraOut(page).catch(() => false)) await wait(dryRun ? 0 : 750)
+      },
+      // The cursor goes to the list and clicks before the choice changes
+      select: async (locator, value) => {
+        locator = locator.first()
+        const { x, y } = await center(locator)
+        await moveTo(x, y)
+        await wait(200)
+        if (clickSound) effect(clickSound)
+        if (!dryRun) await tap(page, x, y)
+        await wait(250)
+        await locator.selectOption(value)
+        await wait(450)
       },
     }
     // A line may name its own voice (from the cast) and how to say it
@@ -481,7 +547,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     v.progress = step => progress({ stage: 'recording', step, steps: total })
     // Spanish names for the helpers of JavaScript scripts
     Object.assign(v, { ir: v.goto, titulo: v.title, leyenda: (h, o) => v.say(h, o && typeof o === 'object' && 'dice' in o ? { ...o, speak: o.dice } : o),
-      clic: v.click, escribir: v.type, resaltar: v.highlight, acercar: v.zoom, ocultar: v.blur, bajarHasta: v.scrollTo, fueraDeCamara: v.offCamera, subir: v.upload })
+      clic: v.click, escribir: v.type, resaltar: v.highlight, acercar: v.zoom, ocultar: v.blur, bajarHasta: v.scrollTo, fueraDeCamara: v.offCamera, subir: v.upload, elegir: v.select })
 
     // Before each step: whatever `dismiss` names is closed off camera, so the viewer never sees it
     // On a page it has not seen yet it also waits a moment, cut from the video: tours open just after the page.
@@ -607,6 +673,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
 
     progress({ stage: 'encoding' })
     const music = typeof script.music === 'string' ? { file: script.music } : script.music
+    const studioFrame = theme.frame === 'window' ? await drawFrame(browser, { width, height, theme, title: script.title ?? name, workDir: work }) : null
     const result = await compose({
       video: source,
       fps,
@@ -625,6 +692,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       quality,
       workDir: work,
       voice,
+      frame: studioFrame,
     }, config)
     // The finished video is looked at too; the findings go into its manifest
     const review = [...watcher.findings, ...(await reviewVideo(result.paths.video, config))]

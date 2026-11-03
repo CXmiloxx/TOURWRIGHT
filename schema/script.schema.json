@@ -91,6 +91,14 @@
                 "grid",
                 "page"
               ]
+            },
+            "frame": {
+              "description": "window: the recording inside a browser window with rounded corners and a shadow, on a wallpaper in the theme colors (walkthroughs)",
+              "type": "string",
+              "enum": [
+                "none",
+                "window"
+              ]
             }
           },
           "additionalProperties": false
@@ -457,6 +465,14 @@
                 "aurora",
                 "grid",
                 "page"
+              ]
+            },
+            "frame": {
+              "description": "window: the recording inside a browser window with rounded corners and a shadow, on a wallpaper in the theme colors (walkthroughs)",
+              "type": "string",
+              "enum": [
+                "none",
+                "window"
               ]
             }
           },

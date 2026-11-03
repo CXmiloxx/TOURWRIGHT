@@ -15,6 +15,7 @@ export const DEFAULT_THEME = {
   logo: null,
   titleAnimation: 'rise',
   titleBackground: 'gradient',
+  frame: 'none',
 }
 
 // A known name, else the first (the default): the class names come from these lists only
@@ -72,19 +73,23 @@ const cssValue = v => String(v ?? '').replace(/[;{}<>]/g, '')
 export const themeCss = t => `
   :root { --tw-accent: ${cssValue(t.accent)}; --tw-bg: ${cssValue(t.background)}; --tw-text: ${cssValue(t.text)};
     --tw-muted: ${cssValue(t.muted)}; --tw-gradient: ${cssValue(t.gradient)}; --tw-font: ${cssValue(t.font)}; }
-  #tw-cursor { position: fixed; z-index: 2147483647; width: 26px; height: 26px; margin: -3px 0 0 -3px;
+  #tw-cursor { position: fixed; z-index: 2147483647; width: 32px; height: 32px; margin: -4px 0 0 -4px;
     pointer-events: none; transition: transform .08s; filter: drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
   #tw-cursor.tw-down { transform: scale(.82); }
   body:has(#tw-title) #tw-cursor, body:has(#tw-title) #tw-caption { display: none; }
-  #tw-ripple { position: fixed; z-index: 2147483646; width: 46px; height: 46px; margin: -23px 0 0 -23px;
-    border-radius: 50%; background: color-mix(in srgb, var(--tw-accent) 45%, transparent); pointer-events: none; opacity: 0; }
-  #tw-ripple.tw-show { animation: tw-ripple .55s ease-out; }
-  @keyframes tw-ripple { from { opacity: 1; transform: scale(.3) } to { opacity: 0; transform: scale(1.7) } }
-  #tw-caption { position: fixed; z-index: 2147483645; left: 50%; bottom: 3.5vh; transform: translateX(-50%);
-    max-width: 72%; padding: .65em 1.25em; border-radius: 16px; background: color-mix(in srgb, var(--tw-bg) 90%, transparent);
-    border-left: 5px solid var(--tw-accent); color: var(--tw-text); font: 500 clamp(17px, 1.35vw, 26px)/1.45 var(--tw-font);
-    text-align: center; pointer-events: none; box-shadow: 0 10px 34px rgba(0,0,0,.32); animation: tw-up .35s ease-out; }
-  @keyframes tw-up { from { opacity: 0; transform: translate(-50%, 12px) } to { opacity: 1; transform: translate(-50%, 0) } }
+  #tw-ripple { position: fixed; z-index: 2147483646; width: 54px; height: 54px; margin: -27px 0 0 -27px;
+    border-radius: 50%; border: 3px solid var(--tw-accent); background: color-mix(in srgb, var(--tw-accent) 28%, transparent);
+    pointer-events: none; opacity: 0; }
+  #tw-ripple.tw-show { animation: tw-ripple .6s cubic-bezier(.2, .8, .3, 1); }
+  @keyframes tw-ripple { from { opacity: 1; transform: scale(.25) } to { opacity: 0; transform: scale(1.8) } }
+  #tw-caption { position: fixed; z-index: 2147483645; left: 50%; bottom: 4vh; transform: translateX(-50%);
+    max-width: 70%; padding: .7em 1.35em; border-radius: 18px; background: color-mix(in srgb, var(--tw-bg) 78%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid color-mix(in srgb, var(--tw-text) 14%, transparent); border-left: 4px solid var(--tw-accent);
+    color: var(--tw-text); font: 600 clamp(18px, 1.45vw, 30px)/1.45 var(--tw-font); letter-spacing: -.005em;
+    text-align: center; pointer-events: none; box-shadow: 0 18px 44px rgba(0,0,0,.34), 0 2px 8px rgba(0,0,0,.18);
+    animation: tw-up .5s cubic-bezier(.2, .9, .3, 1.15); }
+  @keyframes tw-up { from { opacity: 0; transform: translate(-50%, 18px) scale(.96); filter: blur(4px) } to { opacity: 1; transform: translate(-50%, 0) } }
   #tw-caption b, #tw-caption strong { color: var(--tw-accent); }
   #tw-title { position: fixed; inset: 0; z-index: 2147483644; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 22px; color: var(--tw-text); text-align: center;
@@ -179,7 +184,8 @@ export const themeCss = t => `
   .tw-spot.tw-show { opacity: 1; }
   .tw-callout { position: fixed; z-index: 2147483646; max-width: min(360px, 40vw); padding: .7em 1em; border-radius: 14px;
     background: var(--tw-bg); color: var(--tw-text); border: 2px solid var(--tw-accent); font: 500 clamp(15px, 1.15vw, 22px)/1.4 var(--tw-font);
-    box-shadow: 0 12px 32px rgba(0,0,0,.35); pointer-events: none; opacity: 0; transform: scale(.92); transition: opacity .3s, transform .3s; }
+    box-shadow: 0 16px 40px rgba(0,0,0,.38); pointer-events: none; opacity: 0; transform: scale(.9) translateY(6px);
+    transition: opacity .3s, transform .45s cubic-bezier(.2, .9, .3, 1.25); }
   .tw-callout.tw-show { opacity: 1; transform: none; }
   .tw-callout b, .tw-callout strong { color: var(--tw-accent); }
   .tw-callout::after { content: ''; position: absolute; width: 14px; height: 14px; background: var(--tw-bg);
@@ -190,12 +196,41 @@ export const themeCss = t => `
   .tw-callout.tw-left::after { right: -9px; top: calc(var(--tw-arrow) - 9px); border-left: 0; border-bottom: 0; }
   .tw-focus { position: fixed; z-index: 2147483642; border-radius: 14px; pointer-events: none; opacity: 0; transition: opacity .5s;
     box-shadow: 0 0 0 200vmax rgba(2, 6, 23, .64); }
-  .tw-ring { position: fixed; z-index: 2147483643; border-radius: 14px; pointer-events: none; opacity: 0; transition: opacity .4s;
-    border: 3px solid var(--tw-accent); box-shadow: 0 0 22px color-mix(in srgb, var(--tw-accent) 55%, transparent); }
+  .tw-ring { position: fixed; z-index: 2147483643; border-radius: 14px; pointer-events: none; opacity: 0; transform: scale(1.12);
+    transition: opacity .4s, transform .55s cubic-bezier(.2, .9, .3, 1.2);
+    border: 3px solid var(--tw-accent); box-shadow: 0 0 26px color-mix(in srgb, var(--tw-accent) 55%, transparent); }
+  .tw-ring.tw-show { transform: none; }
   .tw-focus.tw-show, .tw-ring.tw-show { opacity: 1; }
   .tw-ring.tw-pulse { animation: tw-pulse 1.6s ease-out infinite; }
   @keyframes tw-pulse { from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tw-accent) 60%, transparent) }
     to { box-shadow: 0 0 0 20px color-mix(in srgb, var(--tw-accent) 0%, transparent) } }
+  #tw-picker { position: fixed; inset: 0; z-index: 2147483646; display: grid; place-items: center; background: rgba(2, 6, 23, .28);
+    opacity: 0; transition: opacity .3s; pointer-events: none; font-family: var(--tw-font) !important; }
+  #tw-picker.tw-show { opacity: 1; }
+  .tw-fp { width: min(560px, 62vw); border-radius: 14px; overflow: hidden; background: #fff; color: #0F172A; box-shadow: 0 30px 80px rgba(2,6,23,.45), 0 0 0 1px rgba(15,23,42,.08);
+    transform: scale(.94) translateY(10px); transition: transform .35s cubic-bezier(.2, .9, .3, 1.2); font-size: clamp(13px, 1.05vw, 17px); }
+  #tw-picker.tw-show .tw-fp { transform: none; }
+  .tw-fp-bar { padding: .7em 1em; background: #F1F5F9; border-bottom: 1px solid #E2E8F0; text-align: center; }
+  .tw-fp-body { display: grid; grid-template-columns: 30% 1fr; min-height: 9em; }
+  .tw-fp-side { padding: .9em 1em; background: #F8FAFC; border-right: 1px solid #E2E8F0; color: #475569; font-weight: 600; }
+  .tw-fp-list { padding: .5em; display: grid; gap: .2em; align-content: start; }
+  .tw-fp-row { display: flex; align-items: center; gap: .7em; padding: .45em .6em; border-radius: 8px; transition: background .2s, color .2s; }
+  .tw-fp-row.tw-on { background: var(--tw-accent); color: #fff; }
+  .tw-fp-ico { min-width: 2.6em; padding: .15em .3em; border-radius: 5px; background: #E2E8F0; color: #334155; font-size: .7em; font-weight: 800; text-align: center; }
+  .tw-fp-row.tw-on .tw-fp-ico { background: rgba(255,255,255,.25); color: #fff; }
+  .tw-fp-foot { display: flex; justify-content: flex-end; padding: .7em 1em; border-top: 1px solid #E2E8F0; }
+  .tw-fp-btn { padding: .45em 1.3em; border-radius: 8px; background: #E2E8F0; color: #334155; font-weight: 700; transition: background .2s, transform .12s; }
+  .tw-fp-btn.tw-on { background: var(--tw-accent); color: #fff; transform: scale(.95); }
+  /* Vertical (phones, Reels, Shorts, TikTok): bigger text, and the captions above the area those apps cover
+     with their own buttons and text */
+  @media (orientation: portrait) {
+    #tw-caption { bottom: 17vh; max-width: 88%; font-size: clamp(18px, 3.8vw, 40px); padding: .75em 1.2em; }
+    .tw-callout { max-width: min(560px, 74vw); font-size: clamp(15px, 3.2vw, 32px); }
+    #tw-title h1 { font-size: min(9.5vw, 6vh); max-width: 88%; }
+    #tw-title p { font-size: min(4.4vw, 2.6vh); max-width: 86%; }
+    #tw-title .tw-kicker { font-size: min(2.6vw, 1.6vh); }
+    #tw-title img { width: min(18vw, 9vh); height: min(18vw, 9vh); }
+  }
   .tw-step { display: inline-block; margin: 0 .55em .1em 0; padding: .1em .55em; border-radius: 999px; background: var(--tw-accent);
     color: var(--tw-bg); font-size: .78em; font-weight: 700; letter-spacing: .3px; vertical-align: .1em; }
 `

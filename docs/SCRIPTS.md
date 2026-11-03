@@ -103,7 +103,7 @@ Each step is an object with **exactly one** action.
 | `type` | `{ target, text, delay?, clear? }` | Clicks a field and types letter by letter |
 | `fill` | `{ target, text }` | Fills a field instantly |
 | `press` | key | `Enter`, `Tab`, `Control+A`… |
-| `select` | `{ target, value }` | Chooses an option of a `<select>` |
+| `select` | `{ target, value }` | The cursor clicks the list, then the option is chosen |
 | `highlight` | target or `{ target, ms? }` | Draws a frame around the element |
 | `spotlight` | target or `{ target, ms? }` | Dims everything except the element |
 | `callout` | `{ target, text, ms?, position? }` | A speech bubble pointing at the element (`auto`, `top`, `bottom`, `left`, `right`); text may have `<b>` |
@@ -117,7 +117,7 @@ Each step is an object with **exactly one** action.
 | `sound` | name, file or `{ file, volume?, wait? }` | Plays a sound: built-in `click`, `pop`, `ding`, `whoosh`, or a file. `wait: true` waits until it ends |
 | `wait` | ms or `{ target?, text?, url?, timeout?, state? }` | Waits **off camera** (cut from the video) |
 | `blur` | target or list | Blurs elements from now on |
-| `upload` | `{ target, files }` | Puts files into an `<input type=file>` |
+| `upload` | `{ target, files }` | The cursor clicks where the file goes (a hidden input's drop zone too), a drawn file chooser picks the files, and they go into the `<input type=file>` (the system's own chooser never shows in a recording) |
 | `offCamera` | list of steps | Steps that happen but are cut from the video |
 | `if` | `{ visible? \| text? \| url?, timeout?, then, else? }` | Runs steps only if an element, a text or a URL is there |
 | `try` | list of steps, or `{ steps, timeout? }` | Steps that may fail without stopping the video |
@@ -175,6 +175,11 @@ a bubble explains it, and the camera can push in, all landing on the word the vo
   fades, so a `type` into the field just focused begins as the voice stops, with no silence in between.
 - Without a `{word}` the focus appears as the narration starts; without `say` it is silent.
 - The zoom happens in the browser, so text stays sharp at any zoom (nothing is upscaled).
+- The camera never goes closer than the element fits whole on screen: a wide field on a phone gets a gentler
+  zoom than the one asked, and under 8 % there is no push in at all.
+- After a zoomed focus the camera stays close: typing in that field or the click is seen up close, and the next
+  zoomed focus glides there without pulling back. A title, a page opened with `goto`, a scroll, a highlight, a
+  spotlight, a callout or a `zoom` step take it back to the whole page first.
 - `caption` shows a different text than the one said; `voice`, `rate`, `pitch`… work as in `say`.
 
 ### Variables, blocks and repeats
@@ -378,6 +383,17 @@ theme: { accent: "#22C55E", titleAnimation: split, titleBackground: grid }
 
 Cards leave with a short blur. In slides the animation is drawn frame by frame, so it is smooth on any machine.
 
+### Studio frame
+
+`theme.frame: window` puts a walkthrough inside a browser window, with rounded corners, a soft shadow and the
+video's title in its bar, on a wallpaper of lights in the theme colors. It is drawn when the video is encoded:
+the page is recorded as usual, so targets, zoom and captions do not change. Pair it with an `accent` from the
+app's own palette, `titleBackground: aurora` and `zoom` on the focus steps for a finished, studio look.
+
+```yaml
+theme: { frame: window, accent: "#3B82F6", titleBackground: aurora }
+```
+
 Each slide stays on screen while its narration lasts (plus a short margin), or `duration` seconds if longer.
 Slides with `title` and no image start a chapter; `chapter` names one explicitly.
 
@@ -568,6 +584,11 @@ export: [video, audio]
 
 Subtitles, poster and manifest always come. `--quality` picks the size: `sd`, `hd` (default; yours with `tourwright config set quality`), `fullhd`,
 `vertical` (1080×1920, for phones and reels) or `square`.
+
+A vertical video is filmed the way a phone shows the app: the page is 540 CSS pixels wide at twice the density,
+so the app uses its own mobile layout, big and sharp, and the frames still come out at 1080×1920. Captions and
+titles grow, and the captions sit above the bottom of the screen that Reels, Shorts and TikTok cover with their
+own buttons. (With `--capture screen`, the virtual display draws at 1×: there the page keeps the full width.)
 
 ## Testing a script
 

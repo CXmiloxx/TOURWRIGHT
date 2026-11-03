@@ -150,6 +150,8 @@ const common = {
     accent: z.string().optional(), background: z.string().optional(), text: z.string().optional(),
     gradient: z.string().optional(), font: z.string().optional(), logo: z.string().optional(),
     titleAnimation: titleLook.animation, titleBackground: titleLook.background,
+    frame: z.enum(['none', 'window']).optional()
+      .describe('window: the recording inside a browser window with rounded corners and a shadow, on a wallpaper in the theme colors (walkthroughs)'),
   }).strict().optional().describe('Colors, font and logo of title cards, captions and cursor'),
   voices: z.record(z.string().regex(/^[\w-]+$/), z.string().min(1).max(200)).optional()
     .describe('The cast: names for the voices of this script, { ana: salome, guide: "piper:es_MX-claude-high?rate=-5%" }'),

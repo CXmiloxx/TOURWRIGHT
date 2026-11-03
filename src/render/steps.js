@@ -129,9 +129,14 @@ const explain = async (error, step, page, index) => {
   return explained
 }
 
+// Steps that need the whole page: the camera held close after a zoomed focus goes back first. Typing, clicking,
+// choosing, uploading and narrating stay close; a focus decides for itself (it may glide to the next element).
+const WIDE = new Set(['goto', 'title', 'back', 'reload', 'scroll', 'scrollTo', 'highlight', 'spotlight', 'callout', 'zoom', 'drag'])
+
 const runStep = async (step, v, page) => {
     if (v.beforeStep) await v.beforeStep()
     const [action, arg] = Object.entries(step)[0]
+    if (WIDE.has(action)) await v.releaseCamera?.()
     const find = t => resolveTarget(page, t, stepTimeout(page))
     const withTarget = a => (typeof a === 'object' && a && 'target' in a ? a : { target: a })
     switch (action) {
@@ -164,7 +169,7 @@ const runStep = async (step, v, page) => {
         break
       }
       case 'press': await page.keyboard.press(arg); await v.pause(300); break
-      case 'select': await (await find(arg.target)).first().selectOption(arg.value); await v.pause(400); break
+      case 'select': await v.select(await find(arg.target), arg.value); break
       case 'highlight': { const a = withTarget(arg); await v.highlight(await find(a.target), a.ms); break }
       case 'spotlight': { const a = withTarget(arg); await v.spotlight(await find(a.target), a.ms); break }
       case 'focus': await v.focus(await find(arg.target), arg); break
@@ -260,6 +265,7 @@ export const plainHelpers = (page, resolveUrl, uploads, toPath) => {
     say: noop,
     click: (l, options) => l.first().click(options),
     check: (l, on) => l.first().setChecked(on),
+    select: (l, value) => l.first().selectOption(value),
     drag: (from, to) => from.first().dragTo(to.first()),
     hover: l => l.first().hover(),
     type: (l, text) => l.first().fill(text),
@@ -270,6 +276,7 @@ export const plainHelpers = (page, resolveUrl, uploads, toPath) => {
     cursor: noop,
     sound: noop,
     zoom: noop,
+    releaseCamera: noop,
     scrollTo: l => l.first().scrollIntoViewIfNeeded(),
     scroll: dy => page.mouse.wheel(0, dy),
     pause: ms => page.waitForTimeout(Math.min(ms, 2000)),

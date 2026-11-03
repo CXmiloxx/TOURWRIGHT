@@ -12,7 +12,7 @@ export const OVERLAY = ([css, blurCss, logo]) => {
     const cursor = document.createElement('div')
     cursor.id = 'tw-cursor'
     cursor.innerHTML =
-      '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M3 2l7 19 2.6-7.4L20 11z" fill="#111827" stroke="#F8FAFC" stroke-width="1.6" stroke-linejoin="round"/></svg>'
+      '<svg viewBox="0 0 24 24" width="32" height="32"><path d="M3 2l7 19 2.6-7.4L20 11z" fill="#111827" stroke="#F8FAFC" stroke-width="1.6" stroke-linejoin="round"/></svg>'
     cursor.style.left = '-50px'
     document.body.appendChild(cursor)
     const ripple = document.createElement('div')

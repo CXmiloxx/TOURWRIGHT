@@ -98,11 +98,23 @@ export const callout = (page, box, html, ms, position) =>
 
 // The camera: scales the page around an element and pans it toward the middle of the screen, never so far
 // that an empty edge shows. 1 goes back. Tourwright's own layers (cursor, captions, focus) stay as they are.
+// From one element to another it glides: the page is measured without the zoom it has now, and every transform
+// has its origin at the top-left corner, so one transform eases into the next.
 /** @param {import('playwright').Locator} locator */
 export const camera = (locator, value) =>
   locator.evaluate((el, value) => {
     const OURS = ['tw-frame', 'tw-spot', 'tw-callout', 'tw-focus', 'tw-ring']
+    const kids = /** @type {HTMLElement[]} */ ([...document.body.children]).filter(child =>
+      !(child.id?.startsWith('tw-') || OURS.some(c => child.classList.contains(c)) || child.tagName === 'SCRIPT' || child.tagName === 'STYLE'))
+    const before = kids.map(k => k.style.transform)
+    for (const k of kids) {
+      k.style.transition = 'none'
+      k.style.transform = ''
+    }
     const r = el.getBoundingClientRect()
+    const boxes = kids.map(k => k.getBoundingClientRect())
+    kids.forEach((k, i) => (k.style.transform = before[i]))
+    void document.body.offsetWidth
     const cx = r.left + r.width / 2
     const cy = r.top + r.height / 2
     const vw = window.innerWidth
@@ -110,19 +122,30 @@ export const camera = (locator, value) =>
     const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
     const tx = clamp(vw / 2 - cx, -(vw - cx) * (value - 1), cx * (value - 1))
     const ty = clamp(vh / 2 - cy, -(vh - cy) * (value - 1), cy * (value - 1))
-    for (const child of /** @type {HTMLElement[]} */ ([...document.body.children])) {
-      if (child.id?.startsWith('tw-') || OURS.some(c => child.classList.contains(c)) || child.tagName === 'SCRIPT' || child.tagName === 'STYLE') continue
-      if (value === 1) {
-        child.style.transform = ''
-        continue
-      }
-      const b = child.getBoundingClientRect()
+    kids.forEach((k, i) => {
       // Ease out: fast start, long soft landing, like a camera operator
-      child.style.transition = 'transform .85s cubic-bezier(.22,1,.36,1)'
-      child.style.transformOrigin = `${cx - b.left}px ${cy - b.top}px`
-      child.style.transform = `translate(${tx}px, ${ty}px) scale(${value})`
-    }
+      k.style.transition = 'transform .85s cubic-bezier(.22,1,.36,1)'
+      k.style.transformOrigin = '0 0'
+      if (value === 1) return void (k.style.transform = 'translate(0px, 0px) scale(1)')
+      // The element's center lands at (cx + tx, cy + ty) with the origin at the child's corner
+      const b = boxes[i]
+      k.style.transform = `translate(${tx + (1 - value) * (cx - b.left)}px, ${ty + (1 - value) * (cy - b.top)}px) scale(${value})`
+    })
   }, value)
+
+/** The camera back to the whole page, whatever it was looking at @param {import('playwright').Page} page */
+// Resolves to whether there was a zoom to undo (a page opened since has none)
+export const cameraOut = page =>
+  page.evaluate(() => {
+    let moved = false
+    for (const k of /** @type {HTMLElement[]} */ ([...document.body.children])) {
+      if (!k.style.transform || k.style.transform === 'translate(0px, 0px) scale(1)') continue
+      k.style.transition = 'transform .85s cubic-bezier(.22,1,.36,1)'
+      k.style.transform = 'translate(0px, 0px) scale(1)'
+      moved = true
+    }
+    return moved
+  })
 
 /**
  * Onboarding-style focus: everything dims except the element, a ring (pulsing if asked) marks it and a
@@ -216,3 +239,39 @@ export const focusOn = (locator, options) =>
 
 /** @param {import('playwright').Page} page */
 export const focusOff = page => page.evaluate(() => window.__tourwright?.focusOff?.())
+
+// A click drawn without clicking: the ripple and the pressed cursor where the mouse is. For elements whose real
+// click would open something the video cannot show (the system's file chooser).
+/** @param {import('playwright').Page} page */
+export const tap = (page, x, y) =>
+  page.evaluate(([x, y]) => {
+    const ripple = document.getElementById('tw-ripple')
+    const cursor = document.getElementById('tw-cursor')
+    if (!ripple) return
+    Object.assign(ripple.style, { left: `${x}px`, top: `${y}px` })
+    ripple.classList.remove('tw-show')
+    void ripple.offsetWidth
+    ripple.classList.add('tw-show')
+    cursor?.classList.add('tw-down')
+    setTimeout(() => cursor?.classList.remove('tw-down'), 140)
+  }, /** @type {const} */ ([x, y]))
+
+// The file chooser, drawn: the system's own never shows in a recording. The files to pick are listed, the first
+// one gets selected, "Open" is pressed and it closes. `step` paces it; it resolves when the chooser is gone.
+/** @param {import('playwright').Page} page @param {string[]} names @param {{ title: string, open: string, folder: string }} words */
+export const filePicker = (page, names, words, step = 420) =>
+  page.evaluate(([names, words, step]) => new Promise(resolve => {
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+    const ext = n => (/\.([a-z0-9]{1,4})$/i.exec(n)?.[1] ?? '').toUpperCase()
+    const others = ['Contrato.pdf', 'Logo.png', 'Notas.txt'].filter(n => !names.includes(n)).slice(0, Math.max(0, 4 - names.length))
+    const rows = [...names, ...others].map((n, i) => `<div class="tw-fp-row${i < names.length ? ' tw-fp-pick' : ''}"><span class="tw-fp-ico">${esc(ext(n) || 'FILE')}</span>${esc(n)}</div>`).join('')
+    const box = document.createElement('div')
+    box.id = 'tw-picker'
+    box.innerHTML = `<div class="tw-fp"><div class="tw-fp-bar"><b>${esc(words.title)}</b></div><div class="tw-fp-body"><div class="tw-fp-side">${esc(words.folder)}</div><div class="tw-fp-list">${rows}</div></div><div class="tw-fp-foot"><span class="tw-fp-btn">${esc(words.open)}</span></div></div>`
+    document.body.appendChild(box)
+    requestAnimationFrame(() => box.classList.add('tw-show'))
+    setTimeout(() => { for (const r of box.querySelectorAll('.tw-fp-pick')) r.classList.add('tw-on') }, step * 2)
+    setTimeout(() => box.querySelector('.tw-fp-btn')?.classList.add('tw-on'), step * 3.4)
+    setTimeout(() => box.classList.remove('tw-show'), step * 4.2)
+    setTimeout(() => { box.remove(); resolve(undefined) }, step * 4.2 + 320)
+  }), /** @type {const} */ ([names, words, step]))
