@@ -1,9 +1,9 @@
 // From a raw recording (or a slideshow) to the deliverables: an mp4 any player opens, with narration,
-// optional background music ducked under the voice, soft subtitles and chapters; plus .srt, .vtt,
+// optional background music ducked under the voice, and chapters; plus .srt, .vtt (the captions are drawn on it),
 // a thumbnail and a JSON manifest that agents can read.
 import { spawn } from 'node:child_process'
 import { existsSync, writeFileSync } from 'node:fs'
-import { basename, join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { loadConfig } from './config.js'
 import { UserError } from './util.js'
 import { chaptersFrom, cutFilter, normalizeCuts, toFfmetadata, toOutput, toSrt, toVtt } from './timeline.js'
@@ -50,6 +50,8 @@ const LANGUAGES = { es: 'spa', en: 'eng', pt: 'por', fr: 'fra', de: 'deu', it: '
  * @param {Record<string, any>} [p.music] { file, volume = 0.15, duck = true, fadeIn = 0, fadeOut = 2 }
  * @param {string} [p.polish]     narration sound preset (default, clean, warm, radio, podcast, none)
  * @param {string} p.out          output path without extension
+ * @param {string} [p.sidecar]    path without extension of the .srt and .vtt (default: captions, next to the video).
+ *                                Never the video's own name: players would load it over the captions on the video
  * @param {string} p.title
  * @param {string} [p.voice]      voice spec, for the manifest
  * @param {string} [p.language]   'es', 'en'…
@@ -63,7 +65,8 @@ export const compose = async (p, config = loadConfig()) => {
   const captions = (p.captions ?? []).map(c => ({ text: c.text, start: at(c.start), end: at(c.end ?? p.end) })).filter(c => c.end > c.start)
   const chapters = chaptersFrom((p.marks ?? []).map(m => ({ title: m.title, start: at(m.start) })), total).filter(c => c.end > c.start)
 
-  const files = { video: `${p.out}.mp4`, srt: `${p.out}.srt`, vtt: `${p.out}.vtt`, thumbnail: `${p.out}.jpg`, manifest: `${p.out}.json` }
+  const sidecar = p.sidecar ?? join(dirname(p.out), 'captions')
+  const files = { video: `${p.out}.mp4`, srt: `${sidecar}.srt`, vtt: `${sidecar}.vtt`, thumbnail: `${p.out}.jpg`, manifest: `${p.out}.json` }
   writeFileSync(files.srt, toSrt(captions))
   writeFileSync(files.vtt, toVtt(captions))
   const metaFile = join(p.workDir, 'chapters.txt')
@@ -117,14 +120,12 @@ export const compose = async (p, config = loadConfig()) => {
     audio = '[aout]'
   }
   // 48 kHz, what every player expects: loudnorm (in the polish) works at 192 kHz and would leave 96 kHz AAC
-  if (audio) maps.push('-map', audio, '-c:a', 'aac', '-b:a', '160k', '-ar', '48000')
+  if (audio) maps.push('-map', audio, '-c:a', 'aac', '-b:a', '160k', '-ar', '48000', '-metadata:s:a:0', `language=${LANGUAGES[p.language] ?? 'und'}`)
   const metaIndex = next++
   inputs.push('-i', metaFile)
   maps.push('-map_metadata', String(metaIndex), '-map_chapters', String(metaIndex))
-  if (captions.length) {
-    inputs.push('-i', files.srt)
-    maps.push('-map', `${next++}:s`, '-c:s', 'mov_text', '-metadata:s:s:0', `language=${LANGUAGES[p.language] ?? 'und'}`)
-  }
+  // No subtitle track inside the mp4: the captions are already drawn on the video, and players turn on the first
+  // track of an mp4 by themselves (two captions on screen). The .srt and .vtt go next to it, for YouTube or a translation.
   await ffmpeg([...inputs, '-filter_complex', filters.join(';'), ...maps,
     '-r', String(p.fps), '-c:v', 'libx264', '-preset', config.preset ?? p.quality.preset, '-crf', p.quality.crf, '-threads', String(config.threads),
     '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-t', total.toFixed(3), '-movflags', '+faststart', files.video], config)

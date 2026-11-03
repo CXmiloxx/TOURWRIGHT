@@ -105,7 +105,10 @@ export const render = async (loaded, opts = {}, config = loadConfig()) => {
     if (!wanted.length) throw new UserError(`export: choose at least one of ${EXPORTS.join(', ')}`)
     const result = await Promise.race([
       (() => {
-        const options = { ...opts, out, workDir, failureDir: opts.failureDir ?? dirname(out) }
+        // The subtitle files are not named after the video: players load a .srt with the video's name by themselves
+        // and draw it over the captions already on the video
+        const sidecar = join(dirname(out), steps ? `captions-step${steps[0]}${steps[1] !== steps[0] ? `-${steps[1]}` : ''}` : 'captions')
+        const options = { ...opts, out, sidecar, workDir, failureDir: opts.failureDir ?? dirname(out) }
         return loaded.kind === 'slides' ? renderSlides(loaded, options, config) : renderBrowser(loaded, options, config)
       })(),
       new Promise((_, reject) => {

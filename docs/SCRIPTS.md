@@ -1,7 +1,7 @@
 # Writing Tourwright scripts
 
-A script describes a video. Tourwright turns it into an `.mp4` with narration, captions (burned in and as a
-subtitle track), chapters, an `.srt`/`.vtt`, a thumbnail and a JSON manifest.
+A script describes a video. Tourwright turns it into an `.mp4` with narration, captions drawn on the
+video, chapters, an `.srt`/`.vtt`, a thumbnail and a JSON manifest.
 
 There are two kinds of video:
 
@@ -49,7 +49,7 @@ tourwright explore https://app.example.com/login --draft app.yaml --login camera
 
 ```yaml
 title: Create your first invoice
-language: en                              # narration language (subtitle track, browser locale)
+language: en                              # narration language (audio track, browser locale)
 voice: lessac                             # see "Voices"
 quality: hd                               # sd 854×480 · hd 1280×720 · fullhd 1920×1080 · vertical 1080×1920 · square 1080×1080
 baseUrl: https://app.example.com
@@ -534,7 +534,8 @@ videos/
   consultar/
     consultar.yaml        the script (the draft from explore goes wherever you say)
     consultar.mp4         the narrated video
-    consultar.srt  .vtt   subtitles (also inside the .mp4, as a track)
+    captions.srt  .vtt    subtitles for YouTube or a translation (the video already shows them; named
+                          apart so players do not draw them a second time)
     consultar.jpg         poster
     consultar.json        manifest: duration, chapters, captions, files
     explore/              screenshots from tourwright explore

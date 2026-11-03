@@ -36,7 +36,7 @@ steps:
 ```
 
 ```bash
-tourwright render tour.yaml        # → videos/tour.mp4 (+ .srt .vtt .jpg .json)
+tourwright render tour.yaml        # → videos/tour/tour.mp4 (+ captions.srt/.vtt, .jpg, .json)
 ```
 
 ## Why Tourwright
@@ -75,7 +75,7 @@ every redesign means recording again. Tourwright videos are **code**:
 - **Plugins**: new actions, TTS engines and voices as small modules ([docs/PLUGINS.md](docs/PLUGINS.md)).
 - **Tight edits, automatically**: page loads, slow waits and voice synthesis are cut out; narration never
   overlaps; background music ducks under the voice.
-- **Deliverables**: H.264/AAC `.mp4` with soft subtitles and chapters, `.srt`, `.vtt`, thumbnail and a JSON
+- **Deliverables**: H.264/AAC `.mp4` with chapters and the captions drawn on it, `.srt`, `.vtt`, thumbnail and a JSON
   manifest (duration, chapters, captions) for automation.
 - **Four ways in**: CLI, HTTP API with job queue and webhooks, MCP server for AI agents, Node library.
 - **Scales out**: stateless API replicas, any number of workers on any number of servers, Redis/BullMQ

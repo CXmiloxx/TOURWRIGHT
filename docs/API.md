@@ -20,7 +20,7 @@ Without tokens the API only listens on localhost (`TOURWRIGHT_API_INSECURE=true`
 | `POST` | `/v1/jobs` | Queue a render → `202` with the job |
 | `GET` | `/v1/jobs?limit=50&status=done` | The caller's jobs, newest first |
 | `GET` | `/v1/jobs/:id` | Status, progress, error or result |
-| `GET` | `/v1/jobs/:id/files/:file` | A result file (`video.mp4`, `video.srt`, `video.vtt`, `video.jpg`, `video.json`). Supports `Range`. With S3 storage: `302` to a presigned URL |
+| `GET` | `/v1/jobs/:id/files/:file` | A result file (`video.mp4`, `captions.srt`, `captions.vtt`, `video.jpg`, `video.json`). Supports `Range`. With S3 storage: `302` to a presigned URL |
 | `DELETE` | `/v1/jobs/:id` | Delete a finished job and its files → `204` |
 
 ## Create a job
@@ -60,7 +60,7 @@ POST /v1/jobs
   "finishedAt": "2026-10-30T15:16:11.834Z",
   "result": {
     "duration": 8.045,
-    "files": { "video": "video.mp4", "srt": "video.srt", "vtt": "video.vtt", "thumbnail": "video.jpg", "manifest": "video.json" },
+    "files": { "video": "video.mp4", "srt": "captions.srt", "vtt": "captions.vtt", "thumbnail": "video.jpg", "manifest": "video.json" },
     "links": { "video": "https://tourwright.example.com/v1/jobs/…/files/video.mp4?exp=…&sig=…" },
     "chapters": [{ "title": "Q3 2026", "start": 0, "end": 8.045 }],
     "captions": [{ "text": "Sales went up.", "start": 0, "end": 3.5 }]

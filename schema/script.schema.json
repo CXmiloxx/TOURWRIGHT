@@ -16,7 +16,7 @@
           "maxLength": 200
         },
         "language": {
-          "description": "Language of the narration: es, en, pt… (subtitle track)",
+          "description": "Language of the narration: es, en, pt… (audio track, browser locale)",
           "type": "string",
           "maxLength": 10
         },
@@ -383,7 +383,7 @@
           "maxLength": 200
         },
         "language": {
-          "description": "Language of the narration: es, en, pt… (subtitle track)",
+          "description": "Language of the narration: es, en, pt… (audio track, browser locale)",
           "type": "string",
           "maxLength": 10
         },

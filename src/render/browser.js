@@ -618,6 +618,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       music: music ? { ...music, file: safePath(music.file, dir, sandboxed) } : null,
       polish: audio.polish,
       out: opts.out,
+      sidecar: opts.sidecar,
       title: script.title ?? name,
       language: script.language ?? (voice ? voiceLanguage(voice) : undefined),
       quality,

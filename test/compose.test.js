@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict'
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { test } from 'node:test'
 import { compose, ffmpeg } from '../src/compose.js'
 import { loadConfig } from '../src/config.js'
@@ -36,11 +36,17 @@ test('voice, ducked music and effects end up in one track; cuts move everything'
     assert.deepEqual(result.captions, [{ text: 'Hola', start: 1, end: 2 }])
     assert.deepEqual(result.chapters.map(c => [c.title, c.start]), [['Uno', 0]])
     const { stdout } = await run(cfg.ffprobe, ['-v', 'error', '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', result.paths.video])
-    assert.deepEqual(stdout.trim().split(/\r?\n/).slice(0, 3), ['video', 'audio', 'subtitle'])
+    // No subtitle track: players would show it on top of the captions drawn on the video
+    const streams = stdout.trim().split(/\r?\n/)
+    assert.deepEqual(streams.slice(0, 2), ['video', 'audio'])
+    assert.ok(!streams.includes('subtitle'))
     // loudnorm in the polish works at 192 kHz: the file must still come out at 48 kHz for every player
     const rate = await run(cfg.ffprobe, ['-v', 'error', '-select_streams', 'a', '-show_entries', 'stream=sample_rate', '-of', 'csv=p=0', result.paths.video])
     assert.equal(rate.stdout.trim(), '48000')
     assert.match(readFileSync(result.paths.srt, 'utf8'), /00:00:01,000 --> 00:00:02,000\nHola/)
+    // Not named after the video: players would load it by themselves over the captions drawn on it
+    assert.equal(basename(result.paths.srt), 'captions.srt')
+    assert.equal(basename(result.paths.vtt), 'captions.vtt')
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }

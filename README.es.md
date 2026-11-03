@@ -36,7 +36,7 @@ steps:
 ```
 
 ```bash
-tourwright render recorrido.yaml   # → videos/recorrido.mp4 (+ .srt .vtt .jpg .json)
+tourwright render recorrido.yaml   # → videos/recorrido/recorrido.mp4 (+ captions.srt/.vtt, .jpg, .json)
 ```
 
 ## Por qué Tourwright
@@ -75,7 +75,7 @@ a alguien que grabe, y cada rediseño obliga a grabar otra vez. Los videos de To
 - **Plugins**: acciones, motores de voz y voces nuevas como módulos pequeños ([docs/PLUGINS.md](docs/PLUGINS.md)).
 - **Edición automática**: se recortan las cargas, las esperas largas y lo que tarda la voz; una narración
   nunca pisa a otra; la música de fondo baja sola cuando alguien habla.
-- **Entregables**: `.mp4` H.264/AAC con subtítulos y capítulos, `.srt`, `.vtt`, miniatura y un manifiesto
+- **Entregables**: `.mp4` H.264/AAC con capítulos y los subtítulos dibujados, `.srt`, `.vtt`, miniatura y un manifiesto
   JSON (duración, capítulos, subtítulos) para automatizar.
 - **Cuatro entradas**: CLI, API HTTP con cola y webhooks, servidor MCP para agentes, librería de Node.
 - **Escala horizontal**: API sin estado con réplicas, tantos workers como servidores tengas, cola en

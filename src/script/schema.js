@@ -140,7 +140,7 @@ export const step = z.record(z.string(), z.unknown()).superRefine((value, ctx) =
 
 const common = {
   title: z.string().max(200).optional().describe('Video title (metadata and manifest)'),
-  language: z.string().max(10).optional().describe('Language of the narration: es, en, pt… (subtitle track)'),
+  language: z.string().max(10).optional().describe('Language of the narration: es, en, pt… (audio track, browser locale)'),
   voice: z.string().optional().describe('engine:id or alias. See `tourwright voices`'),
   quality: z.enum(['sd', 'hd', 'fullhd', 'vertical', 'square']).optional(),
   width: z.number().int().min(320).max(3840).optional(),
