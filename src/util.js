@@ -10,6 +10,23 @@ export const sleep = ms => new Promise(r => setTimeout(r, ms))
 export const hash = (text, length = 16) => createHash('sha1').update(text).digest('hex').slice(0, length)
 export const newId = () => `${Date.now().toString(36)}-${randomBytes(5).toString('hex')}`
 
+/**
+ * `fn` over every item, at most `limit` at a time, in order of the list; the results keep that order.
+ * @template T, R @param {T[]} items @param {number} limit @param {(item: T, index: number) => Promise<R>} fn @returns {Promise<R[]>}
+ */
+export const mapLimit = async (items, limit, fn) => {
+  const results = new Array(items.length)
+  let next = 0
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++
+      results[i] = await fn(items[i], i)
+    }
+  }
+  await Promise.all(Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, worker))
+  return results
+}
+
 export const isWindows = process.platform === 'win32'
 
 // Windows finds `ffmpeg` as ffmpeg.exe (or .cmd, .bat… as PATHEXT says); elsewhere the name is the file.

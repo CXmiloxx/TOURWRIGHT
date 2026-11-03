@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { compose, ffmpeg, qualityOf } from '../compose.js'
 import { loadConfig } from '../config.js'
 import { launchChromium } from './chromium.js'
-import { concatEntry, escapeHtml, log, plainText, UserError } from '../util.js'
+import { concatEntry, escapeHtml, log, mapLimit, plainText, UserError } from '../util.js'
 import { builtInSound } from '../voice/effects.js'
 import { narrate, stripMarks, withProsody } from '../voice/index.js'
 import { resolveTheme, safePath, themeCss, titleHtml, toDataUrl } from './theme.js'
@@ -89,13 +89,16 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
 
   // Narration first: it decides how long each slide stays
   progress({ stage: 'voice' })
+  // A few at once: an online voice spends most of its time waiting on the network
+  const narrations = await mapLimit(script.slides, config.tts.parallel, s => {
+    // A slide may have its own voice from the cast, and its own way of speaking
+    const spec = opts.dryRun ? null : (s.voice ?? voice)
+    return spec && spec !== 'none' && s.say ? narrate(s.say, withProsody(spec, s), config, speech) : null
+  })
   const timed = []
   let t = 0
   for (const [i, s] of script.slides.entries()) {
-    let narration = null
-    // A slide may have its own voice from the cast, and its own way of speaking
-    const spec = opts.dryRun ? null : (s.voice ?? voice)
-    if (spec && spec !== 'none' && s.say) narration = await narrate(s.say, withProsody(spec, s), config, speech)
+    const narration = narrations[i]
     const duration = Math.max(s.duration ?? 0, narration ? narration.duration + LEAD + TAIL : (s.duration ?? DEFAULT_DURATION))
     // `frame` (the drawn PNG) and `source` (what ffmpeg reads) are filled in while drawing
     timed.push({ ...s, index: i, start: t, duration, narration, frame: '', source: '', frames: 0 })

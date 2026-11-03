@@ -70,6 +70,7 @@ In `tourwright.config.json` they go under `render`: `{ "render": { "quality": "f
 | `TOURWRIGHT_OPENAI_TTS_MODEL` | `tts-1` | |
 | `TOURWRIGHT_TTS_COMMAND` | — | e.g. `my-tts --voice {voice} --out {out}` (text on stdin) |
 | `TOURWRIGHT_TTS_PAUSE` | `0.5` | Seconds between sentences |
+| `TOURWRIGHT_TTS_PARALLEL` | `4` | Narration lines made at once, ahead of the recording |
 | `TOURWRIGHT_VOICE_POLISH` | `default` | Sound of the narration: `default`, `clean`, `warm`, `radio`, `podcast`, `none`, or a raw ffmpeg audio filter. A script's `audio.polish` (presets only) wins |
 
 Aliases and a pronunciation dictionary for every script, in `tourwright.config.json`:

@@ -4,7 +4,8 @@
 import { basename } from 'node:path'
 import { PLUGIN_STEPS } from '../script/schema.js'
 import { withCodes } from '../secrets.js'
-import { holdsSecret, log, sleep, UserError } from '../util.js'
+import { holdsSecret, log, plainText, sleep, UserError } from '../util.js'
+import { markedLine } from '../voice/index.js'
 import { asTarget, describeTarget, isMissingElement, offeredElements, resolveTarget, targetsOf } from './targets.js'
 
 // A target of a script (a selector, or { role, name }, { label }…) → a Playwright locator
@@ -44,6 +45,31 @@ export const dismissing = async (page, targets = []) => {
 
 // How a line is spoken, from a step's value
 const prosodyOf = a => ({ voice: a.voice, rate: a.rate, pitch: a.pitch, volume: a.volume, style: a.style })
+
+// What steps will say, the way the helpers of browser.js say it: [text, prosody] for each line, to make them
+// ahead while the browser starts. Steps inside offCamera, if and try count too (they may run).
+/** @param {any[]} steps @returns {[string, Record<string, any>][]} */
+export const spokenLines = steps => steps.flatMap(step => {
+  if (!step || typeof step !== 'object') return []
+  const [action, arg] = Object.entries(step)[0] ?? []
+  if (arg === null || arg === undefined) return []
+  switch (action) {
+    case 'say':
+      if (typeof arg === 'string') return arg ? [[plainText(arg), {}]] : []
+      return arg.speak || arg.caption ? [[arg.speak ?? plainText(arg.caption), prosodyOf(arg)]] : []
+    case 'title': return typeof arg === 'object' && arg.say ? [[arg.say, prosodyOf(arg)]] : []
+    case 'focus': {
+      const { spoken, before } = markedLine(arg.say)
+      if (!spoken) return []
+      // The words before the {marked} one are made on their own too: their length times the focus
+      return /[\p{L}\p{N}]/u.test(before ?? '') ? [[plainText(spoken), prosodyOf(arg)], [plainText(before), prosodyOf(arg)]] : [[plainText(spoken), prosodyOf(arg)]]
+    }
+    case 'offCamera': return Array.isArray(arg) ? spokenLines(arg) : []
+    case 'if': return [...spokenLines(arg.then ?? []), ...spokenLines(arg.else ?? [])]
+    case 'try': return spokenLines(Array.isArray(arg) ? arg : (arg.steps ?? []))
+    default: return []
+  }
+})
 
 // A secret typed on camera stays unreadable: a password field already shows dots, any other field is blurred
 export const hideTyped = locator =>
