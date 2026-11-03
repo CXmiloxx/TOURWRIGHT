@@ -28,6 +28,7 @@ about changing Tourwright itself.
 | `src/mcp.js` | MCP server |
 | `server.json` | The MCP server's entry in the official MCP Registry (version and `mcpName` in `package.json` must match) |
 | `.claude-plugin/`, `claude-plugin/` | Claude Code marketplace and plugin: the MCP server and the `make-tour` skill |
+| `action.yml` | The GitHub Action (`uses: CXmiloxx/tourwright@v2`): render or check scripts in CI |
 
 ## Rules
 

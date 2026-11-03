@@ -184,6 +184,21 @@ Tools: `tourwright_guide`, `tourwright_voices`, `tourwright_validate`, `tourwrig
 `tourwright_render_file` with `TOURWRIGHT_MCP_ALLOW_FILES=true`). Point it at a remote API with `TOURWRIGHT_API_URL`
 and `TOURWRIGHT_API_TOKEN`. Details: [docs/AGENTS.md](docs/AGENTS.md).
 
+### GitHub Action
+
+Re-render your tours on every release, or fail the build when a deploy broke one:
+
+```yaml
+- uses: CXmiloxx/tourwright@v2
+  with:
+    scripts: videos/*.yaml
+    command: check            # or render: the videos become a workflow artifact
+  env:
+    TOURWRIGHT_SECRET_APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+```
+
+Inputs: `scripts`, `command`, `out`, `voice`, `quality`, `voices`, `version`, `upload` ([action.yml](action.yml)).
+
 ### Node library
 
 ```js

@@ -37,6 +37,13 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: npm ci
       - run: npm test
+  # The GitHub Action (action.yml) as users run it: the published package checks a script
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./
+        with: { scripts: examples/example-com.yaml, command: check, voices: en_US-lessac-medium }
   # A real install and real videos on Linux and Windows (render.yml); macOS runs daily and for releases (macos.yml)
   render:
     strategy:
