@@ -1,5 +1,5 @@
 # The project page (site/): its CSS compiled with Tailwind, next to the brand icons, the demo video and the voice
-# samples. https://cxmiloxx.github.io/tourwright/
+# samples. https://cxmiloxx.github.io/TOURWRIGHT/
 name: pages
 on:
   push:
