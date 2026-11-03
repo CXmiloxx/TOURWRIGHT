@@ -61,6 +61,9 @@ Usage:
                                               to send or print as PDF, and Markdown with its images
   tourwright narrate <script> [--write]       the narration rewritten by your AI from what each screen shows
                                               (tourwright config set ai anthropic|openai|ollama); --write saves it
+  tourwright translate <script> --to en       the same video in another language (es, en, pt, fr, de, it), by your
+                                              AI: narration, captions and titles; the app's own words stay.
+                                              Writes <script>.en.yaml (--out to choose, --yes to replace)
   tourwright check <script…> [--json]         dry-run each one: every broken step, with the likely fix; exit 1
       --report <file.md>                      if one broke (CI). In GitHub Actions it also fills the job summary
   tourwright fix <script> [--write]           propose the new target for each broken step; --write saves them
@@ -222,6 +225,7 @@ export const main = async argv => {
       lock: { type: 'string' },
       step: { type: 'string' },
       language: { type: 'string' },
+      to: { type: 'string' },
       plan: { type: 'boolean' },
       report: { type: 'string' },
       write: { type: 'boolean' },
@@ -465,6 +469,15 @@ export const main = async argv => {
       const result = await render(await loadFile(positionals[0], { vars }), { out: values.out, guide: true }, config)
       log.info(`guide: ${result.guide.steps} steps → ${result.guide.html} (and .md, with its images)`)
       if (values.open) openPath(result.guide.html)
+      return
+    }
+    case 'translate': {
+      if (!positionals[0] || !values.to) throw new UserError('usage: tourwright translate <script.yaml> --to en|es|pt|fr|de|it [--out f.yaml] [--yes]')
+      const { translateFile } = await import('./translate.js')
+      log.info(`translating ${positionals[0]} with your AI…`)
+      const r = await translateFile(positionals[0], { to: values.to, out: values.out, yes: values.yes }, config)
+      for (const k of r.kept) process.stdout.write(`kept as it was (${k.why}): ${k.text}\n`)
+      log.info(`${r.out}: ${r.translated} lines translated. Make the video: tourwright render ${r.out}`)
       return
     }
     case 'narrate': {

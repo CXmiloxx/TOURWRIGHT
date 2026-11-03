@@ -109,6 +109,7 @@ tourwright config set quality fullhd  # your own defaults: quality, voice, fpsâ€
 tourwright record https://app.example.com --out tour.yaml   # do the tour by hand: you get the script and the video
 tourwright guide tour.yaml --open     # the same tour as a step-by-step guide with screenshots (HTML, PDF, Markdown)
 tourwright narrate tour.yaml --write  # your AI (Claude, OpenAI, Ollama) rewrites the narration from the screens
+tourwright translate tour.yaml --to en  # the same video in English (or pt, fr, de, it): tour.en.yaml
 tourwright check videos/*.yaml        # which videos broke after a deploy, at which step, and the fix
 tourwright fix tour.yaml --write      # puts the new targets in the script
 tourwright render tour.yaml --step 7  # film one step with its voice, without the whole video

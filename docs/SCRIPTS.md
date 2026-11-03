@@ -697,6 +697,20 @@ around the element's name when the AI drops the braces), and a line that holds a
 refused and the old one stays. Lines written with `{{variables}}` are never touched. `aiModel` picks the model
 (default `claude-opus-5-5`, `gpt-4o-mini`, `gemma3`); a model that sees pictures writes better narration.
 
+### The same video in another language
+
+```bash
+tourwright translate tour.yaml --to en    # writes tour.en.yaml (es, en, pt, fr, de, it)
+tourwright render tour.en.yaml
+```
+
+Your AI (the same as `narrate`) translates what the viewer reads or hears: narration, captions, title cards,
+bubbles and callouts. The targets stay as they are, because the app keeps its own language, and so does what is
+typed into it. `{{variables}}`, `${secrets}`, HTML tags and the `{marked}` word come back as they were; a line
+where the AI changed one stays in the original language, and the command lists it. The new script has the new
+`language`, no fixed `voice` (the render picks a natural one for it) and none of the old pronunciations. Comments
+are kept.
+
 ### A step-by-step guide from the same script
 
 ```bash
