@@ -93,18 +93,21 @@ export const startMcp = async config => {
     title: 'How to write a Tourwright script',
     description: 'The script format (browser walkthroughs and narrated slides), every action, voices and examples. Read it before writing a script.',
     inputSchema: {},
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   }, safe(async () => text(readFileSync(GUIDE, 'utf8'))))
 
   server.registerTool('tourwright_voices', {
     title: 'List voices',
-    description: 'Text-to-speech voices available on the server and which engines work.',
+    description: 'Text-to-speech voices available on the server and which engines work. Use a voice whose language matches the script.',
     inputSchema: {},
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   }, safe(async () => text(await client.voices())))
 
   server.registerTool('tourwright_validate', {
     title: 'Validate a script',
     description: 'Check a script without rendering it. Returns { ok } or the list of errors to fix.',
     inputSchema: { script: scriptInput, vars: varsInput },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   }, safe(async ({ script, vars }) => text(await client.validate({ script, vars }))))
 
   server.registerTool('tourwright_render', {
@@ -115,13 +118,15 @@ export const startMcp = async config => {
       vars: varsInput,
       assets: z.record(z.string(), z.string()).optional().describe('Files the script refers to by name (images, music, uploads), base64-encoded'),
       options: z.object({
-        voice: z.string().optional(),
-        quality: z.enum(['sd', 'hd', 'fullhd', 'vertical', 'square']).optional(),
+        voice: z.string().optional().describe('Voice for the whole video, overriding the script: a name from tourwright_voices'),
+        quality: z.enum(['sd', 'hd', 'fullhd', 'vertical', 'square']).optional().describe('Size of the video: sd 480p, hd 720p, fullhd 1080p, vertical 1080x1920, square 1080x1080'),
         dryRun: z.boolean().optional().describe('Run the script fast without voice or video, to test it'),
-      }).optional(),
-      wait: z.boolean().optional(),
-      waitSeconds: z.number().int().min(5).max(3600).optional(),
+      }).optional().describe('Render settings that override the script'),
+      wait: z.boolean().optional().describe('Wait for the video (default true); false returns the job id at once, to poll with tourwright_job'),
+      waitSeconds: z.number().int().min(5).max(3600).optional().describe('How long to wait for the video before returning the job as it is (default 900)'),
     },
+    // It opens the script's website in a real browser
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   }, safe(async ({ script, vars, assets, options, wait = true, waitSeconds = 900 }) => {
     let job = await client.create({ script, vars, assets, options })
     if (!wait) return text(job)
@@ -136,7 +141,8 @@ export const startMcp = async config => {
   server.registerTool('tourwright_job', {
     title: 'Job status',
     description: 'Status, progress and (when done) the result of a render job.',
-    inputSchema: { id: z.string() },
+    inputSchema: { id: z.string().describe('The job id returned by tourwright_render with wait=false') },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   }, safe(async ({ id }) => text(await client.job(id))))
 
   // Runs a script as a dry run in this process: every broken step, the elements on its page and a proposed fix
@@ -145,6 +151,7 @@ export const startMcp = async config => {
       title: 'Check a script and propose fixes',
       description: 'Run a script fast, without voice or video, against the real site. Returns every step that failed (the target it looked for, the page, the targets that page offers) and, when it can tell, the new target for it. For a YAML script given as text it also returns `fixed`: the same text with those targets replaced (comments kept). Use it after the site changed, then validate and render.',
       inputSchema: { script: scriptInput, vars: varsInput },
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     }, safe(async ({ script, vars }) => {
       const loaded = fromData(typeof script === 'string' ? parseText(script) : script, { sandboxed: true, vars })
       const result = await checkScript(loaded, {}, config)
@@ -159,7 +166,13 @@ export const startMcp = async config => {
     server.registerTool('tourwright_render_file', {
       title: 'Render a script file',
       description: 'Render a script file from this machine (.yaml, .json, .js). Paths inside it resolve next to the file.',
-      inputSchema: { path: z.string(), out: z.string().optional().describe('Output .mp4 path or folder'), dryRun: z.boolean().optional() },
+      inputSchema: {
+        path: z.string().describe('Path of the script file on this machine'),
+        out: z.string().optional().describe('Output .mp4 path or folder (default: ./videos/<name>/)'),
+        dryRun: z.boolean().optional().describe('Run the script fast without voice or video, to test it'),
+      },
+      // Writes the video files, replacing a previous render with the same name
+      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true },
     }, safe(async ({ path, out, dryRun }) => {
       const loaded = await loadFile(path)
       const result = await render(loaded, { out: out ?? outputBase(undefined, loaded.name), dryRun }, config)
