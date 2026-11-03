@@ -156,6 +156,17 @@ tourwright say "Hola" --voice claude --out hola.wav
 
 El formato del guion, cada acción y las voces: **[docs/SCRIPTS.md](docs/SCRIPTS.md)**.
 
+### Claude Code y otros agentes
+
+Como plugin de Claude Code (el servidor MCP y un skill que escribe, prueba y graba el guion):
+
+```text
+/plugin marketplace add CXmiloxx/tourwright
+/plugin install tourwright@tourwright
+```
+
+Cualquier otro cliente MCP: `{ "mcpServers": { "tourwright": { "command": "npx", "args": ["-y", "tourwright", "mcp"] } } }`.
+
 ### API HTTP, agentes (MCP) y librería
 
 Igual que en el [README en inglés](README.md#use-it): `tourwright serve`, `tourwright mcp` y

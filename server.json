@@ -1,0 +1,41 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.CXmiloxx/tourwright",
+  "title": "Tourwright",
+  "description": "Turn a script into a narrated product tour video: real browser, captions, voice, MP4.",
+  "websiteUrl": "https://github.com/CXmiloxx/tourwright",
+  "repository": {
+    "url": "https://github.com/CXmiloxx/tourwright",
+    "source": "github"
+  },
+  "version": "2.0.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "tourwright",
+      "version": "2.0.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ],
+      "environmentVariables": [
+        {
+          "name": "TOURWRIGHT_API_URL",
+          "description": "Send jobs to a Tourwright API instead of rendering on this machine",
+          "isRequired": false
+        },
+        {
+          "name": "TOURWRIGHT_API_TOKEN",
+          "description": "Token for TOURWRIGHT_API_URL",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

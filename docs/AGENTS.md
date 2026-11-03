@@ -19,7 +19,14 @@ With Docker: `"command": "docker", "args": ["run", "-i", "--rm", "-v", "tourwrig
 
 Against a shared server: add `"env": { "TOURWRIGHT_API_URL": "https://tourwright.example.com", "TOURWRIGHT_API_TOKEN": "…" }`.
 
-Claude Code: `claude mcp add tourwright -- tourwright mcp`.
+Claude Code, as a plugin with a skill that knows the loop below:
+
+```text
+/plugin marketplace add CXmiloxx/tourwright
+/plugin install tourwright@tourwright
+```
+
+Or only the MCP server: `claude mcp add tourwright -- npx -y tourwright mcp`.
 
 No MCP? Use the HTTP API ([API.md](API.md)) or the CLI (`tourwright render script.yaml --json`).
 

@@ -1,0 +1,14 @@
+{
+  "name": "tourwright",
+  "description": "Tourwright: scripted, narrated product tour videos made by a real browser",
+  "owner": {
+    "name": "CXmiloxx"
+  },
+  "plugins": [
+    {
+      "name": "tourwright",
+      "source": "./claude-plugin",
+      "description": "Make narrated product tours and how-to videos of any web app: the Tourwright MCP server and a skill that writes, checks and renders the script"
+    }
+  ]
+}

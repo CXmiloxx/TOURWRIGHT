@@ -167,6 +167,15 @@ Endpoints, assets, webhooks: [docs/API.md](docs/API.md).
 
 ### AI agents (MCP)
 
+Claude Code, as a plugin (the MCP server plus a skill that writes, checks and renders the script):
+
+```text
+/plugin marketplace add CXmiloxx/tourwright
+/plugin install tourwright@tourwright
+```
+
+Any other MCP client (Claude Desktop, Cursor, VS Code…):
+
 ```json
 { "mcpServers": { "tourwright": { "command": "tourwright", "args": ["mcp"] } } }
 ```
