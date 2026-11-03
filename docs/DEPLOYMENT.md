@@ -62,8 +62,11 @@ Put a TLS reverse proxy (Caddy, nginx, Traefik) in front and set `TOURWRIGHT_PUB
 - Workers anywhere — another datacenter, a GPU box, ARM servers — with the same Redis and bucket:
 
 ```bash
-docker run -d --restart unless-stopped --shm-size 1g --env-file .env ghcr.io/cxmiloxx/tourwright worker
+docker run -d --restart unless-stopped --shm-size 1g --env-file .env ghcr.io/cxmiloxx/tourwright:2 worker
 ```
+
+Image tags: `latest` follows `main`; each release is `2.1.0`, `2.1` and `2`. Servers pin `2`: they get fixes and new
+features of version 2, never a change that breaks scripts or configuration.
 
 With the `local` queue, many servers can also share an NFS/EFS/CephFS folder as `TOURWRIGHT_DATA_DIR`.
 

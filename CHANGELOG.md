@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- The Docker image is tagged with each release (`2.1.0`, `2.1`, `2`) besides `latest`, so a server or a Kubernetes
+  deployment can pin a version; the Kubernetes manifest and the deployment guide use `:2`.
+
 ## [2.1.0]
 
 Faster renders, a progress line, Tourwright for Claude Code and GitHub Actions, a logo and a project page, and a
