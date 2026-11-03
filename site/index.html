@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tourwright — narrated product tour videos from a script</title>
-<meta name="description" content="Open-source tool that turns a YAML script into a narrated product tour video: a real browser, a guided focus, captions and text-to-speech. CLI, HTTP API, MCP server for AI agents, Claude Code plugin and GitHub Action.">
-<meta property="og:title" content="Tourwright — write the tour, get the video">
-<meta property="og:description" content="A YAML script becomes a narrated product tour video. Re-render after every redesign; CI tells you when one went stale.">
+<title>Tourwright — narrated product tour videos, scripted for you</title>
+<meta name="description" content="Open-source tool that makes narrated product tour videos: click through your app once or tell your AI agent what to show, and Tourwright writes the script, drives a real browser, speaks the narration and hands you an MP4. CLI, HTTP API, MCP server, Claude Code plugin and GitHub Action.">
+<meta property="og:title" content="Tourwright — show the tour, get the video">
+<meta property="og:description" content="Show your app once, or ask your AI agent: the script, the voice and the video are made for you. Re-render after every redesign; CI tells you when one went stale.">
 <meta property="og:image" content="https://cxmiloxx.github.io/TOURWRIGHT/social-preview.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -80,11 +80,12 @@
   <div class="mx-auto max-w-6xl px-4 pt-14 pb-12 sm:px-6 sm:pt-28 sm:pb-14">
     <p class="kicker reveal" style="--i:0">Open source · MIT · Linux, macOS, Windows</p>
     <h1 class="reveal mt-5 max-w-4xl font-display text-[clamp(44px,8.4vw,104px)] leading-[0.92] font-extrabold tracking-[-0.035em]" style="--i:1">
-      Write the tour.<br><span class="relative inline-block text-brand">Get the video.<svg class="absolute -bottom-2 left-0 h-3 w-full" viewBox="0 0 300 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 9 C 80 2, 220 2, 298 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span>
+      Show the tour.<br><span class="relative inline-block text-brand">Get the video.<svg class="absolute -bottom-2 left-0 h-3 w-full" viewBox="0 0 300 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 9 C 80 2, 220 2, 298 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span>
     </h1>
     <p class="reveal mt-8 max-w-2xl text-[clamp(17px,2vw,20px)] leading-relaxed text-muted" style="--i:2">
-      Tourwright drives a real browser through your app, puts a guided focus on each element, speaks your narration and
-      hands you an MP4 with captions and chapters. When the UI changes, you render again. No re-recording.
+      Click through your app once, or tell your AI agent what to show: Tourwright's guide has it write the script for you.
+      Then a real browser follows it with a guided focus, a voice and captions, and you get an MP4. When the UI changes,
+      you render again. No re-recording, no script to write by hand.
     </p>
     <div class="reveal mt-9 flex flex-wrap items-center gap-3" style="--i:3">
       <a class="btn-primary" href="https://github.com/CXmiloxx/tourwright#install">Get started
@@ -106,23 +107,23 @@
         <span class="flex items-center gap-2"><span class="size-2.5 rounded-full bg-[#f5a524]"></span>examples/app.yaml</span>
         <span id="stepinfo" class="tabular-nums">click a step to jump</span>
       </div>
-      <pre id="script" class="max-h-[340px] overflow-auto py-3 text-[12px] leading-[1.8] sm:max-h-[460px] sm:text-[12.5px]" aria-label="The script of the video"><span class="ln is-plain">title: Acme, de punta a punta</span><span class="ln is-plain">language: es</span><span class="ln is-plain">mask: [email, phone, id]   # real data becomes invented</span><span class="ln is-plain">steps:</span><span class="ln" data-t="0">  - title: { text: Acme, say: "Así se usa Acme." }</span><span class="ln" data-t="5.67">  - focus: { target: { label: Usuario o correo }, say: "Primero, escribe tu {usuario o correo}." }</span><span class="ln" data-t="8.6">  - type: { target: { label: Usuario o correo }, text: "${secret:ACME_USER}" }</span><span class="ln" data-t="11.15">  - focus: { target: { label: Contraseña }, say: "Luego tu {contraseña}." }</span><span class="ln" data-t="13.2">  - type: { target: { label: Contraseña }, text: "${secret:ACME_PASSWORD}" }</span><span class="ln" data-t="14.5">  - focus: { target: { role: button, name: Ingresar }, say: "Y pulsa {Ingresar}.", click: true }</span><span class="ln" data-t="16.78">  - focus: { target: { label: Código de verificación }, say: "Escribe el {código}…" }</span><span class="ln" data-t="20">  - type: { target: { label: Código de verificación }, text: "${totp:ACME_TOTP}" }</span><span class="ln" data-t="22.7">  - say: "En Clientes ves a cada cliente con sus datos de contacto y su saldo."</span><span class="ln" data-t="24.3">  - highlight: { target: table }</span><span class="ln" data-t="27.2">  - focus: { target: { role: link, name: Facturas }, say: "…abre {Facturas}.", click: true }</span><span class="ln" data-t="29.8">  - upload: { target: { label: Archivo de la factura }, files: [factura.txt] }</span><span class="ln" data-t="32.03">  - focus: { target: { role: button, name: Subir factura }, click: true }</span><span class="ln" data-t="36.75">  - say: "La factura queda guardada."</span><span class="ln" data-t="39.1">  - focus: { target: { role: link, name: Reportes }, say: "En {Reportes}…", click: true }</span><span class="ln" data-t="43.2">  - focus: { target: { role: button, name: Generar reporte }, click: true }</span><span class="ln" data-t="45.6">  - wait: { text: Reporte listo, timeout: 20000 }   # cut from the video</span><span class="ln" data-t="45.75">  - say: "Cuando termina, ves el resultado."</span><span class="ln" data-t="48.23">  - say: "Y los avisos llegan en vivo, como este pago."</span></pre>
+      <pre id="script" class="max-h-[340px] overflow-auto py-3 text-[12px] leading-[1.8] sm:max-h-[460px] sm:text-[12.5px]" aria-label="The script of the video"><span class="ln is-plain">title: Facturero en un minuto</span><span class="ln is-plain">voice: salome   # a neural voice</span><span class="ln is-plain">mask: [email, phone, id]   # real data becomes invented</span><span class="ln is-plain">theme: { frame: window, accent: "#3B82F6", titleBackground: aurora }</span><span class="ln is-plain">steps:</span><span class="ln" data-t="0">  - title: { text: Facturero en un minuto, say: "Te muestro Facturero en un minuto…" }</span><span class="ln" data-t="8.13">  - focus: { target: { label: Usuario o correo }, say: "Primero, escribe tu {usuario o correo}.", step: 1/4, zoom: 1.35 }</span><span class="ln" data-t="12.06">  - type: { target: { label: Usuario o correo }, text: "${secret:FACTURERO_USER}" }</span><span class="ln" data-t="15.2">  - focus: { target: { label: Contraseña }, say: "Luego tu {contraseña}.", step: 2/4, zoom: 1.35 }</span><span class="ln" data-t="17.52">  - type: { target: { label: Contraseña }, text: "${secret:FACTURERO_PASSWORD}" }</span><span class="ln" data-t="19.81">  - focus: { target: { role: button, name: Ingresar }, say: "Y pulsa {Ingresar}.", pulse: true, click: true }</span><span class="ln" data-t="23.41">  - focus: { target: { label: Código de verificación }, say: "Escribe el {código}…", step: 4/4 }</span><span class="ln" data-t="27.4">  - type: { target: { label: Código de verificación }, text: "${totp:FACTURERO_TOTP}" }</span><span class="ln" data-t="29.83">  - title: { text: Clientes, kicker: "Datos protegidos", background: page }</span><span class="ln" data-t="31.48">  - say: "En Clientes ves a cada cliente con sus datos de contacto y su saldo."</span><span class="ln" data-t="33.69">  - spotlight: { target: table }</span><span class="ln" data-t="35.31">  - callout: { target: { text: "$ 1.250.000" }, text: "Datos inventados en pantalla" }</span><span class="ln" data-t="37.37">  - focus: { target: { role: link, name: Facturas }, say: "Para subir una factura, abre {Facturas}.", click: true }</span><span class="ln" data-t="41.85">  - title: { text: Facturas, kicker: "Subir archivos", background: page }</span><span class="ln" data-t="43.5">  - say: "Elige el archivo de la factura y el cliente."</span><span class="ln" data-t="44.33">  - upload: { target: { label: Archivo de la factura }, files: [factura.txt] }</span><span class="ln" data-t="47.1">  - select: { target: { label: Cliente }, value: Luis Gómez }</span><span class="ln" data-t="48.63">  - focus: { target: { role: button, name: Subir factura }, say: "Y pulsa {Subir factura}.", pulse: true, click: true }</span><span class="ln" data-t="52.15">  - focus: { target: { text: guardada }, say: "La factura queda {guardada}.", zoom: 1.3 }</span><span class="ln" data-t="55.04">  - focus: { target: { role: link, name: Reportes }, say: "En {Reportes}…", click: true }</span><span class="ln" data-t="58.92">  - title: { text: Reportes, kicker: "Procesos largos", background: page }</span><span class="ln" data-t="60.68">  - focus: { target: { role: button, name: Generar reporte }, pulse: true, click: true }</span><span class="ln" data-t="65.33">  - wait: { text: Reporte listo, timeout: 20000 }   # cut from the video</span><span class="ln" data-t="65.44">  - focus: { target: { text: Reporte listo }, say: "Cuando termina, aparece el {resultado}." }</span><span class="ln" data-t="70.07">  - focus: { target: { role: status }, say: "Y los avisos llegan {en vivo}…", pulse: true }</span><span class="ln" data-t="73.49">  - title: { text: Hecho con Tourwright, animation: zoom }</span></pre>
     </div>
     <figure class="order-1 min-w-0 lg:order-2 flex flex-col gap-3">
       <div class="relative overflow-hidden rounded-2xl ring-1 ring-border shadow-[0_40px_120px_-40px_var(--glow)]">
-        <video id="video" class="block aspect-video w-full bg-ink-950" src="demo/demo.mp4" poster="demo/poster.jpg" controls preload="metadata" playsinline width="1280" height="720"><track kind="captions" src="demo/demo.vtt" srclang="es" label="Español"></video>
+        <video id="video" class="block aspect-video w-full bg-ink-950" src="demo/demo.mp4" poster="demo/poster.jpg" controls preload="metadata" playsinline width="1280" height="720"><track kind="captions" src="demo/captions.vtt" srclang="es" label="Español"></video>
       </div>
       <figcaption class="text-[14px] leading-relaxed text-muted">
-        <span class="font-medium text-fg">This video was rendered from the file next to it</span>, by CI, with nobody at the keyboard:
-        a 2FA login, invented data instead of real customers, an upload, a 20-second job cut out, a live notice.
+        <span class="font-medium text-fg">This video was rendered from the script next to it</span>, by CI, with nobody at the keyboard:
+        a 2FA login, invented data instead of real customers, an upload, a long job cut out, a live notice, in a studio frame with zoom and section cards.
         Play it and watch the script follow along.
       </figcaption>
     </figure>
   </div>
   <dl class="mt-6 grid grid-cols-2 overflow-hidden rounded-2xl border border-border bg-border gap-px sm:grid-cols-4">
-    <div class="bg-bg p-5"><dt class="text-[13px] text-muted">Steps in the script</dt><dd class="mt-1 font-display text-[32px] font-bold tabular-nums">19</dd></div>
-    <div class="bg-bg p-5"><dt class="text-[13px] text-muted">Length of the video</dt><dd class="mt-1 font-display text-[32px] font-bold tabular-nums">52 s</dd></div>
-    <div class="bg-bg p-5"><dt class="text-[13px] text-muted">To render, from scratch</dt><dd class="mt-1 font-display text-[32px] font-bold tabular-nums">74 s</dd></div>
+    <div class="bg-bg p-5"><dt class="text-[13px] text-muted">Steps in the script</dt><dd class="mt-1 font-display text-[32px] font-bold tabular-nums">38</dd></div>
+    <div class="bg-bg p-5"><dt class="text-[13px] text-muted">Length of the video</dt><dd class="mt-1 font-display text-[32px] font-bold tabular-nums">77 s</dd></div>
+    <div class="bg-bg p-5"><dt class="text-[13px] text-muted">To render, from scratch</dt><dd class="mt-1 font-display text-[32px] font-bold tabular-nums">142 s</dd></div>
     <div class="bg-bg p-5"><dt class="text-[13px] text-muted">People at the keyboard</dt><dd class="mt-1 font-display text-[32px] font-bold tabular-nums text-brand">0</dd></div>
   </dl>
 </section>
@@ -131,13 +132,14 @@
 <section id="how" class="scroll-mt-20 border-y border-border bg-surface-2/60">
   <div class="section">
     <p class="kicker">How it works</p>
-    <h2 class="h2 mt-4 max-w-3xl">Three commands, from clicking around to a video that keeps itself current.</h2>
+    <h2 class="h2 mt-4 max-w-3xl">From showing your app once to a video that keeps itself current.</h2>
     <ol class="mt-10 grid gap-4 sm:mt-14 sm:gap-5 md:grid-cols-3">
       <li class="card relative">
         <span class="font-display text-[64px] leading-none font-extrabold text-brand/25">01</span>
-        <h3 class="mt-3 font-display text-[22px] font-bold">Record or write</h3>
-        <p class="mt-2 text-[15px] text-muted">Click through your app once and get a script, or write the YAML. Targets are roles and labels, not brittle CSS.</p>
-        <pre class="code mt-5 overflow-x-auto px-4 py-3"><span class="p">$</span> tourwright record https://app.acme.com</pre>
+        <h3 class="mt-3 font-display text-[22px] font-bold">Show it, or ask for it</h3>
+        <p class="mt-2 text-[15px] text-muted">Click through your app once, or tell your AI agent what the video should show. The system asks for the script and writes it, following its own guide: you just read the narration.</p>
+        <pre class="code mt-5 overflow-x-auto px-4 py-3"><span class="p">$</span> tourwright record https://app.facturero.co
+<span class="c">  or: "make a 1-minute tour of checkout"</span></pre>
       </li>
       <li class="card relative">
         <span class="font-display text-[64px] leading-none font-extrabold text-brand/25">02</span>

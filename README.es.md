@@ -18,7 +18,7 @@ voz y entrega un `.mp4` con subtítulos, capítulos y miniatura. Hecho para pers
 
 <p align="center">
   <a href="docs/demo/demo.mp4"><img src="docs/demo/demo.gif" alt="Un video de Tourwright: login con 2FA, foco guiado en cada campo, datos inventados en lugar de clientes reales, una carga de archivo y un aviso en vivo" width="800"></a>
-  <br><sub>Hecho por Tourwright a partir de <a href="examples/app.yaml">examples/app.yaml</a>, sin nadie en el teclado. <a href="docs/demo/demo.mp4">▶ Verlo con sonido</a> (52 s)</sub>
+  <br><sub>Hecho por Tourwright a partir de <a href="examples/app.yaml">examples/app.yaml</a>, sin nadie en el teclado. <a href="docs/demo/demo.mp4">▶ Verlo con sonido</a> (77 s)</sub>
 </p>
 
 ```yaml

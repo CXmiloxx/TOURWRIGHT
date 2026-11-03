@@ -18,7 +18,7 @@ an `.mp4` with captions, chapters, subtitles and a thumbnail. Built for people *
 
 <p align="center">
   <a href="docs/demo/demo.mp4"><img src="docs/demo/demo.gif" alt="A Tourwright video: a login with 2FA, a guided focus on each field, invented data instead of real customers, an upload and a live notice" width="800"></a>
-  <br><sub>Made by Tourwright from <a href="examples/app.yaml">examples/app.yaml</a>, with nobody at the keyboard. <a href="docs/demo/demo.mp4">▶ Watch it with sound</a> (52 s)</sub>
+  <br><sub>Made by Tourwright from <a href="examples/app.yaml">examples/app.yaml</a>, with nobody at the keyboard. <a href="docs/demo/demo.mp4">▶ Watch it with sound</a> (77 s)</sub>
 </p>
 
 ```yaml

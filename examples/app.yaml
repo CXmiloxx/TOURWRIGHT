@@ -3,12 +3,14 @@
 # live notice. CI renders it on every change.
 #
 #   node examples/app/server.js &
-#   export TOURWRIGHT_SECRET_ACME_USER=demo@acme.test TOURWRIGHT_SECRET_ACME_PASSWORD=demo123
-#   export TOURWRIGHT_SECRET_ACME_TOTP=JBSWY3DPEHPK3PXP
+#   export TOURWRIGHT_SECRET_FACTURERO_USER=demo@facturero.test TOURWRIGHT_SECRET_FACTURERO_PASSWORD=demo123
+#   export TOURWRIGHT_SECRET_FACTURERO_TOTP=JBSWY3DPEHPK3PXP
 #   tourwright check examples/app.yaml            # every step, in seconds
 #   tourwright render examples/app.yaml --open
-title: Acme, de punta a punta
+title: Facturero en un minuto
 language: es
+# A neural voice (Microsoft Edge, needs internet). Offline and as natural: pocket:lola after tourwright install --pocket
+voice: salome
 baseUrl: http://127.0.0.1:4800
 # Emails, phones and ID numbers on screen become invented ones (the same real value, the same invented one)
 mask:
@@ -16,44 +18,66 @@ mask:
   - phone
   - id
   - { text: "Ana Pérez", as: "Laura Gómez" }
+# The studio look: the app inside a window on a wallpaper, titles over drifting lights, a click you can hear
+theme:
+  frame: window
+  accent: "#3B82F6"
+  titleBackground: aurora
+audio:
+  clicks: true
 steps:
   - goto: /login
-  - title: { text: Acme, subtitle: "Login con 2FA, datos protegidos, archivos y procesos largos", say: "Así se usa Acme." }
+  - title:
+      text: Facturero en un minuto
+      kicker: "Tour guiado · 1 min"
+      subtitle: "Login con 2FA, datos protegidos, archivos y procesos largos"
+      say: "Te muestro Facturero en un minuto: el ingreso, los clientes, las facturas y los reportes."
 
   # ── The login, on camera. The label "Usuario o correo" is not linked to its field (an icon wraps it):
   # `label` still finds it. The password shows as dots; secrets come from the environment.
-  - focus: { target: { label: Usuario o correo }, say: "Primero, escribe tu {usuario o correo}.", text: "<b>Usuario</b>" }
-  - type: { target: { label: Usuario o correo }, text: "${secret:ACME_USER}" }
-  - focus: { target: { label: Contraseña }, say: "Luego tu {contraseña}.", text: "<b>Contraseña</b>" }
-  - type: { target: { label: Contraseña }, text: "${secret:ACME_PASSWORD}" }
-  - focus: { target: { role: button, name: Ingresar }, say: "Y pulsa {Ingresar}.", click: true }
+  - focus: { target: { label: Usuario o correo }, say: "Primero, escribe tu {usuario o correo}.", text: "Tu <b>usuario</b> o correo", step: 1/4, zoom: 1.35 }
+  - type: { target: { label: Usuario o correo }, text: "${secret:FACTURERO_USER}" }
+  - focus: { target: { label: Contraseña }, say: "Luego tu {contraseña}.", text: "Se ve como <b>puntos</b>", step: 2/4, zoom: 1.35 }
+  - type: { target: { label: Contraseña }, text: "${secret:FACTURERO_PASSWORD}" }
+  - focus: { target: { role: button, name: Ingresar }, say: "Y pulsa {Ingresar}.", step: 3/4, zoom: 1.3, pulse: true, click: true }
 
   # ── The 2FA code of an authenticator app, made when it is typed
   - wait: { target: { label: Código de verificación } }
-  - focus: { target: { label: Código de verificación }, say: "Escribe el {código} de tu aplicación de autenticación." }
-  - type: { target: { label: Código de verificación }, text: "${totp:ACME_TOTP}" }
+  - focus: { target: { label: Código de verificación }, say: "Escribe el {código} de tu aplicación de autenticación.", text: "El código <b>cambia cada 30 s</b>", step: 4/4, zoom: 1.35 }
+  - type: { target: { label: Código de verificación }, text: "${totp:FACTURERO_TOTP}" }
   - click: { role: button, name: Verificar }
   - wait: { target: { role: heading, name: Clientes } }
 
   # ── Real data, invented on screen
+  - title: { text: Clientes, kicker: "Datos protegidos", background: page, animation: split, ms: 1200 }
   - say: "En Clientes ves a cada cliente con sus datos de contacto y su saldo."
-  - highlight: { target: table, ms: 2500 }
+  - spotlight: { target: table, ms: 2200 }
+  - callout: { target: { text: "$ 1.250.000" }, text: "Correos, teléfonos y documentos <b>inventados</b> en pantalla", ms: 2600 }
 
   # ── Uploading a file
-  - focus: { target: { role: link, name: Facturas }, say: "Para subir una factura, abre {Facturas}.", click: true }
+  - focus: { target: { role: link, name: Facturas }, say: "Para subir una factura, abre {Facturas}.", zoom: 1.4, click: true }
   - wait: { target: { role: heading, name: Facturas } }
+  - title: { text: Facturas, kicker: "Subir archivos", background: page, animation: split, ms: 1200 }
+  - say: "Elige el archivo de la factura y el cliente."
   - upload: { target: { label: Archivo de la factura }, files: [app/factura.txt] }
   - select: { target: { label: Cliente }, value: Luis Gómez }
-  - focus: { target: { role: button, name: Subir factura }, say: "Elige el archivo y el cliente, y pulsa {Subir factura}.", click: true }
+  - focus: { target: { role: button, name: Subir factura }, say: "Y pulsa {Subir factura}.", zoom: 1.4, pulse: true, click: true }
   - wait: { text: guardada }
-  - say: "La factura queda guardada."
+  - focus: { target: { text: guardada }, say: "La factura queda {guardada}.", zoom: 1.3 }
 
   # ── A long process: the wait is cut from the video, then a live notice from the server
-  - focus: { target: { role: link, name: Reportes }, say: "En {Reportes} generas el resumen del mes.", click: true }
-  - focus: { target: { role: button, name: Generar reporte }, say: "Pulsa {Generar reporte}.", click: true }
+  - focus: { target: { role: link, name: Reportes }, say: "En {Reportes} generas el resumen del mes.", zoom: 1.4, click: true }
+  - wait: { target: { role: heading, name: Reportes } }
+  - title: { text: Reportes, kicker: "Procesos largos", background: page, animation: split, ms: 1200 }
+  - focus: { target: { role: button, name: Generar reporte }, say: "Pulsa {Generar reporte}.", zoom: 1.3, pulse: true, click: true }
   - wait: { text: Reporte listo, timeout: 20000 }
-  - say: "Cuando termina, ves el resultado."
+  - focus: { target: { text: Reporte listo }, say: "Cuando termina, aparece el {resultado}.", text: "La espera se <b>cortó</b> del video", zoom: 1.35 }
   - wait: { target: { role: status } }
-  - say: "Y los avisos llegan en vivo, como este pago."
-  - pause: 1500
+  - focus: { target: { role: status }, say: "Y los avisos llegan {en vivo}, como este pago.", text: "Aviso <b>en tiempo real</b>", pulse: true }
   - say: null
+  - title:
+      text: Hecho con Tourwright
+      kicker: "github.com/CXmiloxx/tourwright"
+      subtitle: "Muestras tu app una vez: el guion, la voz y el video salen solos"
+      animation: zoom
+      ms: 2600
