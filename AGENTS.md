@@ -29,6 +29,7 @@ about changing Tourwright itself.
 | `server.json`, `glama.json` | The MCP server's entry in the official MCP Registry (version and `mcpName` in `package.json` must match); `glama.json` names the maintainers on Glama |
 | `.claude-plugin/`, `claude-plugin/` | Claude Code marketplace and plugin: the MCP server and the `make-tour` skill |
 | `.github/workflows/image.yml` | The Docker image: `latest` from `main`, `X.Y.Z`, `X.Y` and `X` for each release tag |
+| `.github/workflows/release.yml` | A release from one tag `vX.Y.Z`: npm (Trusted Publishing), the MCP Registry, the GitHub release and the `v2` tag |
 | `action.yml` | The GitHub Action (`uses: CXmiloxx/tourwright@v2`): render or check scripts in CI |
 | `site/`, `docs/demo/` | The project page (GitHub Pages, `pages.yml`; Tailwind v4 in `site/src/styles.css`, built with `npm run build` inside `site/`, its own `package.json`) and the demo video, GIF and social preview |
 | `brand/` | The logo (light and dark) and the web icons: use these files, never redraw the mark |

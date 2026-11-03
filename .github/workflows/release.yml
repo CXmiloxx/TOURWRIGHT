@@ -1,0 +1,62 @@
+# A release, from one tag: `git tag -a v2.4.0 -m "Tourwright 2.4.0" && git push origin v2.4.0`.
+#   1. checks that the tag, package.json and server.json say the same version, and runs `npm run check`
+#   2. publishes the package to npm with provenance (Trusted Publishing: no token stored anywhere)
+#   3. publishes server.json to the official MCP Registry (GitHub OIDC; it checks the version is on npm)
+#   4. creates the GitHub release with that version's section of the CHANGELOG
+#   5. moves the major tag (`v2`) that `uses: CXmiloxx/tourwright@v2` follows
+# The Docker image is built by image.yml from the same tag. Every step skips what is already done, so a failed
+# run can be started again (Actions → release → Re-run).
+name: release
+on:
+  push:
+    tags: ["v*.*.*"]
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # the GitHub release and the major tag
+      id-token: write   # npm Trusted Publishing and the MCP Registry login
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 24, registry-url: "https://registry.npmjs.org", cache: npm }
+      # Trusted Publishing needs npm 11.5.1 or newer
+      - run: npm install -g npm@^11.5.1
+      - name: Same version in the tag, package.json and server.json
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg=$(node -p "require('./package.json').version")
+          srv=$(node -p "require('./server.json').version")
+          echo "tag $tag · package.json $pkg · server.json $srv"
+          [ "$tag" = "$pkg" ] && [ "$tag" = "$srv" ] || { echo "::error::the tag, package.json and server.json must say the same version"; exit 1; }
+          grep -q "^## \[$tag\]" CHANGELOG.md || { echo "::error::CHANGELOG.md has no section for $tag"; exit 1; }
+      - run: npm ci
+      - run: npm run check
+      - name: npm
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if [ "$(npm view "tourwright@$version" version 2>/dev/null)" = "$version" ]; then echo "tourwright@$version is already on npm"; exit 0; fi
+          npm publish --provenance --access public
+      - name: MCP Registry
+        env: { PUBLISHER: v1.8.7 }
+        run: |
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/download/$PUBLISHER/mcp-publisher_linux_amd64.tar.gz" | tar -xz mcp-publisher
+          # npm takes a moment to show a new version to the registry's check
+          for i in 1 2 3 4 5 6; do npm view "tourwright@${GITHUB_REF_NAME#v}" version >/dev/null 2>&1 && break; sleep 10; done
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish || { echo "::warning::the MCP Registry did not take it (already published?)"; }
+      - name: GitHub release
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then echo "release $GITHUB_REF_NAME already exists"; exit 0; fi
+          awk -v v="$version" '$0 ~ "^## \\[" v "\\]" { on = 1; next } /^## \[/ { on = 0 } on' CHANGELOG.md | sed '/./,$!d' > notes.md
+          gh release create "$GITHUB_REF_NAME" --title "Tourwright $version" --notes-file notes.md --latest
+      - name: Major tag
+        run: |
+          major="${GITHUB_REF_NAME%%.*}"
+          git tag -f "$major" "$GITHUB_SHA"
+          git push -f origin "refs/tags/$major"

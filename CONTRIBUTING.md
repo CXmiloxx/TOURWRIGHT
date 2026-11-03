@@ -68,6 +68,20 @@ per commit; a breaking change takes `!` after the type and a `BREAKING CHANGE:` 
 
 Everyone follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
+## Releasing
+
+For maintainers. Bump the version in `package.json` (`npm version X.Y.Z --no-git-tag-version`), `server.json`
+and `claude-plugin/.claude-plugin/plugin.json`, add its section to `CHANGELOG.md`, commit, then push a tag:
+
+```bash
+git tag -a v2.4.0 -m "Tourwright 2.4.0" && git push origin v2.4.0
+```
+
+`release.yml` checks that the three versions match the tag, runs `npm run check`, publishes to npm with provenance,
+publishes `server.json` to the MCP Registry, creates the GitHub release from the CHANGELOG and moves the `v2` tag
+of the GitHub Action; `image.yml` builds the Docker image. npm takes the package without any token: the package is
+set up on npmjs.com to trust this workflow (Trusted Publishing).
+
 ## License
 
 By contributing you agree your work is released under the MIT license.
