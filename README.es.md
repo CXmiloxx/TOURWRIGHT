@@ -167,6 +167,19 @@ Como plugin de Claude Code (el servidor MCP y un skill que escribe, prueba y gra
 
 Cualquier otro cliente MCP: `{ "mcpServers": { "tourwright": { "command": "npx", "args": ["-y", "tourwright", "mcp"] } } }`.
 
+### GitHub Action
+
+Vuelve a grabar tus recorridos en cada versión, o falla el build cuando un despliegue rompió uno:
+
+```yaml
+- uses: CXmiloxx/tourwright@v2
+  with:
+    scripts: videos/*.yaml
+    command: check            # o render: los videos quedan como artefacto del workflow
+  env:
+    TOURWRIGHT_SECRET_APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+```
+
 ### API HTTP, agentes (MCP) y librería
 
 Igual que en el [README en inglés](README.md#use-it): `tourwright serve`, `tourwright mcp` y

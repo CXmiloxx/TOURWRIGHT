@@ -1,0 +1,90 @@
+# Tourwright as a GitHub Action: render your product tours on every change, or check that they still work
+# against the deployed app (a renamed button fails the job naming the step, and the job summary shows the fix).
+#
+#   - uses: CXmiloxx/tourwright@v2
+#     with:
+#       scripts: videos/*.yaml
+#       command: check          # or render (default)
+#
+# Secrets for the scripts (${secret:NAME}) come from the environment: env: { TOURWRIGHT_SECRET_NAME: ... }
+name: Tourwright
+description: Render scripted, narrated product tour videos, or check that they still match your app
+author: CXmiloxx
+branding:
+  icon: video
+  color: blue
+inputs:
+  scripts:
+    description: Scripts to use (paths or globs, separated by spaces or new lines)
+    required: true
+  command:
+    description: "render: make the videos; check: dry-run each script and report every broken step"
+    default: render
+  out:
+    description: Folder for the videos (render)
+    default: videos
+  voice:
+    description: Voice for every script (see `tourwright voices`); empty uses each script's own
+    default: ""
+  quality:
+    description: sd, hd, fullhd, vertical or square; empty uses each script's own
+    default: ""
+  voices:
+    description: Offline Piper voices to install, separated by commas
+    default: es_MX-claude-high,en_US-lessac-medium
+  version:
+    description: Tourwright version from npm
+    default: latest
+  upload:
+    description: Upload the videos as a workflow artifact (render)
+    default: "true"
+outputs:
+  folder:
+    description: Folder with the videos, subtitles, posters and manifests
+    value: ${{ steps.run.outputs.folder }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v7
+      with: { node-version: 22 }
+    - if: runner.os == 'Linux'
+      shell: bash
+      run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb > /dev/null
+    - if: runner.os == 'macOS'
+      shell: bash
+      run: brew install ffmpeg
+    - shell: bash
+      env: { VERSION: "${{ inputs.version }}", VOICES: "${{ inputs.voices }}" }
+      run: |
+        npm install -g "tourwright@$VERSION"
+        tourwright install --yes --voices "$VOICES"
+        if [ "$RUNNER_OS" = "Linux" ]; then sudo env "PATH=$PATH" npx -y playwright install-deps chromium; fi
+    - id: run
+      shell: bash
+      env:
+        COMMAND: ${{ inputs.command }}
+        SCRIPTS: ${{ inputs.scripts }}
+        OUT: ${{ inputs.out }}
+        VOICE: ${{ inputs.voice }}
+        QUALITY: ${{ inputs.quality }}
+      run: |
+        shopt -s globstar nullglob
+        files=()
+        for pattern in $SCRIPTS; do files+=($pattern); done
+        if [ ${#files[@]} -eq 0 ]; then echo "::error::no scripts match: $SCRIPTS"; exit 1; fi
+        echo "folder=$OUT" >> "$GITHUB_OUTPUT"
+        if [ "$COMMAND" = "check" ]; then
+          tourwright check "${files[@]}"
+          exit
+        fi
+        for f in "${files[@]}"; do
+          args=(render "$f" --out "$OUT/$(basename "${f%.*}")/")
+          [ -n "$VOICE" ] && args+=(--voice "$VOICE")
+          [ -n "$QUALITY" ] && args+=(--quality "$QUALITY")
+          tourwright "${args[@]}"
+        done
+    - if: inputs.command == 'render' && inputs.upload == 'true'
+      uses: actions/upload-artifact@v7
+      with:
+        name: tourwright-videos
+        path: ${{ inputs.out }}

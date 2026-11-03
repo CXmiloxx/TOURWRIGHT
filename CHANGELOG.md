@@ -10,6 +10,8 @@ All notable changes to this project are documented here. The format follows
 
 - A Claude Code plugin: `/plugin marketplace add CXmiloxx/tourwright`, then `/plugin install tourwright@tourwright`
   brings the MCP server and a `make-tour` skill that writes, checks and renders a script.
+- A GitHub Action (`uses: CXmiloxx/tourwright@v2`): render the tours on every release, or `command: check` to fail
+  the build when a deploy broke one.
 - `server.json` and `mcpName`, to list the MCP server in the official MCP Registry.
 - `render` shows its progress on one line in a terminal: the stage, the step being filmed and the time so far.
   Jobs of the API report the step too (`progress.step`, `progress.steps`).
