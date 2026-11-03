@@ -14,7 +14,8 @@
 // whole, so commas are breathed by the voice itself; the silence around each one is trimmed and a short,
 // even pause is placed between them. Every sentence and phrase is cached by engine, voice and text:
 // rendering the same script twice never asks the engine again.
-import { closeSync, existsSync, fstatSync, mkdirSync, openSync, readSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { closeSync, existsSync, fstatSync, mkdirSync, mkdtempSync, openSync, readSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadConfig } from '../config.js'
@@ -135,6 +136,42 @@ export const parseVoice = (spec, config = loadConfig(), aliases = {}) => {
   // The id ends up in file paths (piper) and in a shell line (command): letters, digits, . _ - only
   if (!/^[A-Za-z0-9_.-]+$/.test(id) || id.includes('..')) throw new UserError(`invalid voice id "${id}"`)
   return { engine, id, options, spec: withOptions(`${engine}:${id}`, options) }
+}
+
+// The most natural voice this machine can use for a language, when nobody chose one: Pocket TTS (offline,
+// natural) when installed; else a neural Microsoft voice when edge-tts answers (needs internet; tried once per
+// process with a short word); else Piper, offline everywhere.
+const AUTO = {
+  pocket: { es: 'lola', en: 'alba', pt: 'pocket:rafael', fr: 'pocket:estelle', de: 'pocket:juergen', it: 'pocket:giovanni' },
+  edge: { es: 'salome', en: 'ava' },
+  piper: { es: 'claude', en: 'lessac' },
+}
+let edgeWorks = null
+const edgeAnswers = async config => {
+  edgeWorks ??= (async () => {
+    if (!(await ENGINES.edge.available(config).catch(() => ({ ok: false }))).ok) return false
+    const dir = mkdtempSync(join(tmpdir(), 'tw-edge-'))
+    try {
+      const probe = ENGINES.edge.synthesize({ text: 'ok', voice: parseVoice('ava', config), out: join(dir, 'probe.wav'), config })
+      await Promise.race([probe, new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000))])
+      return true
+    } catch {
+      return false
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })()
+  return edgeWorks
+}
+
+/** @param {string} [language] @returns {Promise<string>} a voice spec */
+export const autoVoice = async (language, config = loadConfig()) => {
+  if (config.tts.voiceChosen) return config.tts.defaultVoice
+  const lang = String(language ?? 'es').slice(0, 2).toLowerCase()
+  if (config.tts.pocket?.python) return AUTO.pocket[lang] ?? AUTO.pocket.en
+  // Multilingual Ava speaks the other languages without a strong accent
+  if (await edgeAnswers(config)) return AUTO.edge[lang] ?? 'ava'
+  return AUTO.piper[lang] ?? config.tts.defaultVoice
 }
 
 // A voice with some options changed: `withProsody('ana', { rate: '+10%' })` → 'ana?rate=+10%'.

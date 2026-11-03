@@ -8,7 +8,7 @@ import { loadConfig } from '../config.js'
 import { interpolate, secretsShown } from '../script/load.js'
 import { hash, holdsSecret, log, mapLimit, plainText, UserError } from '../util.js'
 import { builtInSound, typingSound } from '../voice/effects.js'
-import { durationOf, markedLine, narrate, parseVoice, stripMarks, withProsody } from '../voice/index.js'
+import { autoVoice, durationOf, markedLine, narrate, parseVoice, stripMarks, withProsody } from '../voice/index.js'
 import { launchChromium } from './chromium.js'
 import { CHROME_MAX, openDisplay, pickCapture, recordScreen, recordScreencast } from './capture.js'
 import { centerOf, createCursor } from './cursor.js'
@@ -73,7 +73,8 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   const height = opts.height ?? script.height ?? quality.height
   const fps = script.fps ?? config.render.fps
   const dryRun = Boolean(opts.dryRun)
-  const voiceSpec = opts.voice ?? script.voice ?? config.tts.defaultVoice
+  // Nobody chose one: the most natural voice this machine has for the script's language
+  const voiceSpec = opts.voice ?? script.voice ?? (dryRun ? config.tts.defaultVoice : await autoVoice(script.language, config))
   const voice = dryRun || voiceSpec === 'none' ? null : voiceSpec
   const mode = dryRun ? 'dry' : pickCapture(opts.capture ?? config.render.capture, config)
   const work = opts.workDir

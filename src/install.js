@@ -414,6 +414,11 @@ export const installAll = async ({ voices = DEFAULT_VOICES, edge = true, chromiu
   if (pocket) await installPocket(config)
   if (chromium) await installChromium(config)
   if (platform() === 'linux' && !config.xvfb) log.info('Optional, for the sharpest capture: install Xvfb (apt install xvfb)')
+  // Without Pocket the natural voices need internet (Microsoft's): say how to have them offline too
+  if (!pocket && !config.tts.pocket?.python) {
+    log.info('Voices: with internet each video uses a natural neural voice; offline it falls back to Piper, more synthetic.')
+    log.info('  For natural voices offline too: tourwright install --pocket (about 1 GB, once)')
+  }
   // The packages are installed: what was downloaded to install them is not needed any more
   const freed = cleanDownloads(config)
   if (freed) log.info(`removed ${human(freed)} of downloads (tourwright clean shows what Tourwright takes)`)

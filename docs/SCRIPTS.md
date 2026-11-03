@@ -383,6 +383,12 @@ Slides with `title` and no image start a chapter; `chapter` names one explicitly
 
 ## Voices and how they speak
 
+With no `voice` in the script, on the command line (`--voice`) or in your settings (`tourwright config set voice`),
+each render picks the most natural voice it has **for the script's `language`**: Pocket TTS when it is installed
+(offline), else Microsoft's neural voices when they answer (internet: `salome` in Spanish, `ava` in English and
+the other languages), else Piper (offline everywhere, more synthetic). `tourwright voices` says which one it is on
+this machine.
+
 `voice` is `engine:id[?options]` or a name:
 
 | Voice | Engine | Notes |

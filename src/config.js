@@ -148,6 +148,8 @@ export const loadConfig = (overrides = {}) => {
     tts: {
       // The most natural voice installed: Pocket TTS when it is there, else Piper
       defaultVoice: env.TOURWRIGHT_VOICE ?? file.tts?.defaultVoice ?? (pocket ? 'pocket:lola' : 'piper:es_MX-claude-high'),
+      // Nobody chose a voice: each render picks the most natural one for its language (voice/index.js autoVoice)
+      voiceChosen: Boolean(env.TOURWRIGHT_VOICE ?? file.tts?.defaultVoice),
       pocket: { python: pocket },
       piper: {
         python: piperPython(home, file),

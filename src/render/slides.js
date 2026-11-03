@@ -8,7 +8,7 @@ import { loadConfig } from '../config.js'
 import { launchChromium } from './chromium.js'
 import { concatEntry, escapeHtml, log, mapLimit, plainText, UserError } from '../util.js'
 import { builtInSound } from '../voice/effects.js'
-import { narrate, stripMarks, withProsody } from '../voice/index.js'
+import { autoVoice, narrate, stripMarks, withProsody } from '../voice/index.js'
 import { resolveTheme, safePath, themeCss, titleHtml, toDataUrl } from './theme.js'
 
 // Clips and the crossfade are temporary (compose encodes the final video): fastest preset, low CRF
@@ -78,7 +78,8 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
   const width = opts.width ?? script.width ?? quality.width
   const height = opts.height ?? script.height ?? quality.height
   const fps = script.fps ?? config.render.fps
-  const voiceSpec = opts.voice ?? script.voice ?? config.tts.defaultVoice
+  // Nobody chose one: the most natural voice this machine has for the script's language
+  const voiceSpec = opts.voice ?? script.voice ?? (opts.dryRun ? config.tts.defaultVoice : await autoVoice(script.language, config))
   const voice = opts.dryRun || voiceSpec === 'none' ? null : voiceSpec
   const theme = resolveTheme(script.theme, config.theme, dir, { sandboxed })
   const work = opts.workDir

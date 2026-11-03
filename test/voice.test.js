@@ -84,3 +84,14 @@ test('wavDuration reads the length from the header, and gives up on anything els
   assert.equal(wavDuration(join(dir, 'c.wav')), null)
   assert.equal(wavDuration(join(dir, 'missing.wav')), null)
 })
+
+test('with no voice chosen, each render gets the most natural one for its language', async () => {
+  const { autoVoice } = await import('../src/voice/index.js')
+  const base = { tts: { defaultVoice: 'piper:es_MX-claude-high', voiceChosen: false, pocket: {}, edge: { bin: null } } }
+  assert.equal(await autoVoice('es', { ...base, tts: { ...base.tts, voiceChosen: true, defaultVoice: 'jorge' } }), 'jorge')
+  assert.equal(await autoVoice('en', { ...base, tts: { ...base.tts, pocket: { python: '/py' } } }), 'alba')
+  assert.equal(await autoVoice('fr', { ...base, tts: { ...base.tts, pocket: { python: '/py' } } }), 'pocket:estelle')
+  // No Pocket, no edge-tts: Piper in the script's language
+  assert.equal(await autoVoice('en', base), 'lessac')
+  assert.equal(await autoVoice('es', base), 'claude')
+})

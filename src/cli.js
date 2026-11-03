@@ -15,7 +15,7 @@ import { checkScript, markdownReport, textReport, writeFixes } from './repair.js
 import { listSettings, setSetting, unsetSetting } from './settings.js'
 import { clearSecrets, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret } from './secrets.js'
 import { log, openPath, setStatus, UserError } from './util.js'
-import { listVoices, narrate, recordSamples, SAMPLES_DIR, SAMPLES_URL } from './voice/index.js'
+import { autoVoice, listVoices, narrate, recordSamples, SAMPLES_DIR, SAMPLES_URL } from './voice/index.js'
 
 const HELP = `tourwright — scripts into narrated videos
 
@@ -378,7 +378,8 @@ export const main = async argv => {
       }
       const v = await listVoices(config)
       if (values.json) return void process.stdout.write(`${JSON.stringify(v, null, 2)}\n`)
-      process.stdout.write(`default: ${v.default}\n\n`)
+      process.stdout.write(config.tts.voiceChosen ? `default: ${v.default}\n\n`
+        : `default: automatic, the most natural for the script's language: Pocket TTS when installed, else Microsoft's neural voices (internet), else Piper. Now in Spanish: ${await autoVoice('es', config)} · in English: ${await autoVoice('en', config)}\n(tourwright config set voice <name> to always use one)\n\n`)
       for (const [e, s] of Object.entries(v.engines)) process.stdout.write(`${s.ok ? '✔' : '✘'} ${e.padEnd(8)} ${s.ok ? '' : s.reason}\n`)
       process.stdout.write('\n')
       const NAMES = { es: 'Español', en: 'English', fr: 'Français', de: 'Deutsch', it: 'Italiano', pt: 'Português' }
