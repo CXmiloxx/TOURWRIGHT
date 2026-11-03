@@ -1,0 +1,12 @@
+{
+  "name": "tourwright",
+  "version": "2.0.0",
+  "description": "Make narrated product tours and how-to videos of any web app: the Tourwright MCP server and a skill that writes, checks and renders the script",
+  "author": {
+    "name": "CXmiloxx"
+  },
+  "homepage": "https://github.com/CXmiloxx/tourwright",
+  "repository": "https://github.com/CXmiloxx/tourwright",
+  "license": "MIT",
+  "keywords": ["video", "product-tour", "walkthrough", "tutorial", "narration", "text-to-speech", "playwright", "mcp"]
+}

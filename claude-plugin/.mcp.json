@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "tourwright": {
+      "command": "npx",
+      "args": ["-y", "tourwright", "mcp"]
+    }
+  }
+}

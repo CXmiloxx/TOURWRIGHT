@@ -26,6 +26,8 @@ about changing Tourwright itself.
 | `src/server/http.js` | HTTP API |
 | `examples/app/` | A demo app with no dependencies (2FA login, personal data, upload, long process, live notice) that CI films |
 | `src/mcp.js` | MCP server |
+| `server.json` | The MCP server's entry in the official MCP Registry (version and `mcpName` in `package.json` must match) |
+| `.claude-plugin/`, `claude-plugin/` | Claude Code marketplace and plugin: the MCP server and the `make-tour` skill |
 
 ## Rules
 

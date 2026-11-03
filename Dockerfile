@@ -53,5 +53,7 @@ RUN for v in $VOICES; do node bin/tourwright.js install-voice "$v"; done \
 USER node
 VOLUME /var/lib/tourwright
 EXPOSE 4700
+# The MCP Registry checks that this image belongs to the server it lists (server.json)
+LABEL io.modelcontextprotocol.server.name="io.github.CXmiloxx/tourwright"
 ENTRYPOINT ["tini", "--", "node", "/app/bin/tourwright.js"]
 CMD ["serve", "--worker"]
