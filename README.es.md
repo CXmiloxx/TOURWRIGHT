@@ -87,7 +87,11 @@ tourwright clean                      # cuánto ocupa cada parte; borra descarga
 tourwright doctor                     # qué funciona en esta máquina
 ```
 
-Sin instalar nada global: `npx tourwright <comando>`.
+Sin instalar nada global: `npx tourwright <comando>`. Con pnpm: `pnpm add -g tourwright` (en la 2.0.0,
+agrega `--no-optional`).
+
+La cola en Redis y Claude para `narrate` son opcionales: instala `bullmq ioredis` o `@anthropic-ai/sdk` junto a
+Tourwright cuando los uses (`npm install -g bullmq ioredis`). La imagen de Docker ya los trae.
 
 ### Sin Docker (Linux, macOS, Windows)
 
