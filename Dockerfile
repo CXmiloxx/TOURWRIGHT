@@ -31,13 +31,13 @@ RUN arch=$([ "$TARGETARCH" = "arm64" ] && echo aarch64 || echo x86_64) \
 
 WORKDIR /app
 COPY package.json package-lock.json ./
-# The Redis queue (bullmq, ioredis) and Claude for `narrate` are optional peers of the npm package: the
-# image brings them, at the versions of the lockfile. They are also devDependencies (for the checks), so
-# they are dropped from there first, or --omit=dev would leave them out
-RUN npm ci --omit=dev --no-audit --no-fund \
- && peers=$(node -p "['bullmq', 'ioredis', '@anthropic-ai/sdk'].map(n => n + '@' + require('./package-lock.json').packages['node_modules/' + n].version).join(' ')") \
- && npm pkg delete devDependencies \
- && npm install --omit=dev --no-audit --no-fund $peers \
+COPY scripts/docker-deps.js ./scripts/
+# The image brings the Redis queue and Claude for `narrate`, optional for an npm install: everything is installed
+# from the lockfile (NODE_ENV=production would skip devDependencies), they are kept, and the dev tools go
+RUN npm ci --include=dev --no-audit --no-fund \
+ && node scripts/docker-deps.js \
+ && npm prune --no-audit --no-fund \
+ && find node_modules -mindepth 1 -maxdepth 1 -type d -empty -delete \
  && npx playwright install --with-deps chromium \
  && rm -rf /var/lib/apt/lists/* /root/.npm /tmp/*
 
