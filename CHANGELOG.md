@@ -13,6 +13,11 @@ All notable changes to this project are documented here. The format follows
 - The Docker image is tagged with each release (`2.1.0`, `2.1`, `2`) besides `latest`, so a server or a Kubernetes
   deployment can pin a version; the Kubernetes manifest and the deployment guide use `:2`.
 
+### Changed
+
+- The Docker image speaks with `piper-tts` kept loaded, like `tourwright install`, instead of the archived standalone
+  Piper: ten sentences take 5 s instead of 9.5 s. Voice samples and the demo video no longer go into the image.
+
 ### Fixed
 
 - The 2.1.0 Docker image came without BullMQ, ioredis and the Claude SDK, so its Redis queue (the one
