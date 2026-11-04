@@ -37,5 +37,25 @@ jobs:
           sleep 1
           node bin/tourwright.js check examples/app.yaml examples/example-com.yaml examples/features.yaml
           node bin/tourwright.js render examples/app.yaml --capture ${{ inputs.capture }} --out out/
+      # The same app as a vertical video with the capture chosen on its own, the way the Docker image films it
+      # (Xvfb here): the job fails when the review finds text too small, a page cut off, a caption over the
+      # element shown, a blank screen or a long silence
+      - name: Demo app, vertical, reviewed
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          TOURWRIGHT_SECRET_FACTURERO_USER: demo@facturero.test
+          TOURWRIGHT_SECRET_FACTURERO_PASSWORD: demo123
+          TOURWRIGHT_SECRET_FACTURERO_TOTP: JBSWY3DPEHPK3PXP
+        run: |
+          node examples/app/server.js &
+          sleep 1
+          node bin/tourwright.js render examples/app.yaml --quality vertical --out out/vertical/
+          node -e '
+            const { review = [] } = JSON.parse(require("node:fs").readFileSync("out/vertical/app.json", "utf8"))
+            const bad = review.filter(f => ["layout", "caption", "blank", "silence"].includes(f.kind))
+            for (const f of bad) console.log(`::error::vertical video, ${f.kind}${f.step ? ` (step ${f.step})` : ""}: ${f.message}`)
+            process.exit(bad.length ? 1 : 0)
+          '
       - uses: actions/upload-artifact@v7
         with: { name: "videos-${{ inputs.os }}", path: out/ }
