@@ -6,8 +6,9 @@
 //               rate into ffmpeg. Runs anywhere Chromium runs (containers, ARM, no X server).
 //   playwright  Playwright's built-in recorder (VP8, lower quality). Last resort.
 //
-// `auto` picks screen when Xvfb exists, screencast otherwise. A vertical video is always a screencast: the virtual
-// display draws at 1x, so a phone-sized video would show the app's desktop layout, tiny in the middle of the screen.
+// `auto` picks screen when Xvfb exists, screencast otherwise. A page drawn bigger than 1x (a vertical video, or
+// `scale`) is always a screencast: the virtual display draws at 1x, so a phone-sized video would show the app's
+// desktop layout, tiny in the middle of the screen.
 import { spawn } from 'node:child_process'
 import { loadConfig } from '../config.js'
 

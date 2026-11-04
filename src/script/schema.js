@@ -176,6 +176,8 @@ const common = {
 const browser = z.object({
   type: z.literal('browser').optional(),
   ...common,
+  scale: z.number().min(1).max(4).optional()
+    .describe('How big the page is drawn: the page is width/scale CSS pixels wide, at that density. 2 (default on vertical videos) shows a phone layout that fills the screen; 1 (default otherwise) a desktop one; 2.75 on a vertical video is an iPhone (393 px)'),
   baseUrl: z.string().optional().describe('Relative paths in goto resolve against it. Local scripts may use a folder next to them ("./site/"): pages without a server'),
   session: z.string().regex(/^[\w.-]+$/).optional().describe('Name of a saved browser session (cookies) reused between renders'),
   setup: z.array(step).optional().describe('Steps run off camera before recording (log in…). Skipped while `session` is still valid'),

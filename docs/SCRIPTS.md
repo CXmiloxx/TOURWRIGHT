@@ -52,6 +52,7 @@ title: Create your first invoice
 language: en                              # narration language (audio track, browser locale)
 voice: lessac                             # see "Voices"
 quality: hd                               # sd 854×480 · hd 1280×720 · fullhd 1920×1080 · vertical 1080×1920 · square 1080×1080
+scale: 1                                  # how big the page is drawn: 1 desktop (default), 2 phone (default on vertical)
 baseUrl: https://app.example.com
 blur: ['[data-private]', '.email']        # CSS selectors blurred for the whole video (personal data)
 music: { file: music.mp3, volume: 0.12 }  # optional, looped and lowered while someone speaks
@@ -318,6 +319,21 @@ hosts:
 The browser opens `https://app.example.com/…` and Tourwright serves it from `http://localhost:3000` (cookies,
 WebSockets and live event streams included). Useful to film a local or staging copy under its real domain.
 Not available to API jobs.
+
+### How big the page is drawn
+
+`scale` decides how many CSS pixels the page gets: `width / scale`, drawn at that density, so the video stays
+sharp. The app picks its layout from that width.
+
+| | Video | Page (CSS) | Layout |
+|---|---|---|---|
+| `quality: hd` (default `scale: 1`) | 1280×720 | 1280×720 | desktop |
+| `quality: vertical` (default `scale: 2`) | 1080×1920 | 540×960 | phone, filling the screen |
+| `quality: vertical`, `scale: 2.75` | 1080×1920 | 393×698 | an iPhone |
+| `quality: fullhd`, `scale: 1.5` | 1920×1080 | 1280×720 | desktop, everything bigger |
+
+Raise it when the app looks small with empty space around it; lower it when the page does not fit. With
+`--capture screen` (Xvfb) the page is always drawn at 1×: `auto` uses a screencast for any other scale.
 
 ## Narrated slides
 
