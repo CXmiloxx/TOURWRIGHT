@@ -22,7 +22,7 @@ import { markOffered, resolveTarget } from './targets.js'
 import { guideEntry, writeGuide } from '../guide.js'
 import { drawFrame } from './frame.js'
 import { resolveTheme, safePath, themeCss, titleHtml } from './theme.js'
-import { callout, camera, cameraOut, filePicker, focusOff, focusOn, frame, hideTitle, setCaption, showTitle, spotlight, tap } from './visuals.js'
+import { callout, camera, cameraOut, captionClear, filePicker, focusOff, focusOn, frame, hideTitle, setCaption, showTitle, spotlight, tap } from './visuals.js'
 
 // A local script may point baseUrl at a folder or file next to it ("./site/"): pages without a server.
 // A scheme needs two letters at least, so Windows' "C:\\" is a path.
@@ -211,7 +211,12 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
 
     const cursor = createCursor(page, { width: pageSize.width, height: pageSize.height, dryRun })
     const moveTo = cursor.moveTo
-    const center = locator => centerOf(page, locator, dryRun)
+    // Where the cursor goes; the caption gets out of its way first
+    const center = async locator => {
+      const at = await centerOf(page, locator, dryRun)
+      if (!dryRun) await captionClear(page, at)
+      return at
+    }
 
     // Slow preparation (a voice or a sound made for the first time) is cut from the video
     const offClock = async fn => {
@@ -418,11 +423,13 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
           await wait(dryRun ? 0 : 700)
         } else await v.releaseCamera()
         // The voice starts and the cursor glides there meanwhile: no silence while it travels
-        const { x, y } = await center(locator)
+        const target = await center(locator)
+        const { x, y } = target
         const shown = caption ?? (spoken || null)
         if (shown) {
           const html = stripMarks(shown)
           await setCaption(page, html)
+          if (!dryRun) await captionClear(page, target)
           closeCaption()
           markStart()
           captions.push({ start: now(), text: plainText(html) })

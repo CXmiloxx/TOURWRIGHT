@@ -34,6 +34,27 @@ export const setCaption = (page, html) =>
     c.innerHTML = html
   }, html ?? '')
 
+/**
+ * The caption never covers what the viewer must see: when the element the cursor goes to sits under it (an option
+ * of a list, a field low on a phone), it moves to the top of the screen, and back down once the element is clear.
+ * @param {import('playwright').Page} page @param {{ x: number, y: number, width?: number, height?: number }} box
+ */
+export const captionClear = (page, box) =>
+  page
+    .evaluate(b => {
+      const c = document.getElementById('tw-caption')
+      if (!c) return
+      const w = b.width ?? 0
+      const h = b.height ?? 0
+      const under = r => b.x - w / 2 < r.right + 12 && b.x + w / 2 > r.left - 12 && b.y - h / 2 < r.bottom + 12 && b.y + h / 2 > r.top - 12
+      const top = c.classList.contains('tw-top')
+      // Where it would be at the bottom: measured without the class, put back before the next frame is drawn
+      if (top) c.classList.remove('tw-top')
+      const covers = under(c.getBoundingClientRect())
+      c.classList.toggle('tw-top', covers)
+    }, box)
+    .catch(() => {})
+
 /** @param {import('playwright').Page} page @param {Box} box */
 export const frame = (page, box, ms) =>
   page.evaluate(([b, ms]) => {

@@ -83,7 +83,7 @@ export const themeCss = t => `
   #tw-ripple.tw-show { animation: tw-ripple .6s cubic-bezier(.2, .8, .3, 1); }
   @keyframes tw-ripple { from { opacity: 1; transform: scale(.25) } to { opacity: 0; transform: scale(1.8) } }
   #tw-caption { position: fixed; z-index: 2147483645; left: 50%; bottom: 4vh; transform: translateX(-50%);
-    max-width: 70%; padding: .7em 1.35em; border-radius: 18px; background: color-mix(in srgb, var(--tw-bg) 78%, transparent);
+    width: max-content; max-width: 70%; padding: .7em 1.35em; border-radius: 18px; background: color-mix(in srgb, var(--tw-bg) 78%, transparent);
     -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4);
     border: 1px solid color-mix(in srgb, var(--tw-text) 14%, transparent); border-left: 4px solid var(--tw-accent);
     color: var(--tw-text); font: 600 clamp(18px, 1.45vw, 30px)/1.45 var(--tw-font); letter-spacing: -.005em;
@@ -91,6 +91,8 @@ export const themeCss = t => `
     animation: tw-up .5s cubic-bezier(.2, .9, .3, 1.15); }
   @keyframes tw-up { from { opacity: 0; transform: translate(-50%, 18px) scale(.96); filter: blur(4px) } to { opacity: 1; transform: translate(-50%, 0) } }
   #tw-caption b, #tw-caption strong { color: var(--tw-accent); }
+  /* Moved to the top while the element the cursor goes to sits under it */
+  #tw-caption.tw-top { bottom: auto; top: 4vh; }
   #tw-title { position: fixed; inset: 0; z-index: 2147483644; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 22px; color: var(--tw-text); text-align: center;
     font-family: var(--tw-font); background: var(--tw-gradient); overflow: hidden; }
@@ -225,6 +227,7 @@ export const themeCss = t => `
      with their own buttons and text */
   @media (orientation: portrait) {
     #tw-caption { bottom: 17vh; max-width: 88%; font-size: clamp(18px, 3.8vw, 40px); padding: .75em 1.2em; }
+    #tw-caption.tw-top { bottom: auto; top: 7vh; }
     .tw-callout { max-width: min(560px, 74vw); font-size: clamp(15px, 3.2vw, 32px); }
     #tw-title h1 { font-size: min(9.5vw, 6vh); max-width: 88%; }
     #tw-title p { font-size: min(4.4vw, 2.6vh); max-width: 86%; }
