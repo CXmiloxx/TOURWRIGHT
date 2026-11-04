@@ -4,6 +4,29 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [2.4.0]
+
+Vertical videos that fill the screen with the app's phone layout, captions that never cover what is being used,
+and walkthroughs without long silences on heavy pages.
+
+### Added
+
+- `scale` in a browser script: how big the page is drawn (the page is `width / scale` CSS pixels wide, at that
+  density). `scale: 2.75` on a vertical video shows the app as on an iPhone; `scale: 1.5` on Full HD makes
+  everything bigger and stays sharp.
+
+### Fixed
+
+- Vertical videos rendered with Xvfb (the Docker image) showed the app's desktop layout, tiny in the middle of the
+  screen: `capture: auto` now films them as a screencast at twice the density, the way a phone shows the app.
+- Captions wrapped at half the screen width into a tall box of five or six lines that covered the page; they now
+  take the width they need (up to 70 %, 88 % on vertical), and move to the top while the element the cursor goes to
+  sits under them (an option of a list, a field low on a phone).
+- On heavy pages (long lists with hover styles, servers without GPU) each cursor glide could take several seconds
+  of silence: it now takes a set time (0.28–0.65 s), with fewer moves when the page is slow.
+- Waiting for an element to show up (a search result, a list still loading) is cut from the video once the voice
+  has stopped, like a page that loads.
+
 ## [2.3.0]
 
 Videos with a studio look, narration that sounds clear and even, a natural voice chosen for each script's language,
