@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- The review of every video now also reports text too small to read and pages wider than the video (`layout`),
+  a caption that covers the element shown even at the top (`caption`), and 6 s or more with nothing to hear in a
+  narrated video (`silence`): the mistakes of a vertical video filmed with a desktop layout are named before
+  anyone watches it.
+
 ## [2.4.0]
 
 Vertical videos that fill the screen with the app's phone layout, captions that never cover what is being used,

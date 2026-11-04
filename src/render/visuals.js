@@ -52,8 +52,10 @@ export const captionClear = (page, box) =>
       if (top) c.classList.remove('tw-top')
       const covers = under(c.getBoundingClientRect())
       c.classList.toggle('tw-top', covers)
+      // True when it covers the element at the top too: a big element, or one that fills the screen
+      return covers && c.textContent?.trim() !== '' && under(c.getBoundingClientRect())
     }, box)
-    .catch(() => {})
+    .catch(() => false)
 
 /** @param {import('playwright').Page} page @param {Box} box */
 export const frame = (page, box, ms) =>

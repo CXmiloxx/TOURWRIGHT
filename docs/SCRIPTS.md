@@ -740,7 +740,14 @@ in a help center or print as PDF — and `tour.guide.md` with its pictures in `t
 
 ### The review of every video
 
-While a video is filmed and once it is finished, Tourwright looks for what a viewer would notice: a JavaScript
-error or a 5xx answer on the page, a click that changed nothing (the wrong element, or a missing wait), and a
-blank or black screen for more than a second. Each finding is printed with its step and saved under `review` in
-the video's `.json` manifest; none of them stops the render.
+While a video is filmed and once it is finished, Tourwright looks for what a viewer would notice. Each finding is
+printed with its step and saved under `review` in the video's `.json` manifest; none of them stops the render.
+
+| `kind` | What it means | What usually fixes it |
+|---|---|---|
+| `page-error`, `http` | A JavaScript error, or a 5xx answer, on the page | The app, or the data the tour uses |
+| `no-effect` | A click that changed nothing | The right target, or a `wait` before it |
+| `layout` | The page's text is too small to read (under about 1.1 % of the video height), or the page is wider than the video and its right side is cut off. Once per address | `scale: 2` on a vertical video, or the app's mobile layout ([How big the page is drawn](#how-big-the-page-is-drawn)) |
+| `caption` | The caption covers the element shown, even moved to the top of the screen | A smaller target, or a shorter caption |
+| `blank` | A blank or black screen for more than a second | A `wait` for the content |
+| `silence` | 6 s or more with nothing to hear, in a narrated video | A slow page or search filmed whole: a `wait` (always cut from the video), or a shorter `ms` |

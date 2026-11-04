@@ -17,7 +17,7 @@ import { OVERLAY } from './overlay.js'
 import { needsPrep, prepare, saveSession, sessionPath } from './session.js'
 import { dismissing, hideTyped, locate, plainHelpers, runSteps, setStepTimeout, spokenLines } from './steps.js'
 import { maskInPage } from './mask.js'
-import { clickWithEffect, reportFindings, reviewVideo, watchPage } from './review.js'
+import { checkLayout, clickWithEffect, reportFindings, reviewVideo, watchPage } from './review.js'
 import { markOffered, resolveTarget } from './targets.js'
 import { guideEntry, writeGuide } from '../guide.js'
 import { drawFrame } from './frame.js'
@@ -222,8 +222,21 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       const quiet = Math.max(from, voiceEnd)
       if (!dryRun && now() - quiet > 0.3) cuts.push([quiet, now()])
       const at = await centerOf(page, locator, dryRun)
-      if (!dryRun) await captionClear(page, at)
+      if (!dryRun) await clearCaption(at, locator)
+      await lookAtLayout()
       return at
+    }
+    // A caption that cannot get out of the way (an element as tall as the screen) is said once per element
+    const clearCaption = async (at, locator) => {
+      if (await captionClear(page, at)) watcher.add({ kind: 'caption', message: `the caption covers ${locator} even at the top of the screen (focus a smaller element, or a shorter caption)` })
+    }
+    // Each address is looked at once: text too small to read, content wider than the video
+    const laidOut = new Set()
+    const lookAtLayout = async () => {
+      const address = page.url().split('#')[0]
+      if (dryRun || laidOut.has(address)) return
+      laidOut.add(address)
+      for (const message of await checkLayout(page, { density, height })) watcher.add({ kind: 'layout', message: `${address}: ${message}` })
     }
 
     // Slow preparation (a voice or a sound made for the first time) is cut from the video
@@ -250,6 +263,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       const idle = () => page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {})
       await (now() < voiceEnd ? idle() : offClock(idle))
       await cursor.restore()
+      await lookAtLayout()
     }
 
     // The camera stays close after a zoomed focus, until a step that needs the whole page (steps.js)
@@ -437,7 +451,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         if (shown) {
           const html = stripMarks(shown)
           await setCaption(page, html)
-          if (!dryRun) await captionClear(page, target)
+          if (!dryRun) await clearCaption(target, locator)
           closeCaption()
           markStart()
           captions.push({ start: now(), text: plainText(html) })
@@ -710,7 +724,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       frame: studioFrame,
     }, config)
     // The finished video is looked at too; the findings go into its manifest
-    const review = [...watcher.findings, ...(await reviewVideo(result.paths.video, config))]
+    const review = [...watcher.findings, ...(await reviewVideo(result.paths.video, config, { narrated: narrations.length > 0 }))]
     reportFindings(review)
     writeFileSync(result.paths.manifest, JSON.stringify({ ...JSON.parse(readFileSync(result.paths.manifest, 'utf8')), review }, null, 2))
     return { ...result, review }
