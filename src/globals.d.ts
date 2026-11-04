@@ -10,6 +10,7 @@ declare global {
     __twSseEmit?: (id: string, type: string, data: string, lastEventId?: string) => void
     // The review's probe: how many changes a click made (src/render/review.js)
     __twChanges?: number
+    __twFields?: WeakSet<Element>
     __twProbe?: MutationObserver
     // `tourwright record` (src/record.js)
     __twRecording?: boolean

@@ -105,7 +105,7 @@ Each step is an object with **exactly one** action.
 | `type` | `{ target, text, delay?, clear? }` | Clicks a field and types letter by letter |
 | `fill` | `{ target, text }` | Fills a field instantly |
 | `press` | key | `Enter`, `Tab`, `Control+A`… |
-| `select` | `{ target, value }` | The cursor clicks the list, then the option is chosen |
+| `select` | `{ target, value, search? }` | The cursor clicks the list, then the option is chosen. Works on a `<select>` and on lists of their own (React Select, MUI, Ant, a search box over a list): `search` is typed into the field the list brings, the wait for the results is cut from the video, and the option is picked by its text (or part of it). `value` can be a list, for multi-selects |
 | `highlight` | target or `{ target, ms? }` | Draws a frame around the element |
 | `spotlight` | target or `{ target, ms? }` | Dims everything except the element |
 | `callout` | `{ target, text, ms?, position? }` | A speech bubble pointing at the element (`auto`, `top`, `bottom`, `left`, `right`); text may have `<b>` |

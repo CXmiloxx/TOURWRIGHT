@@ -81,7 +81,8 @@ export const STEPS = {
     .describe('Click a field and type letter by letter'),
   fill: z.object({ target, text: z.string() }).strict().describe('Fill a field instantly'),
   press: z.string().describe('Press a key: Enter, Tab, Control+A…'),
-  select: z.object({ target, value: z.union([z.string(), z.array(z.string())]) }).strict().describe('Choose an option of a <select>'),
+  select: z.object({ target, value: z.union([z.string(), z.array(z.string())]), search: z.string().min(1).optional() }).strict()
+    .describe('Choose an option: of a <select>, or of a list of its own (React Select, MUI, Ant, a search box over a list), opened with a click, narrowed by typing `search` and picked by the text of the option (or part of it)'),
   highlight: targetWith({ ms: ms.optional() }).describe('Draw a frame around an element'),
   spotlight: targetWith({ ms: ms.optional() }).describe('Dim everything except an element'),
   focus: z.object({

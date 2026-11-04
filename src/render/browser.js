@@ -15,7 +15,7 @@ import { centerOf, createCursor } from './cursor.js'
 import { createGuard, setupNetwork } from './network.js'
 import { OVERLAY } from './overlay.js'
 import { needsPrep, prepare, saveSession, sessionPath } from './session.js'
-import { dismissing, hideTyped, locate, plainHelpers, runSteps, setStepTimeout, spokenLines } from './steps.js'
+import { dismissing, hideTyped, isNativeSelect, listOption, listSearch, locate, markFields, missingOption, plainHelpers, runSteps, setStepTimeout, spokenLines } from './steps.js'
 import { maskInPage } from './mask.js'
 import { checkLayout, clickWithEffect, reportFindings, reviewVideo, watchPage } from './review.js'
 import { markOffered, resolveTarget } from './targets.js'
@@ -550,16 +550,42 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
         if (await cameraOut(page).catch(() => false)) await wait(dryRun ? 0 : 750)
       },
       // The cursor goes to the list and clicks before the choice changes
-      select: async (locator, value) => {
+      select: async (locator, value, search) => {
         locator = locator.first()
         const { x, y } = await center(locator)
         await moveTo(x, y)
         await wait(200)
         if (clickSound) effect(clickSound)
-        if (!dryRun) await tap(page, x, y)
-        await wait(250)
-        await locator.selectOption(value)
-        await wait(450)
+        if (await isNativeSelect(locator)) {
+          if (!dryRun) await tap(page, x, y)
+          await wait(250)
+          await locator.selectOption(value)
+          return void (await wait(450))
+        }
+        // A list of its own: opened, narrowed by a quick search, the option picked. The wait for the results
+        // is cut from the video (center), so a slow search never shows as dead air
+        for (const [i, text] of [value].flat().entries()) {
+          if (i) {
+            const again = await center(locator)
+            await moveTo(again.x, again.y)
+            await wait(150)
+          }
+          await markFields(page)
+          await locator.click()
+          await wait(250)
+          if (search) {
+            const field = await listSearch(page, locator)
+            await field.pressSequentially(search, { delay: dryRun ? 0 : 45 })
+            await wait(200)
+          }
+          const option = listOption(page, text)
+          const at = await center(option).catch(error => missingOption(page, text, error))
+          await moveTo(at.x, at.y)
+          await wait(150)
+          if (clickSound) effect(clickSound)
+          await option.click()
+          await wait(400)
+        }
       },
     }
     // A line may name its own voice (from the cast) and how to say it

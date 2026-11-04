@@ -14,6 +14,9 @@ All notable changes to this project are documented here. The format follows
   anyone watches it.
 - `device: iphone | iphone-se | android | ipad` in a browser script: the app filmed as that device shows it, with
   its width, its browser (user agent, touch, mobile layout) and a video in its shape, without working out a `scale`.
+- `select` works on lists of their own too (React Select, MUI, Ant, a search box over a list of cities), with
+  `search`: one step opens the list, types the search into the field it brings, waits for the results off the
+  video and picks the option by its text. An option that never shows up names the ones the list offers.
 
 ## [2.4.0]
 

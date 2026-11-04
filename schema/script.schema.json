@@ -1815,7 +1815,7 @@
         },
         {
           "type": "object",
-          "description": "Choose an option of a <select>",
+          "description": "Choose an option: of a <select>, or of a list of its own (React Select, MUI, Ant, a search box over a list), opened with a click, narrowed by typing `search` and picked by the text of the option (or part of it)",
           "properties": {
             "select": {
               "type": "object",
@@ -1875,6 +1875,10 @@
                       }
                     }
                   ]
+                },
+                "search": {
+                  "type": "string",
+                  "minLength": 1
                 }
               },
               "required": [
@@ -1882,7 +1886,7 @@
                 "value"
               ],
               "additionalProperties": false,
-              "description": "Choose an option of a <select>"
+              "description": "Choose an option: of a <select>, or of a list of its own (React Select, MUI, Ant, a search box over a list), opened with a click, narrowed by typing `search` and picked by the text of the option (or part of it)"
             }
           },
           "required": [
