@@ -1,6 +1,6 @@
 {
   "name": "tourwright",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "mcpName": "io.github.CXmiloxx/tourwright",
   "description": "Scripted, narrated product tours and how-to videos: a real browser follows your script with a guided focus, captions and text-to-speech, and you get a finished MP4. CLI, HTTP API, job queue and MCP server for AI agents.",
   "type": "module",

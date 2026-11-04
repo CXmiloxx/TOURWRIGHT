@@ -4,7 +4,10 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.5.0]
+
+Videos that look like the app on a phone without working out numbers, lists with a search box in one step, and
+a review that names a tiny page, a covered element or a long silence before anyone watches the video.
 
 ### Added
 
