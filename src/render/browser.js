@@ -211,8 +211,13 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
 
     const cursor = createCursor(page, { width: pageSize.width, height: pageSize.height, dryRun })
     const moveTo = cursor.moveTo
-    // Where the cursor goes; the caption gets out of its way first
+    // Where the cursor goes; the caption gets out of its way first. Waiting for the element to show up (the result
+    // of a search, a list still loading) is cut from the video once the voice has stopped: no dead air.
     const center = async locator => {
+      const from = now()
+      await locator.waitFor({ state: 'visible' })
+      const quiet = Math.max(from, voiceEnd)
+      if (!dryRun && now() - quiet > 0.3) cuts.push([quiet, now()])
       const at = await centerOf(page, locator, dryRun)
       if (!dryRun) await captionClear(page, at)
       return at
