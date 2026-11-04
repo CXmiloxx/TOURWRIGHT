@@ -44,10 +44,18 @@ jobs:
         env: { PUBLISHER: v1.8.7 }
         run: |
           curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/download/$PUBLISHER/mcp-publisher_linux_amd64.tar.gz" | tar -xz mcp-publisher
-          # npm takes a moment to show a new version to the registry's check
-          for i in 1 2 3 4 5 6; do npm view "tourwright@${GITHUB_REF_NAME#v}" version >/dev/null 2>&1 && break; sleep 10; done
+          # npm takes minutes to show a new version to the registry's check ("version not found"): it tries again
+          # every 30 s for up to 10 minutes
           ./mcp-publisher login github-oidc
-          ./mcp-publisher publish || { echo "::warning::the MCP Registry did not take it (already published?)"; }
+          for i in $(seq 1 20); do
+            out=$(./mcp-publisher publish 2>&1) && { echo "$out"; exit 0; }
+            echo "$out"
+            # Any other refusal (already published, a wrong server.json) will not change by waiting
+            echo "$out" | grep -qiE "not found|take a moment" || { echo "::warning::the MCP Registry did not take it (already published?)"; exit 0; }
+            echo "the MCP Registry does not see it on npm yet, again in 30 s ($i/20)"
+            sleep 30
+          done
+          echo "::warning::the MCP Registry did not take it: re-run this job once npm shows the version"
       - name: GitHub release
         env: { GH_TOKEN: "${{ github.token }}" }
         run: |
