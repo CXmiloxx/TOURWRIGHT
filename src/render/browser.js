@@ -77,10 +77,10 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   // Nobody chose one: the most natural voice this machine has for the script's language
   const voiceSpec = opts.voice ?? script.voice ?? (dryRun ? config.tts.defaultVoice : await autoVoice(script.language, config))
   const voice = dryRun || voiceSpec === 'none' ? null : voiceSpec
-  const mode = dryRun ? 'dry' : pickCapture(opts.capture ?? config.render.capture, config)
+  const mode = dryRun ? 'dry' : pickCapture(opts.capture ?? config.render.capture, config, { portrait: height > width })
   // A vertical video is filmed the way a phone shows the app: half as wide in CSS pixels at twice the density, so
   // the app uses its own mobile layout, big and sharp. The frames still come out at width x height.
-  // (The virtual display of capture "screen" draws at 1x: there it stays as it is.)
+  // (The virtual display of capture "screen" draws at 1x: `auto` films a vertical video as a screencast.)
   const density = height > width && mode !== 'screen' ? 2 : 1
   const pageSize = { width: Math.round(width / density), height: Math.round(height / density), scale: density }
   const work = opts.workDir

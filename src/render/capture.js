@@ -6,7 +6,8 @@
 //               rate into ffmpeg. Runs anywhere Chromium runs (containers, ARM, no X server).
 //   playwright  Playwright's built-in recorder (VP8, lower quality). Last resort.
 //
-// `auto` picks screen when Xvfb exists, screencast otherwise.
+// `auto` picks screen when Xvfb exists, screencast otherwise. A vertical video is always a screencast: the virtual
+// display draws at 1x, so a phone-sized video would show the app's desktop layout, tiny in the middle of the screen.
 import { spawn } from 'node:child_process'
 import { loadConfig } from '../config.js'
 
@@ -14,12 +15,13 @@ import { loadConfig } from '../config.js'
 // display is taller than the video and ffmpeg grabs only the content area.
 export const CHROME_MAX = 300
 
-export const pickCapture = (requested, config = loadConfig()) => {
+/** @param {string | undefined} requested @param {ReturnType<typeof loadConfig>} [config] @param {{ portrait?: boolean }} [video] */
+export const pickCapture = (requested, config = loadConfig(), video = {}) => {
   if (requested && requested !== 'auto') {
     if (requested === 'screen' && !config.xvfb) throw new Error('capture "screen" needs Xvfb (apt install xvfb) — try --capture=screencast')
     return requested
   }
-  return config.xvfb ? 'screen' : 'screencast'
+  return config.xvfb && !video.portrait ? 'screen' : 'screencast'
 }
 
 // A free virtual display chosen by Xvfb itself (-displayfd): many renders can run side by side.
