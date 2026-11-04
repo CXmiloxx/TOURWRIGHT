@@ -109,3 +109,13 @@ test('a title card: words to animate, escaped text, known styles only', async ()
   assert.equal((titleHtml({ text: 'Hola', animation: 'type' }).match(/class="tw-c"/g) ?? []).length, 4)
   assert.match(titleHtml({ text: 'x', animation: 'evil" onload="x', background: 'nope' }), /class="tw-s-rise tw-bg-gradient"/)
 })
+
+test('device names a real browser of Playwright; an unknown one is refused', async () => {
+  const { DEVICES } = await import('../src/render/browser.js')
+  const { devices } = await import('playwright')
+  for (const [name, d] of Object.entries(DEVICES)) {
+    assert.equal(validateScript({ device: name, steps: [{ goto: '/' }] }).ok, true, name)
+    assert.ok(devices[d.playwright]?.viewport.width, `${name}: ${d.playwright} is not in Playwright's list`)
+  }
+  assert.equal(validateScript({ device: 'nokia', steps: [{ goto: '/' }] }).ok, false)
+})

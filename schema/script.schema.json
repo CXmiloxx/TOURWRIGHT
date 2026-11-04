@@ -605,6 +605,16 @@
             ]
           }
         },
+        "device": {
+          "description": "Film the app as this device shows it: its width, its browser (user agent, touch, mobile layout) and a video in its shape (vertical for phones, 3:4 for ipad) unless quality/width/height choose one. iphone is an iPhone 15 (393 px), iphone-se 320 px, android a Pixel 7 (412 px), ipad 810 px",
+          "type": "string",
+          "enum": [
+            "iphone",
+            "iphone-se",
+            "android",
+            "ipad"
+          ]
+        },
         "scale": {
           "description": "How big the page is drawn: the page is width/scale CSS pixels wide, at that density. 2 (default on vertical videos) shows a phone layout that fills the screen; 1 (default otherwise) a desktop one; 2.75 on a vertical video is an iPhone (393 px)",
           "type": "number",

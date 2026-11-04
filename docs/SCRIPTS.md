@@ -52,6 +52,7 @@ title: Create your first invoice
 language: en                              # narration language (audio track, browser locale)
 voice: lessac                             # see "Voices"
 quality: hd                               # sd 854×480 · hd 1280×720 · fullhd 1920×1080 · vertical 1080×1920 · square 1080×1080
+# device: iphone                          # film it as an iphone, iphone-se, android or ipad shows it (instead of quality)
 scale: 1                                  # how big the page is drawn: 1 desktop (default), 2 phone (default on vertical)
 baseUrl: https://app.example.com
 blur: ['[data-private]', '.email']        # CSS selectors blurred for the whole video (personal data)
@@ -334,6 +335,21 @@ sharp. The app picks its layout from that width.
 
 Raise it when the app looks small with empty space around it; lower it when the page does not fit. With
 `--capture screen` (Xvfb) the page is always drawn at 1×: `auto` uses a screencast for any other scale.
+
+`device` films the app as a real phone or tablet shows it, without working out a `scale`: the device's width in CSS
+pixels, its browser (user agent, touch, `pointer: coarse`, mobile layout) and a video in its shape. An app that
+serves another page to phones, or hides a menu behind a tap, shows that version.
+
+| `device` | Page (CSS) | Video, unless `quality`/`width`/`height` choose one |
+|---|---|---|
+| `iphone` | 393 px wide (iPhone 15) | 1080×1920 |
+| `iphone-se` | 320 px | 1080×1920 |
+| `android` | 412 px (Pixel 7) | 1080×1920 |
+| `ipad` | 810 px (iPad) | 1080×1440 |
+
+```yaml
+device: iphone      # the scale comes from the device; `scale` still wins when set
+```
 
 ## Narrated slides
 

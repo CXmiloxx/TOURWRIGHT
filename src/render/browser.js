@@ -69,9 +69,13 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   const script = interpolate(loaded.script, { allowed: !sandboxed || config.api.allowSecrets, config })
   const progress = opts.onProgress ?? (() => {})
   // The command, then the script, then the person's own default (tourwright config set quality …)
-  const quality = qualityOf(opts.quality ?? script.quality ?? config.render.quality)
-  const width = opts.width ?? script.width ?? quality.width
-  const height = opts.height ?? script.height ?? quality.height
+  // A device films the app as that phone or tablet shows it: its width in CSS pixels, its browser (user agent,
+  // touch, mobile layout) and, unless a size is chosen, a video in its own shape
+  const device = script.device ? DEVICES[script.device] : null
+  const named = opts.quality ?? script.quality
+  const quality = qualityOf(named ?? (device ? device.quality : config.render.quality))
+  const width = opts.width ?? script.width ?? (device && !named ? device.size?.width : undefined) ?? quality.width
+  const height = opts.height ?? script.height ?? (device && !named ? device.size?.height : undefined) ?? quality.height
   const fps = script.fps ?? config.render.fps
   const dryRun = Boolean(opts.dryRun)
   // Nobody chose one: the most natural voice this machine has for the script's language
@@ -81,9 +85,11 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   // twice the density, so the app uses its own mobile layout, filling the screen, big and sharp; `scale` chooses
   // another size. The frames still come out at width x height. The virtual display of capture "screen" draws at
   // 1x: `auto` films any other density as a screencast.
-  const wanted = script.scale ?? (height > width ? 2 : 1)
-  const mode = dryRun ? 'dry' : pickCapture(opts.capture ?? config.render.capture, config, { portrait: wanted !== 1 })
+  const browserOf = device ? (await import('playwright')).devices[device.playwright] : null
+  const wanted = script.scale ?? (browserOf ? Math.min(4, Math.max(1, width / browserOf.viewport.width)) : height > width ? 2 : 1)
+  const mode = dryRun ? 'dry' : pickCapture(opts.capture ?? config.render.capture, config, { portrait: wanted !== 1 || Boolean(device) })
   if (mode === 'screen' && wanted !== 1) log.warn(`scale ${wanted}: capture "screen" draws the page at 1x; use --capture screencast for a bigger page`)
+  if (mode === 'screen' && device) log.warn(`device ${script.device}: capture "screen" films a desktop browser; use --capture screencast to film it as the device`)
   const density = mode === 'screen' ? 1 : wanted
   const pageSize = { width: Math.round(width / density), height: Math.round(height / density), scale: density }
   const work = opts.workDir
@@ -130,6 +136,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     browser = await launch({ headless: mode !== 'screen', display: display?.display, width, height, locale }, config)
     const common = {
       ...(mode === 'screen' ? { viewport: null } : { viewport: { width: pageSize.width, height: pageSize.height }, deviceScaleFactor: pageSize.scale }),
+      ...(browserOf ? { userAgent: browserOf.userAgent, hasTouch: true, ...(mode === 'screen' ? {} : { isMobile: browserOf.isMobile }) } : {}),
       locale,
       timezoneId: opts.timezone ?? process.env.TZ ?? 'UTC',
       serviceWorkers: /** @type {'block'} */ ('block'),
@@ -731,6 +738,15 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   } finally {
     await cleanup()
   }
+}
+
+// `device` in a script: the browser of Playwright's list it borrows (user agent, touch, mobile), the quality used
+// when none is chosen, and for a tablet its own video size (3:4, not a phone's 9:16)
+export const DEVICES = {
+  iphone: { playwright: 'iPhone 15', quality: 'vertical' },
+  'iphone-se': { playwright: 'iPhone SE', quality: 'vertical' },
+  android: { playwright: 'Pixel 7', quality: 'vertical' },
+  ipad: { playwright: 'iPad (gen 7)', quality: 'vertical', size: { width: 1080, height: 1440 } },
 }
 
 const voiceLanguage = spec => /(?:^|[:_-])(es|en|pt|fr|de|it)[_-]/i.exec(spec)?.[1]?.toLowerCase()

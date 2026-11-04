@@ -12,6 +12,8 @@ All notable changes to this project are documented here. The format follows
   a caption that covers the element shown even at the top (`caption`), and 6 s or more with nothing to hear in a
   narrated video (`silence`): the mistakes of a vertical video filmed with a desktop layout are named before
   anyone watches it.
+- `device: iphone | iphone-se | android | ipad` in a browser script: the app filmed as that device shows it, with
+  its width, its browser (user agent, touch, mobile layout) and a video in its shape, without working out a `scale`.
 
 ## [2.4.0]
 
