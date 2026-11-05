@@ -27,8 +27,9 @@
     "test": "node --test",
     "lint": "biome lint",
     "typecheck": "tsc -p jsconfig.json",
-    "check": "npm run lint && npm run typecheck && npm test && node scripts/check-schema.js",
-    "schema": "node bin/tourwright.js schema > schema/script.schema.json"
+    "check": "npm run lint && npm run typecheck && npm run architecture && npm test && node scripts/check-schema.js",
+    "schema": "node bin/tourwright.js schema > schema/script.schema.json",
+    "architecture": "node scripts/check-architecture.js"
   },
   "keywords": [
     "product-tour",
