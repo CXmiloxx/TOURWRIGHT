@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { loadConfig } from '../src/config.js'
-import { applyPronunciation, parseVoice, polishFilter, prosodyFilter, splitNarration, splitSentences, stripMarks, withProsody } from '../src/voice/index.js'
+import { loadConfig } from '#core/config.js'
+import { applyPronunciation, parseVoice, polishFilter, prosodyFilter, splitNarration, splitSentences, stripMarks, withProsody } from '#voice/index.js'
 
 const config = loadConfig({ tts: { defaultVoice: 'piper:es_MX-claude-high', aliases: { mia: 'gonzalo' }, piper: {}, edge: {}, openai: {} } })
 
@@ -53,7 +53,7 @@ test('wavDuration reads the length from the header, and gives up on anything els
   const { mkdtempSync, writeFileSync } = await import('node:fs')
   const { join } = await import('node:path')
   const { tmpdir } = await import('node:os')
-  const { wavDuration } = await import('../src/voice/index.js')
+  const { wavDuration } = await import('#voice/index.js')
   const dir = mkdtempSync(join(tmpdir(), 'tw-wav-'))
   // 24 kHz mono 16-bit: 48000 bytes a second; a LIST chunk before the data, as ffmpeg writes
   const wav = (dataSize, data) => {
@@ -86,7 +86,7 @@ test('wavDuration reads the length from the header, and gives up on anything els
 })
 
 test('with no voice chosen, each render gets the most natural one for its language', async () => {
-  const { autoVoice } = await import('../src/voice/index.js')
+  const { autoVoice } = await import('#voice/index.js')
   const base = { tts: { defaultVoice: 'piper:es_MX-claude-high', voiceChosen: false, pocket: {}, edge: { bin: null } } }
   assert.equal(await autoVoice('es', { ...base, tts: { ...base.tts, voiceChosen: true, defaultVoice: 'jorge' } }), 'jorge')
   assert.equal(await autoVoice('en', { ...base, tts: { ...base.tts, pocket: { python: '/py' } } }), 'alba')

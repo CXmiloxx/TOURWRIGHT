@@ -3,7 +3,7 @@
 FROM node:24-bookworm-slim
 
 # Piper as the piper-tts package, kept loaded during a render (about 5x faster per sentence than the old
-# standalone program). The same version as PIPER_TTS in src/install.js; a test keeps them equal
+# standalone program). The same version as PIPER_TTS in src/install/sources.js; a test keeps them equal
 ARG PIPER_TTS=1.8.0
 # Piper voices baked into the image (more: `tourwright install-voice <name>` at runtime, into the data volume)
 ARG VOICES="es_MX-claude-high en_US-lessac-medium"

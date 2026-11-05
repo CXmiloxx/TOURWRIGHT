@@ -35,7 +35,8 @@ dependencies, everything from `loadConfig()`, untrusted input validated, logs on
 ## Adding a step action
 
 1. Add it to `STEPS` in `src/script/schema.js` (zod).
-2. Implement it in `runSteps` in `src/render/browser.js`.
+2. Call it from `runStep` in `src/render/steps/index.js`; its filmed helper goes in the group of
+   `src/render/walkthrough/helpers/` it belongs to, and a plain version in `plainHelpers` (`src/render/steps/quick.js`).
 3. Document it in the Actions table of `docs/SCRIPTS.md`.
 4. `npm run schema` and commit `schema/script.schema.json` (CI checks it is up to date).
 5. Add a test in `test/`, then render a script that uses it and watch the video.

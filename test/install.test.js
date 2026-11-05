@@ -5,7 +5,7 @@ import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { download, SHA256 } from '../src/install.js'
+import { download, SHA256 } from '#install/index.js'
 
 const BODY = Buffer.from('a release archive')
 const sha = createHash('sha256').update(BODY).digest('hex')

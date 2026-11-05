@@ -7,9 +7,9 @@ import { readFileSync } from 'node:fs'
 import { basename, dirname, extname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import YAML from 'yaml'
-import { loadConfig } from '../config.js'
-import { codeMarker, getSecret, secretName, totpKey } from '../secrets.js'
-import { hideSecret, UserError } from '../util.js'
+import { loadConfig } from '#core/config.js'
+import { codeMarker, getSecret, secretName, totpKey } from '#core/secrets.js'
+import { hideSecret, UserError } from '#core/util.js'
 import { expandScript } from './expand.js'
 import { validateScript } from './schema.js'
 
@@ -36,18 +36,19 @@ export const parseText = (text, format = 'yaml') => {
 // (a queued job): its texts may hold "{{" that came from a variable's value.
 /**
  * @param {any} data
- * @param {{ name?: string, dir?: string, sandboxed?: boolean, vars?: Record<string, unknown>, expand?: boolean }} [options]
+ * @param {{ name?: string, dir?: string, sandboxed?: boolean, vars?: Record<string, unknown>, expand?: boolean, missing?: Set<string> }} [options]
+ *   `missing`: variables without a value are collected there instead of failing (`validate --no-vars`)
  * @returns {Loaded}
  */
-export const fromData = (data, { name = 'video', dir = process.cwd(), sandboxed = false, vars, expand = true } = {}) => {
-  const r = validateScript(expand ? expandScript(data, { vars }) : data)
+export const fromData = (data, { name = 'video', dir = process.cwd(), sandboxed = false, vars, expand = true, missing = undefined } = {}) => {
+  const r = validateScript(expand ? expandScript(data, { vars, missing }) : data)
   if (!r.ok) throw new UserError(`invalid script:\n  ${r.errors.join('\n  ')}`)
   const base = { name, dir, sandboxed }
   return r.script.type === 'slides' ? { ...base, kind: 'slides', script: r.script } : { ...base, kind: 'browser', script: r.script }
 }
 
-/** @param {string} file @param {{ allowJs?: boolean, vars?: Record<string, unknown> }} [options] @returns {Promise<Loaded>} */
-export const loadFile = async (file, { allowJs = true, vars = undefined } = {}) => {
+/** @param {string} file @param {{ allowJs?: boolean, vars?: Record<string, unknown>, missing?: Set<string> }} [options] @returns {Promise<Loaded>} */
+export const loadFile = async (file, { allowJs = true, vars = undefined, missing = undefined } = {}) => {
   const path = resolve(file)
   const ext = extname(path).toLowerCase()
   const name = basename(path).replace(/\.(m?js|json|ya?ml)$/i, '')
@@ -62,7 +63,7 @@ export const loadFile = async (file, { allowJs = true, vars = undefined } = {}) 
     return { kind: 'browser', name, dir: dirname(path), sandboxed: false, script: { ...options, steps: [] }, run: mod.default, setupFn: mod.setup }
   }
   const text = readFileSync(path, 'utf8')
-  return fromData(parseText(text, ext === '.json' ? 'json' : 'yaml'), { name, dir: dirname(path), vars })
+  return fromData(parseText(text, ext === '.json' ? 'json' : 'yaml'), { name, dir: dirname(path), vars, missing })
 }
 
 // Secrets in declarative scripts: "${secret:PASSWORD}" (saved with `tourwright secret set PASSWORD`, or the

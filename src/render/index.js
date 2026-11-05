@@ -4,10 +4,10 @@ import { execFileSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { setPriority, tmpdir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
-import { loadConfig } from '../config.js'
-import { loadPlugins } from '../plugins.js'
-import { UserError } from '../util.js'
-import { renderBrowser } from './browser.js'
+import { loadConfig } from '#core/config.js'
+import { loadPlugins } from '#plugins/index.js'
+import { UserError } from '#core/util.js'
+import { renderBrowser } from './walkthrough/index.js'
 import { renderSlides } from './slides.js'
 
 let prioritySet = false
@@ -41,7 +41,7 @@ export const outputBase = (out, name) => {
 export const EXPORTS = ['video', 'audio', 'silent']
 
 const exportExtras = async (result, wanted, config) => {
-  const { ffmpeg } = await import('../compose.js')
+  const { ffmpeg } = await import('#video/ffmpeg.js')
   const video = result.paths.video
   const base = video.slice(0, -4)
   if (wanted.includes('audio')) {
@@ -63,7 +63,7 @@ const exportExtras = async (result, wanted, config) => {
 }
 
 /**
- * @param {import('../script/load.js').Loaded} loaded  a script from script/load.js
+ * @param {import('#script/load.js').Loaded} loaded  a script from script/load.js
  * @param {Record<string, any>} [opts]  { out, voice, quality, width, height, capture, dryRun, timeout (s), onProgress, sessionNamespace }
  * @returns manifest: { title, duration, files, chapters, captions, paths } (or a dry-run summary)
  */

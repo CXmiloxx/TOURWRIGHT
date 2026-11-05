@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { fromData, interpolate, parseText } from '../src/script/load.js'
-import { jsonSchema, validateScript } from '../src/script/schema.js'
+import { fromData, interpolate, parseText } from '#script/load.js'
+import { jsonSchema, validateScript } from '#script/schema.js'
 
 test('a browser script with every kind of target is valid', () => {
   const r = validateScript({
@@ -89,7 +89,7 @@ test('the JSON Schema points nested steps back to the step definition', () => {
 })
 
 test('focus: the marked word and what is said before it', async () => {
-  const { markedLine } = await import('../src/voice/index.js')
+  const { markedLine } = await import('#voice/index.js')
   assert.deepEqual(markedLine('Then press {Pay}.'), { spoken: 'Then press Pay.', before: 'Then press ' })
   assert.deepEqual(markedLine('{Total} first'), { spoken: 'Total first', before: '' })
   assert.deepEqual(markedLine('No mark here'), { spoken: 'No mark here', before: null })
@@ -100,7 +100,7 @@ test('focus: the marked word and what is said before it', async () => {
 })
 
 test('a title card: words to animate, escaped text, known styles only', async () => {
-  const { titleHtml } = await import('../src/render/theme.js')
+  const { titleHtml } = await import('#render/page/theme.js')
   const html = titleHtml({ text: 'Tu <b>primera</b> factura', subtitle: 'Paso a paso', kicker: 'Tutorial', animation: 'rise', background: 'aurora' })
   assert.match(html, /class="tw-s-rise tw-bg-aurora"/)
   assert.equal((html.match(/class="tw-w"/g) ?? []).length, 3)
@@ -111,7 +111,7 @@ test('a title card: words to animate, escaped text, known styles only', async ()
 })
 
 test('device names a real browser of Playwright; an unknown one is refused', async () => {
-  const { DEVICES } = await import('../src/render/browser.js')
+  const { DEVICES } = await import('#render/walkthrough/plan.js')
   const { devices } = await import('playwright')
   for (const [name, d] of Object.entries(DEVICES)) {
     assert.equal(validateScript({ device: name, steps: [{ goto: '/' }] }).ok, true, name)

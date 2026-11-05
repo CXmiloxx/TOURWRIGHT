@@ -15,15 +15,15 @@ import { createHash, timingSafeEqual } from 'node:crypto'
 import { createReadStream, existsSync, statSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
-import { openBlobs } from '../jobs/blobs.js'
-import { checkLink, linkSigner } from '../jobs/links.js'
-import { createJob, deleteJobFiles, resultWithLinks } from '../jobs/service.js'
-import { createBackend, publicJob } from '../jobs/store.js'
-import { loadPlugins } from '../plugins.js'
-import { fromData, parseText } from '../script/load.js'
-import { jsonSchema } from '../script/schema.js'
-import { log, UserError } from '../util.js'
-import { listVoices } from '../voice/index.js'
+import { openBlobs } from './jobs/blobs.js'
+import { checkLink, linkSigner } from './jobs/links.js'
+import { createJob, deleteJobFiles, resultWithLinks } from './jobs/service.js'
+import { createBackend, publicJob } from './jobs/store.js'
+import { loadPlugins } from '#plugins/index.js'
+import { fromData, parseText } from '#script/load.js'
+import { jsonSchema } from '#script/schema.js'
+import { log, UserError } from '#core/util.js'
+import { listVoices } from '#voice/index.js'
 
 const TYPES = { mp4: 'video/mp4', jpg: 'image/jpeg', srt: 'application/x-subrip; charset=utf-8', vtt: 'text/vtt; charset=utf-8', json: 'application/json' }
 const LOOPBACK = ['127.0.0.1', '::1', 'localhost']
@@ -191,7 +191,7 @@ export const startServer = async (config, { worker = false } = {}) => {
   process.once('SIGTERM', shutdown)
   process.once('SIGINT', shutdown)
   if (worker) {
-    const { startWorker } = await import('../worker.js')
+    const { startWorker } = await import('./worker.js')
     await startWorker(config)
   }
 }

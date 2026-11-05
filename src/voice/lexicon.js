@@ -1,9 +1,8 @@
-import { readFileSync } from 'node:fs'
-
 // What narration says for what is written for the eye: tech words, acronyms and numbers. A voice reads
 // "API" or "JSON" letter by letter in the wrong language, or as a word; these say them the way people who
 // work with them do. Captions keep the original text. The config's `tts.pronounce` and a script's
 // `pronounce` win over these.
+import { readFileSync } from 'node:fs'
 
 // Spanish as spoken in Latin American offices: spelled with Spanish letter names, English words written
 // the way they sound to a Spanish voice

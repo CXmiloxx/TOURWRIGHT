@@ -4,9 +4,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import YAML from 'yaml'
-import { acquireLock } from '../src/lock.js'
-import { asTarget, describeTarget, isMissingElement, targetsOf } from '../src/render/targets.js'
-import { validateScript } from '../src/script/schema.js'
+import { acquireLock } from '#core/lock.js'
+import { asTarget, describeTarget, isMissingElement, targetsOf } from '#render/steps/targets.js'
+import { validateScript } from '#script/schema.js'
 
 test('a value split by an unquoted comma says how to write it', () => {
   const data = YAML.parse('title: x\nsteps:\n  - type: { target: { placeholder: Nombres, apellidos o celular }, text: ana }\n')
@@ -56,13 +56,13 @@ test('the browser lock lets one holder in at a time', async () => {
 })
 
 test('mask rules and a preview of some steps are checked like the rest of the script', async () => {
-  const { parseSteps } = await import('../src/render/index.js')
+  const { parseSteps } = await import('#render/index.js')
   assert.deepEqual(parseSteps('5'), [5, 5])
   assert.deepEqual(parseSteps('3-6'), [3, 6])
   assert.equal(parseSteps(undefined), null)
   assert.throws(() => parseSteps('6-3'), /range goes up/)
   assert.throws(() => parseSteps('x'), /step number/)
-  const ok = validateScript({ title: 't', mask: ['email', 'id', { text: 'Ana Pérez', as: 'Laura Gómez' }, { pattern: 'P-\d+', as: 'P-0000' }], steps: [{ goto: '/' }] })
+  const ok = validateScript({ title: 't', mask: ['email', 'id', { text: 'Ana Pérez', as: 'Laura Gómez' }, { pattern: 'P-d+', as: 'P-0000' }], steps: [{ goto: '/' }] })
   assert.equal(ok.ok, true)
   const bad = validateScript({ title: 't', mask: ['passport'], steps: [{ goto: '/' }] })
   assert.equal(bad.ok, false)

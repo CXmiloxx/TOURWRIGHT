@@ -98,5 +98,18 @@
     "bullmq": "^6.5.1",
     "ioredis": "^6.0.0",
     "typescript": "^7.0.2"
+  },
+  "imports": {
+    "#core/*": "./src/core/*",
+    "#script/*": "./src/script/*",
+    "#render/*": "./src/render/*",
+    "#video/*": "./src/video/*",
+    "#voice/*": "./src/voice/*",
+    "#ai/*": "./src/ai/*",
+    "#authoring/*": "./src/authoring/*",
+    "#install/*": "./src/install/*",
+    "#plugins/*": "./src/plugins/*",
+    "#server/*": "./src/server/*",
+    "#cli/*": "./src/cli/*"
   }
 }

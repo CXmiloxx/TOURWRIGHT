@@ -6,7 +6,7 @@
 //
 // A step is an object with exactly one action key: { click: "#buy" }, { say: "Hello" }…
 import { z } from 'zod'
-import { maskRule } from '../render/mask.js'
+import { maskRule } from './mask-rule.js'
 
 // How to find an element. A string is a Playwright selector (CSS, `text=…`, `xpath=…`); the object forms
 // are the robust ones (by role and accessible name, label, placeholder, visible text or test id).

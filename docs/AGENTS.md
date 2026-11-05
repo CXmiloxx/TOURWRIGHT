@@ -54,7 +54,9 @@ No MCP? Use the HTTP API ([API.md](API.md)) or the CLI (`tourwright render scrip
    never ask for them in the chat.
 3. Write the script. Short narrated sentences; one idea per `say`; a `title` per section.
 4. `tourwright_validate`, then `tourwright_render` with `options.dryRun: true`: it runs every step in seconds and
-   fails on the first selector that does not match, with the error.
+   fails on the first selector that does not match, with the error. On an app where clicking does real things
+   (sign-ups, payments, messages), use `options.safe: true` instead: it finds every element and presses nothing.
+   Read `review` in the result: `ambiguous`, `privacy`, `loudness` and `clipping` findings name the step to fix.
 5. Fix, then render for real. Return the `links.video` to the user.
 6. When a video that used to work breaks (the site changed), call `tourwright_check`: it says which step and
    proposes the new target; check the `fixed` script, then render again.

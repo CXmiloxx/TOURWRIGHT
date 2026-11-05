@@ -177,6 +177,8 @@ Credentials are asked for once, never shown and never written in the script (`to
 tourwright init video.yaml                  # an example script
 tourwright validate video.yaml
 tourwright render video.yaml --dry-run      # runs every step fast: tests selectors, no voice/video
+tourwright render video.yaml --safe         # the same, pressing nothing: no real sign-up, payment or SMS
+tourwright render video.yaml --keep         # keeps the recording: tourwright recompose videos/video remakes it without the browser
 tourwright render video.yaml --quality fullhd --voice salome --out out/
 tourwright voices                           # voices available here
 tourwright install-voice en_GB-alba-medium  # any voice from huggingface.co/rhasspy/piper-voices

@@ -19,11 +19,11 @@
   },
   "overrides": [
     {
-      "includes": ["src/render/network.js"],
+      "includes": ["src/render/browser/network.js"],
       "linter": { "rules": { "correctness": { "noConstructorReturn": "off", "noUnreachableSuper": "off" } } }
     },
     {
-      "includes": ["src/render/steps.js", "src/run-job.js"],
+      "includes": ["src/render/steps/index.js", "src/server/run-job.js"],
       "linter": { "rules": { "suspicious": { "noControlCharactersInRegex": "off" } } }
     },
     {

@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { registerPlugin } from '../src/plugins.js'
-import { jsonSchema, PLUGIN_STEPS, validateScript } from '../src/script/schema.js'
-import { ENGINES } from '../src/voice/engines.js'
-import { parseVoice } from '../src/voice/index.js'
-import { loadConfig } from '../src/config.js'
+import { registerPlugin } from '#plugins/index.js'
+import { jsonSchema, PLUGIN_STEPS, validateScript } from '#script/schema.js'
+import { ENGINES } from '#voice/engines.js'
+import { parseVoice } from '#voice/index.js'
+import { loadConfig } from '#core/config.js'
 
 test('a plugin adds a validated step, an engine and a voice name', () => {
   registerPlugin({

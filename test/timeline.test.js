@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { chaptersFrom, cutFilter, normalizeCuts, toFfmetadata, toOutput, toSrt, toVtt } from '../src/timeline.js'
+import { chaptersFrom, cutFilter, normalizeCuts, toFfmetadata, toOutput, toSrt, toVtt } from '#video/timeline.js'
 
 test('normalizeCuts merges overlapping and drops empty cuts', () => {
   assert.deepEqual(normalizeCuts([[5, 7], [0, 2], [6, 9], [3, 3]]), [[0, 2], [5, 9]])

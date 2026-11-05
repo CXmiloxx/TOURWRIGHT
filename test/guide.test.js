@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { guideEntry, writeGuide } from '../src/guide.js'
+import { guideEntry, writeGuide } from '#render/guide/write.js'
 
 test('each step says what to do, in plain words, and never a secret', () => {
   assert.deepEqual(guideEntry({ chapter: 'Clientes' }), { kind: 'section', text: 'Clientes' })

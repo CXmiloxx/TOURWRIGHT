@@ -42,7 +42,8 @@ POST /v1/jobs
   `. _ -`. Total body up to `TOURWRIGHT_MAX_BODY_MB` (50 MB).
 - `vars`: values for the script's `{{variables}}`, over its own `vars`. One script, one video per set of values.
   `POST /v1/validate` takes them too.
-- `options`: `voice`, `quality`, `width`, `height`, `capture`, `dryRun` override the script.
+- `options`: `voice`, `quality`, `width`, `height`, `capture`, `dryRun`, `safe` override the script. `safe` is a dry
+  run that presses, types and chooses nothing: nothing real happens in the app.
 - `webhook`: called when the job ends.
 
 ## Job

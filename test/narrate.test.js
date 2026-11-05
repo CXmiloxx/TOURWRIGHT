@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { parseJson } from '../src/ai.js'
-import { applyNarration, checkLine, narratable } from '../src/narrate.js'
-import { hideSecret } from '../src/util.js'
+import { parseJson } from '#ai/client.js'
+import { applyNarration, checkLine, narratable } from '#ai/narrate.js'
+import { hideSecret } from '#core/util.js'
 
 test('the lines a script says are found, with the element each one points at', () => {
   const lines = narratable([

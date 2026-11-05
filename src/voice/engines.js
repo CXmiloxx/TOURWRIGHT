@@ -4,7 +4,7 @@
 import { spawn } from 'node:child_process'
 import { existsSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { log, run, runWithInput, sleep, UserError } from '../util.js'
+import { log, run, runWithInput, sleep, UserError } from '#core/util.js'
 import { findPiperVoice } from './piper-voices.js'
 import { pythonProcess } from './python.js'
 

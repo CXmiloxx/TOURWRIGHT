@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { spokenLines } from '../src/render/steps.js'
-import { mapLimit, sleep } from '../src/util.js'
+import { spokenLines } from '#render/steps/index.js'
+import { mapLimit, sleep } from '#core/util.js'
 
 test('mapLimit keeps the order of the list and never runs more than the limit at once', async () => {
   let running = 0

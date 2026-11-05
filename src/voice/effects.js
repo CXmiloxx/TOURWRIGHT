@@ -2,8 +2,8 @@
 // keyboard sound of typing. Generated once into the cache, like the voice.
 import { existsSync, mkdirSync, renameSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
-import { loadConfig } from '../config.js'
-import { hash, run, UserError } from '../util.js'
+import { loadConfig } from '#core/config.js'
+import { hash, run, UserError } from '#core/util.js'
 
 // ffmpeg `aevalsrc` expressions (t = seconds) and their length
 const BUILT_IN = {

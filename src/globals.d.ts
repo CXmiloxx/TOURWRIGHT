@@ -12,6 +12,8 @@ declare global {
     __twChanges?: number
     __twFields?: WeakSet<Element>
     __twProbe?: MutationObserver
+    // `mask` (src/render/mask.js): what a text looks like masked, for steps that look for the real one
+    __twMask?: (text: string) => string
     // `tourwright record` (src/record.js)
     __twRecording?: boolean
     __twRecord?: (event: object) => void

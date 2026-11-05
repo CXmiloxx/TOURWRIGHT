@@ -3,8 +3,8 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { after, before, test } from 'node:test'
-import { loadConfig } from '../src/config.js'
-import { createApp } from '../src/server/http.js'
+import { loadConfig } from '#core/config.js'
+import { createApp } from '#server/http.js'
 
 let dir
 let base

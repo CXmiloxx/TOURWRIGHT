@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { pickCapture } from '../src/render/capture.js'
-import { createCursor, MOVE_MAX } from '../src/render/cursor.js'
+import { pickCapture } from '#render/browser/capture.js'
+import { createCursor, MOVE_MAX } from '#render/page/cursor.js'
 
 test('auto films a vertical video as a screencast even with Xvfb (the virtual display draws at 1x)', () => {
   const config = /** @type {any} */ ({ xvfb: '/usr/bin/Xvfb' })

@@ -44,13 +44,14 @@ The default export may also be a function `({ z, config }) => plugin` (sync or a
 
 ### Steps
 
-- `arg` is the step's value, already validated by `schema`.
+- `arg` is the step's value, already validated by `schema`, with its `.default()` values filled in.
 - `page` is the Playwright page; `locate(target)` turns a Tourwright target (`{ role, name }`, a selector…)
   into a Playwright locator.
 - `v` has the same helpers as JavaScript scripts: `v.click(locator)`, `v.say(html, { voice })`,
   `v.highlight(locator, ms)`, `v.pause(ms)`, `v.offCamera(fn)`, `v.sound({ file })`… Use them to keep the
   cursor, captions, narration and cuts consistent.
 - In a rehearsal (`--dry-run`) `dryRun` is true: skip slow or visual work.
+- A safe rehearsal (`--safe`) does not call `run` at all: a plugin may do real things (send a code, wait for one).
 - Inside `setup` (off camera) `v` is a plain version without animations; visual helpers do nothing.
 - A step name cannot replace a built-in action.
 

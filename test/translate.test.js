@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import YAML from 'yaml'
-import { checkTranslation, translatable, translatedPath, translateScript } from '../src/translate.js'
+import { checkTranslation, translatable, translatedPath, translateScript } from '#ai/translate.js'
 
 const SOURCE = `# My tour
 title: Tu primera factura

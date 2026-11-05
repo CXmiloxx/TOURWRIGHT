@@ -244,6 +244,7 @@ mask:
   - email                                   # ana.perez@gmail.com → luis31@ejemplo.com
   - phone                                   # 300 555 1234 → 905 042 1655
   - id                                      # CC 1.023.456.789 → CC 7.144.349.251 (amounts like $ 1.250.000 stay)
+  - date                                    # 05/11/1987 → 08/06/1984, 5 de noviembre de 1987, November 5, 1987…
   - { text: "Ana Pérez", as: "Laura Gómez" }
   - { pattern: "P-\\d{5}", as: "P-00000" }  # anything else, by regular expression
 ```
@@ -251,6 +252,13 @@ mask:
 The same real value always becomes the same invented one, on every page, also in what loads later. Only what
 is drawn changes: the app keeps working with the real data, and a field that can be edited keeps its real
 value (a form would send the invented one; blur those). `examples/app.yaml` shows it on a customer table.
+
+`date` also blurs every filled date field (`<input type="date">` and its kin), which keeps its real value. A
+birth date or the issue date of an ID helps prove who someone is: without `date`, the review says when a filled
+date field is seen in the video (`privacy`).
+
+Steps still name the real text: `{ text: 1.200.000 - 1.600.000 }` finds the option even when the screen shows
+it with other digits, and so do `wait: { text }`, `if: { text }` and the options of `select`.
 
 ### Secrets
 
@@ -626,9 +634,23 @@ own buttons. (With `--capture screen`, the virtual display draws at 1×: there t
 
 ```bash
 tourwright validate video.yaml          # the format, without running it (blocks and variables expanded)
+tourwright validate video.yaml --no-vars  # only the format and the names: no --var nor secrets needed
 tourwright render video.yaml --dry-run  # runs every step fast, no voice or video: tests the selectors
+tourwright render video.yaml --safe     # a dry run that presses, types and chooses nothing
 tourwright explore video.yaml           # logs in like the script and lists each page's targets
 ```
+
+`--dry-run` presses the buttons: on a real app it signs people up and sends codes like a recording does.
+`--safe` finds every element and checks it could be used (visible, still, enabled, nothing on top), but performs
+no click, typing, choice, upload, key or plugin step. Steps that only exist after one of those (the next page
+after a login) are listed as not checked, not as failures. The off-camera `setup` (a login) still runs, as it must to reach the
+pages; a saved `session` avoids even that.
+
+When several elements match a target, the one with exactly those words wins over a longer text that contains
+them, and a visible one over a hidden copy (the same link in a closed mobile menu). If it is still ambiguous,
+the first is used and the review says so (`ambiguous`): add `exact: true`, `nth` or `css` to choose. A step
+that clicks waits until its element can be clicked (not moving, enabled, nothing on top), and when it never
+can, the error says why: `the link named "Pagar" is there but cannot be used (<div class="loader"> intercepts pointer events)`.
 
 When a step fails, Tourwright saves a screenshot of the page (`failure-<name>.png`) next to the output, and the
 error names the element it looked for and what the page offers instead, as targets to paste:
@@ -767,3 +789,33 @@ printed with its step and saved under `review` in the video's `.json` manifest; 
 | `caption` | The caption covers the element shown, even moved to the top of the screen | A smaller target, or a shorter caption |
 | `blank` | A blank or black screen for more than a second | A `wait` for the content |
 | `silence` | 6 s or more with nothing to hear, in a narrated video | A slow page or search filmed whole: a `wait` (always cut from the video), or a shorter `ms` |
+| `loudness` | A sentence more than 4 LU quieter or louder than the narration (-16 LUFS), with its text | A `volume` in the step, or loud music over it |
+| `clipping` | A true peak over -1 dBFS, with its second | A loud sound file, or `audio.effects` lower |
+| `privacy` | A filled date field seen in the video | `mask: [date]`, or `blur` it |
+| `ambiguous` | A target whose words match several elements; the first one was used | `exact: true`, `nth` or `css` |
+
+Every sentence of narration is leveled on its own to -16 LUFS (measured, a linear gain, a true-peak limiter only
+where a peak needs it, measured again), and the whole mix goes through a true-peak limiter at the end. Clicks and
+typing made off camera (`offCamera`, waits, before the first title) are left out, instead of piling up where the
+video jumps.
+
+### Making a video again without the browser
+
+On a real app, filming does real things: a sign-up, an SMS, a request. To change the sound, a caption or a
+blur without doing them again, render with `--keep`:
+
+```bash
+tourwright render video.yaml --keep           # also videos/video/video.source/: recording, voices, timeline.json
+tourwright recompose videos/video --no-clicks # the same video without click and typing sounds
+tourwright recompose videos/video --voice salome --polish warm
+```
+
+`timeline.json` can be edited before `recompose`: the text of a caption, the `text` of a sentence (it is said
+again with its voice), and `blurs`, boxes of the final video blurred between two of its seconds. `steps` says
+when each step starts, in seconds of the video:
+
+```json
+"blurs": [{ "x": 120, "y": 340, "width": 260, "height": 48, "start": 31.5, "end": 44 }]
+```
+
+The recording is kept as filmed: what was not masked on the page can only be blurred, not replaced.

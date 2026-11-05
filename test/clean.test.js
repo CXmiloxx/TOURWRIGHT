@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { clean, human, sizeOf } from '../src/clean.js'
+import { clean, human, sizeOf } from '#install/clean.js'
 
 test('sizes are summed through folders and written for people', () => {
   const dir = mkdtempSync(join(tmpdir(), 'tw-clean-'))

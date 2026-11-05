@@ -4,9 +4,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Readable } from 'node:stream'
 import { test } from 'node:test'
-import { interpolate, secretsIn, secretsShown } from '../src/script/load.js'
-import { clearSecrets, codeMarker, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret, totp, withCodes } from '../src/secrets.js'
-import { holdsSecret, redact } from '../src/util.js'
+import { interpolate, secretsIn, secretsShown } from '#script/load.js'
+import { clearSecrets, codeMarker, deleteSecret, getSecret, listSecrets, promptHidden, secretName, setSecret, totp, withCodes } from '#core/secrets.js'
+import { holdsSecret, redact } from '#core/util.js'
 
 const withStore = fn => () => {
   const dir = mkdtempSync(join(tmpdir(), 'tw-secrets-'))

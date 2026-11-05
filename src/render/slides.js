@@ -1,15 +1,18 @@
 // Narrated slideshows: title cards, images and HTML pages, each one on screen while its narration lasts.
 // Slides are drawn by headless Chromium (no virtual display); a slideshow of only images also works
 // without any browser, with ffmpeg alone.
-import { existsSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { compose, ffmpeg, qualityOf } from '../compose.js'
-import { loadConfig } from '../config.js'
-import { launchChromium } from './chromium.js'
-import { concatEntry, escapeHtml, log, mapLimit, plainText, UserError } from '../util.js'
-import { builtInSound } from '../voice/effects.js'
-import { autoVoice, narrate, stripMarks, withProsody } from '../voice/index.js'
-import { resolveTheme, safePath, themeCss, titleHtml, toDataUrl } from './theme.js'
+import { compose } from '#video/compose.js'
+import { ffmpeg } from '#video/ffmpeg.js'
+import { qualityOf } from '#video/quality.js'
+import { loadConfig } from '#core/config.js'
+import { launchChromium } from './browser/chromium.js'
+import { reportFindings, reviewAudio } from '#video/review.js'
+import { concatEntry, escapeHtml, log, mapLimit, plainText, UserError } from '#core/util.js'
+import { builtInSound } from '#voice/effects.js'
+import { autoVoice, narrate, stripMarks, withProsody } from '#voice/index.js'
+import { resolveTheme, safePath, themeCss, titleHtml, toDataUrl } from './page/theme.js'
 
 // Clips and the crossfade are temporary (compose encodes the final video): fastest preset, low CRF
 const INTERMEDIATE_PRESET = 'ultrafast'
@@ -70,7 +73,7 @@ const motionFilter = (motion, frames, width, height, fps) => {
   }
 }
 
-/** @param {import('../script/load.js').Loaded & { kind: 'slides' }} loaded @param {any} opts */
+/** @param {import('#script/load.js').Loaded & { kind: 'slides' }} loaded @param {any} opts */
 export const renderSlides = async (loaded, opts, config = loadConfig()) => {
   const { name, dir, sandboxed, script } = loaded
   const progress = opts.onProgress ?? (() => {})
@@ -199,12 +202,13 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
 
   const music = typeof script.music === 'string' ? { file: script.music } : script.music
   log.debug(`slides: ${timed.length} slides, ${end.toFixed(1)} s`)
-  return compose({
+  const result = await compose({
     video: raw,
     fps,
     end,
     cuts: [],
-    narrations: timed.filter(s => s.narration).map(s => ({ at: s.start + LEAD, file: s.narration.file })),
+    narrations: timed.filter(s => s.narration).map(s => ({ at: s.start + LEAD, file: s.narration.file, duration: s.narration.duration,
+      step: timed.indexOf(s) + 1, text: s.say ? plainText(stripMarks(s.say)) : undefined })),
     effects,
     captions: timed.filter(s => s.say || s.caption).map(s => ({ start: s.start, end: s.start + s.duration, text: plainText(stripMarks(s.caption ?? s.say)) })),
     marks: timed.filter(s => s.chapter || (s.title && !s.image && !s.html)).map(s => ({ start: s.start, title: s.chapter ?? s.title })),
@@ -218,4 +222,10 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
     workDir: work,
     voice,
   }, config)
+  // Each sentence as loud as the others and no peak that distorts: said with the slide it belongs to
+  const review = await reviewAudio(result.paths.video, config, result.spoken)
+  reportFindings(review)
+  writeFileSync(result.paths.manifest, JSON.stringify({ ...JSON.parse(readFileSync(result.paths.manifest, 'utf8')), review }, null, 2))
+  const { spoken, ...delivered } = result
+  return { ...delivered, review }
 }

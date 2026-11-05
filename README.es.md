@@ -181,6 +181,8 @@ Las credenciales se piden una vez, no se muestran y nunca quedan en el guion (`t
 tourwright init video.yaml              # un guion de ejemplo
 tourwright validate video.yaml
 tourwright render video.yaml --dry-run  # ensayo: corre todo rápido, sin voz ni video (prueba los selectores)
+tourwright render video.yaml --safe     # el mismo ensayo sin presionar nada: ni registros, ni pagos, ni SMS reales
+tourwright render video.yaml --keep     # guarda la grabación: tourwright recompose videos/video lo rearma sin navegador
 tourwright render video.yaml --quality fullhd --voice gonzalo --out salida/
 tourwright voices                       # las voces de este servidor
 tourwright install-voice es_ES-sharvard-medium

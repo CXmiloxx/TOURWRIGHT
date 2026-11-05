@@ -3,9 +3,9 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { loadConfig } from '../src/config.js'
-import { checkLink, linkSigner } from '../src/jobs/links.js'
-import { localStore } from '../src/jobs/store.js'
+import { loadConfig } from '#core/config.js'
+import { checkLink, linkSigner } from '#server/jobs/links.js'
+import { localStore } from '#server/jobs/store.js'
 
 test('local queue: each ticket is claimed once, in order', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'tourwright-test-'))

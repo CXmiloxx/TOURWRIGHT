@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { frameFilter, frameLayout } from '../src/render/frame.js'
-import { validateScript } from '../src/script/schema.js'
+import { frameLayout } from '#render/page/frame.js'
+import { frameFilter } from '#video/frame-filter.js'
+import { validateScript } from '#script/schema.js'
 
 test('the studio frame keeps the recording whole, centered and even-sized', () => {
   for (const [width, height] of [[1280, 720], [1920, 1080], [1080, 1920], [1080, 1080]]) {

@@ -729,7 +729,8 @@
                 "enum": [
                   "email",
                   "phone",
-                  "id"
+                  "id",
+                  "date"
                 ]
               },
               {

@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import YAML from 'yaml'
-import { recordedScript, stepsFrom } from '../src/record.js'
-import { validateScript } from '../src/script/schema.js'
+import { recordedScript, stepsFrom } from '#authoring/record/index.js'
+import { validateScript } from '#script/schema.js'
 
 test('a recording becomes steps with a first narration, and passwords become secrets', () => {
   const steps = stepsFrom([
@@ -51,7 +51,7 @@ test('the narration says where the element is, and logins keep nothing personal'
 })
 
 test('the studio look: zoom on fields, a pulse on the button that sends, the theme and a closing card', async () => {
-  const { stepsFrom, recordedScript, outroStep, studioTheme, secretsTyped } = await import('../src/record.js')
+  const { stepsFrom, recordedScript, outroStep, studioTheme, secretsTyped } = await import('#authoring/record/index.js')
   const events = [
     { action: 'goto', url: 'https://app.acme.test/login' },
     { action: 'look', accent: '#2563eb' },
@@ -72,6 +72,6 @@ test('the studio look: zoom on fields, a pulse on the button that sends, the the
   assert.match(yaml, /^audio: \{ clicks: true \}$/m)
   assert.match(yaml, /title: \{ text: ¡Listo!, subtitle: Ya sabes usar Acme, animation: zoom \}/)
   assert.ok(!yaml.includes('s3cret') && !yaml.includes('ana@acme.test'), 'what was typed in the login stays out of the script')
-  const { fromData, parseText } = await import('../src/script/load.js')
+  const { fromData, parseText } = await import('#script/load.js')
   assert.ok(fromData(parseText(yaml)).script.theme.frame === 'window')
 })

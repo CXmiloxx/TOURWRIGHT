@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import YAML from 'yaml'
-import { describe, draftScript, keyControls, outline, secretPrefix, sections } from '../src/explore.js'
-import { validateScript } from '../src/script/schema.js'
+import { describe, draftScript, keyControls, outline, secretPrefix, sections } from '#authoring/explore/index.js'
+import { validateScript } from '#script/schema.js'
 
 const SNAPSHOT = `- link "Skip to content":
   - /url: "#content"

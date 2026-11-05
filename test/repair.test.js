@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { applyFixes, likeness, markdownReport, suggestFix } from '../src/repair.js'
+import { applyFixes, likeness, markdownReport, suggestFix } from '#authoring/repair.js'
 
 const elements = [
   { target: { placeholder: 'Tu usuario o tu correo' }, kind: 'field', hint: 'Tu usuario o tu correo Usuario o correo' },

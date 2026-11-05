@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { lexicon, spanishNumber, speakable, voiceLanguage } from '../src/voice/lexicon.js'
-import { applyPronunciation } from '../src/voice/index.js'
+import { lexicon, spanishNumber, speakable, voiceLanguage } from '#voice/lexicon.js'
+import { applyPronunciation } from '#voice/index.js'
 
 test('Spanish numbers in words, with "un" before thousands and millions', () => {
   const cases = { 0: 'cero', 21: 'veintiuno', 31: 'treinta y uno', 100: 'cien', 101: 'ciento uno', 2026: 'dos mil veintiséis', 21000: 'veintiún mil', 25800: 'veinticinco mil ochocientos', 1000000: 'un millón', 2500000: 'dos millones quinientos mil' }

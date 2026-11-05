@@ -3,8 +3,8 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { reloadConfig, userConfigFile } from '../src/config.js'
-import { listSettings, setSetting, unsetSetting } from '../src/settings.js'
+import { reloadConfig, userConfigFile } from '#core/config.js'
+import { listSettings, setSetting, unsetSetting } from '#cli/settings.js'
 
 test('each person sets their own defaults; the environment still wins', () => {
   const home = mkdtempSync(join(tmpdir(), 'tw-settings-'))

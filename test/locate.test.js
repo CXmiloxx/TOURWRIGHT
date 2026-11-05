@@ -3,9 +3,9 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { isAbsolute, join } from 'node:path'
 import { test } from 'node:test'
-import { extraBinDirs } from '../src/locate.js'
-import { cachedBuilds, isSnap } from '../src/render/chromium.js'
-import { findPiperVoice, installedPiperVoices } from '../src/voice/piper-voices.js'
+import { extraBinDirs } from '#core/locate.js'
+import { cachedBuilds, isSnap } from '#render/browser/chromium.js'
+import { findPiperVoice, installedPiperVoices } from '#voice/piper-voices.js'
 
 const voice = (dir, id) => {
   mkdirSync(dir, { recursive: true })

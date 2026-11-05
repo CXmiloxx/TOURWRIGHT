@@ -4,6 +4,47 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+Narration at one volume from the first sentence to the last, videos made again without touching the app, and a
+dry run that presses nothing.
+
+### Added
+
+- `tourwright render --keep` keeps the recording, each sentence and a `timeline.json` next to the video, and
+  `tourwright recompose <folder>` makes the video again without the browser: another voice or `--polish`,
+  `--no-clicks`, captions and sentences edited, and `blurs` (boxes of the video blurred between two seconds).
+- `--safe` (and `options.safe` in the API and MCP): a dry run that finds every element and checks it could be
+  used, but clicks, types, chooses and uploads nothing; steps that come after a skipped action are listed as not
+  checked instead of failed.
+- `mask: [date]`: dates in the text become other dates in the same format, and filled date fields are blurred.
+- The review now reports a sentence more than 4 LU from the narration (`loudness`), a true peak over -1 dBFS
+  (`clipping`), a filled date field on camera (`privacy`) and a target that matches several elements (`ambiguous`).
+- `tourwright validate --no-vars` checks the format and the names without values for variables and secrets.
+
+### Fixed
+
+- Short sentences with a sharp consonant came out 5 to 15 dB quieter than the rest: each sentence is now leveled
+  with a measured gain and a true-peak limiter, and measured again, instead of loudnorm (which gave up the gain
+  to keep the peaks). Leveled sentences are cached.
+- Clicks and typing made off camera piled up where the video jumps and could reach +12 dBFS: they are left out,
+  and a true-peak limiter closes the whole mix.
+- A target with a hidden copy (the same link in a closed menu) failed as "cannot be used": the visible one is
+  used. A target whose words are part of a longer text now prefers the exact one. Steps that click wait until
+  the element can be clicked, and the error says what is in the way.
+- With `mask`, a step looking for a text the mask changed on screen (an amount read as an ID) found nothing.
+- The `.default()` values of a plugin step's schema did not reach its `run`.
+- `render --step` failed on a script with `focus … click: true` before the chosen steps: off camera that click was
+  never made.
+
+### Changed
+
+- `src/` is split by domain (`core`, `script`, `voice`, `video`, `plugins`, `render`, `ai`, `install`,
+  `authoring`, `server`, `cli`), each with an alias in `package.json` (`#core/…`) and a layer it may import from.
+  `npm run check` now checks the rules: at most 400 lines a file, a comment at the top, kebab-case names, no
+  `../` imports and no import from a higher layer. `AGENTS.md` (and `CLAUDE.md`) say where each thing goes. The
+  library API (`import … from 'tourwright'`) is the same.
+
 ## [2.5.0]
 
 Videos that look like the app on a phone without working out numbers, lists with a search box in one step, and

@@ -6,7 +6,7 @@
 //   repeat   { times | each, as, steps }   the same steps several times ({{index}}, {{item}})
 //
 // Pure data in, pure data out: safe for scripts that come from the API.
-import { UserError } from '../util.js'
+import { UserError } from '#core/util.js'
 
 // A script from the API may not explode into millions of steps
 const MAX_STEPS = 5000
@@ -15,10 +15,18 @@ const MAX_REPEAT = 500
 const VAR = /\{\{\s*([\w.]+)\s*\}\}/g
 const WHOLE = /^\{\{\s*([\w.]+)\s*\}\}$/
 
+// `validate --no-vars`: a variable without a value is noted and left as it is written, instead of an error
+/** @type {Set<string> | null} */
+let unset = null
+
 const lookup = (name, scope) => {
   let value = scope
   for (const part of name.split('.')) {
     if (value === null || typeof value !== 'object' || !Object.hasOwn(value, part)) {
+      if (unset) {
+        unset.add(name.split('.')[0])
+        return `{{${name}}}`
+      }
       throw new UserError(`{{${name}}} is not defined (variables: ${Object.keys(scope).join(', ') || 'none'})`)
     }
     value = value[part]
@@ -41,7 +49,21 @@ export const substitute = (value, scope) => {
   return value
 }
 
-export const expandScript = (data, { vars: extra = {} } = {}) => {
+/**
+ * @param {any} data
+ * @param {{ vars?: Record<string, unknown>, missing?: Set<string> }} [options]  `missing`: collects the variables with
+ *   no value instead of failing on them (they stay as "{{name}}")
+ */
+export const expandScript = (data, { vars: extra = {}, missing = undefined } = {}) => {
+  unset = missing ?? null
+  try {
+    return expandAll(data, extra)
+  } finally {
+    unset = null
+  }
+}
+
+const expandAll = (data, extra) => {
   if (!data || typeof data !== 'object' || Array.isArray(data)) return data
   const { vars = {}, blocks = {}, ...rest } = data
   if (typeof vars !== 'object' || Array.isArray(vars) || !vars) throw new UserError('vars: must be an object of name: value')
@@ -67,10 +89,12 @@ export const expandScript = (data, { vars: extra = {} } = {}) => {
         continue
       }
       if (action === 'repeat' && arg && typeof arg === 'object') {
-        const times = arg.each === undefined ? Number(substitute(arg.times, scope)) : 0
+        let times = arg.each === undefined ? Number(substitute(arg.times, scope)) : 0
+        if (unset && arg.each === undefined && Number.isNaN(times)) times = 1
         // Checked before anything is allocated: validation only sees the expanded script
         if (arg.each === undefined && !(Number.isInteger(times) && times >= 1 && times <= MAX_REPEAT)) throw new UserError(`${where}: repeat.times must be a whole number from 1 to ${MAX_REPEAT}`)
-        const items = arg.each !== undefined ? substitute(arg.each, scope) : Array.from({ length: times }, (_, i) => i + 1)
+        let items = arg.each !== undefined ? substitute(arg.each, scope) : Array.from({ length: times }, (_, i) => i + 1)
+        if (unset && typeof items === 'string') items = [items]
         if (!Array.isArray(items)) throw new UserError(`${where}: repeat.each must be a list`)
         if (items.length > MAX_REPEAT) throw new UserError(`${where}: repeat.each has more than ${MAX_REPEAT} items`)
         items.forEach((item, i) => {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { expandScript } from '../src/script/expand.js'
-import { fromData } from '../src/script/load.js'
+import { expandScript } from '#script/expand.js'
+import { fromData } from '#script/load.js'
 
 test('variables replace text and keep the type of a whole value', () => {
   const s = expandScript({ vars: { product: 'Acme', wait: 1500, user: { name: 'Ana' } }, title: '{{product}} tour', steps: [{ say: 'Hi {{ user.name }}' }, { pause: '{{wait}}' }] })
@@ -43,4 +43,14 @@ test('fromData expands, takes vars from outside and validates the result', () =>
 test('a huge repeat is refused before anything is allocated', () => {
   assert.throws(() => expandScript({ steps: [{ repeat: { times: 1e9, steps: [{ pause: 1 }] } }] }), /from 1 to 500/)
   assert.throws(() => expandScript({ steps: [{ repeat: { times: 'x', steps: [] } }] }), /from 1 to 500/)
+})
+
+test('validate --no-vars: variables without a value are collected and left as written, not an error', () => {
+  const missing = new Set()
+  const out = expandScript({ steps: [{ type: { target: '#u', text: '{{user}}' } }, { repeat: { times: '{{n}}', steps: [{ say: 'Hola {{who.name}}' }] } }] }, { missing })
+  assert.deepEqual([...missing].sort(), ['n', 'user', 'who'])
+  assert.equal(out.steps[0].type.text, '{{user}}')
+  assert.equal(out.steps[1].say, 'Hola {{who.name}}')
+  // Without it, the same script still fails on the first one
+  assert.throws(() => expandScript({ steps: [{ say: '{{user}}' }] }), /is not defined/)
 })

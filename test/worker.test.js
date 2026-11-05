@@ -3,10 +3,10 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { loadConfig } from '../src/config.js'
-import { createBlobs } from '../src/jobs/blobs.js'
-import { localStore } from '../src/jobs/store.js'
-import { makeHandler } from '../src/worker.js'
+import { loadConfig } from '#core/config.js'
+import { createBlobs } from '#server/jobs/blobs.js'
+import { localStore } from '#server/jobs/store.js'
+import { makeHandler } from '#server/worker.js'
 
 // A worker with a fake render: each call takes the next answer from `answers`.
 const setup = answers => {
