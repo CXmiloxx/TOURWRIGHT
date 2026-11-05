@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.6.0]
 
 Narration at one volume from the first sentence to the last, videos made again without touching the app, and a
 dry run that presses nothing.
