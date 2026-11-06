@@ -1,7 +1,9 @@
 version: 2
+# Commit titles carry a gitmoji like the rest of the history: `⬆️ build(deps): …`, `👷 ci(deps): …`
 updates:
   - package-ecosystem: npm
     directory: /
+    commit-message: { prefix: "⬆️ build", include: scope }
     schedule: { interval: weekly }
     groups:
       minor-and-patch:
@@ -12,12 +14,14 @@ updates:
         update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
+    commit-message: { prefix: "👷 ci", include: scope }
     schedule: { interval: weekly }
     groups:
       minor-and-patch:
         update-types: [minor, patch]
   - package-ecosystem: docker
     directory: /
+    commit-message: { prefix: "⬆️ build", include: scope }
     schedule: { interval: weekly }
     groups:
       minor-and-patch:
