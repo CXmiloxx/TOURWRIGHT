@@ -52,11 +52,13 @@ Conventional Commits with a [gitmoji](https://gitmoji.dev): `<gitmoji> type(scop
 ```
 ✨ feat(voice): pronunciation dictionary per script
 🐛 fix(render): cursor jumps when the page scrolls
-📚 docs(scripts): document the drag action
+📝 docs(scripts): the drag action explained
 ```
 
-Types: ✨ feat · 🐛 fix · ♻️ refactor · ⚡ perf · 📚 docs · ✅ test · 👷 ci · 📦 build · 🔧 chore. One intent
-per commit; a breaking change takes `!` after the type and a `BREAKING CHANGE:` footer.
+Types: ✨ feat · 🐛 fix · ♻️ refactor · ⚡️ perf · 🎨 style · 📝 docs · ✅ test · 📦️ build · 👷 ci · 🔧 chore ·
+⏪️ revert. The title says what changed, not what you did (no "add", "fix", "update" at the start). One intent
+per commit; a breaking change takes 💥, `!` after the scope and a `BREAKING CHANGE:` footer. No AI attribution:
+no `Co-Authored-By` line for an assistant or a model.
 
 ## Pull requests
 
