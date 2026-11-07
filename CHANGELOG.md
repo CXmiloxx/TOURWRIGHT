@@ -4,7 +4,10 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.6.1]
+
+A sandbox that checks every connection of the browser, renders that stop at their time limit, and fixes to
+the API, voices, nested steps and the browser lock.
 
 ### Fixed
 
@@ -451,6 +454,7 @@ First release.
 - Quality checks: lint (Biome), types (JSDoc checked by `tsc`), tests and a real render on the three
   systems in CI.
 
+[2.6.1]: https://github.com/CXmiloxx/tourwright/compare/v2.6.0...v2.6.1
 [2.6.0]: https://github.com/CXmiloxx/tourwright/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/CXmiloxx/tourwright/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/CXmiloxx/tourwright/compare/v2.3.0...v2.4.0
