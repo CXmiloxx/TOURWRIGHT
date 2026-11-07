@@ -121,7 +121,8 @@ export const render = async (loaded, opts = {}, config = loadConfig()) => {
         }, timeout)
       }),
     ])
-    return result.dryRun || (wanted.length === 1 && wanted[0] === 'video') ? result : await exportExtras(result, wanted, config)
+    // A dry run, a guide or what `narrate` collects has no video to export from
+    return opts.dryRun || result.dryRun || (wanted.length === 1 && wanted[0] === 'video') ? result : await exportExtras(result, wanted, config)
   } finally {
     clearTimeout(timer)
     // Stopped at the time limit: what it was writing in the work folder ends first (or 30 s pass)
