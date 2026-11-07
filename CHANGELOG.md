@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.6.2]
 
 Every built-in voice measured on its own, so tech words, acronyms and shortcuts come out right with each one.
 
@@ -474,6 +474,7 @@ First release.
 - Quality checks: lint (Biome), types (JSDoc checked by `tsc`), tests and a real render on the three
   systems in CI.
 
+[2.6.2]: https://github.com/CXmiloxx/tourwright/compare/v2.6.1...v2.6.2
 [2.6.1]: https://github.com/CXmiloxx/tourwright/compare/v2.6.0...v2.6.1
 [2.6.0]: https://github.com/CXmiloxx/tourwright/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/CXmiloxx/tourwright/compare/v2.4.0...v2.5.0
