@@ -8,12 +8,12 @@
     "url": "https://github.com/CXmiloxx/tourwright",
     "source": "github"
   },
-  "version": "2.6.1",
+  "version": "2.6.2",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "tourwright",
-      "version": "2.6.1",
+      "version": "2.6.2",
       "transport": {
         "type": "stdio"
       },
