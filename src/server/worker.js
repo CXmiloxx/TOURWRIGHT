@@ -1,6 +1,5 @@
 // Takes jobs from the queue and renders them, `concurrency` at a time. Run as many workers as your servers
 // allow: they coordinate through the queue (a shared folder or Redis).
-import { spawn } from 'node:child_process'
 import { createHmac } from 'node:crypto'
 import { lookup as dnsLookup } from 'node:dns'
 import { mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
@@ -16,13 +15,20 @@ import { linkSigner } from './jobs/links.js'
 import { createBackend, publicJob } from './jobs/store.js'
 import { loadPlugins } from '#plugins/index.js'
 import { createGuard } from '#render/browser/network.js'
-import { log } from '#core/util.js'
+import { killTree, log, spawnTree } from '#core/util.js'
 
 const RUN_JOB = fileURLToPath(new URL('./run-job.js', import.meta.url))
+// The render stops itself at the time limit and says so; past this margin it is killed with all it started
+const GRACE_S = 60
+
+// Renders running now: in their own process group, so a worker that ends takes them along
+const running = new Set()
+process.once('exit', () => running.forEach(killTree))
 
 const runChild = (input, output, options, { timeout, onProgress }) =>
   new Promise(resolve => {
-    const child = spawn(process.execPath, [RUN_JOB, input, output, JSON.stringify(options)], { stdio: ['ignore', 'pipe', 'inherit'] })
+    const child = spawnTree(process.execPath, [RUN_JOB, input, output, JSON.stringify({ ...options, timeout })], { stdio: ['ignore', 'pipe', 'inherit'] })
+    running.add(child)
     let last = null
     let buffer = ''
     child.stdout.on('data', chunk => {
@@ -42,10 +48,13 @@ const runChild = (input, output, options, { timeout, onProgress }) =>
     })
     const timer = setTimeout(() => {
       last = { error: `render took more than ${timeout} s` }
-      child.kill('SIGKILL')
-    }, timeout * 1000)
+      killTree(child)
+    }, (timeout + GRACE_S) * 1000)
     child.on('exit', code => {
       clearTimeout(timer)
+      running.delete(child)
+      // Whatever it started and left behind (a browser that hung on close) goes with it
+      killTree(child)
       resolve(last ?? { error: `render process exited with ${code}` })
     })
   })

@@ -89,6 +89,9 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   let studio = null
   try {
     studio = await openStudio({ plan, script, loaded, opts, config, network, resolveUrl, sessionFile, progress })
+    // Past the time limit the browser and the recording close, and the steps waiting on them fail and stop
+    const opened = studio
+    opts.signal?.addEventListener('abort', () => void opened.close(), { once: true })
     const { page, context } = studio
     const blocker = await dismissing(page, script.dismiss)
     const clock = createClock(page, { dryRun, startedAt: studio.startedAt })

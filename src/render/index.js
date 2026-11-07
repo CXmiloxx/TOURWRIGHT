@@ -6,7 +6,7 @@ import { setPriority, tmpdir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 import { loadConfig } from '#core/config.js'
 import { loadPlugins } from '#plugins/index.js'
-import { UserError } from '#core/util.js'
+import { sleep, UserError } from '#core/util.js'
 import { renderBrowser } from './walkthrough/index.js'
 import { renderSlides } from './slides.js'
 
@@ -62,11 +62,6 @@ const exportExtras = async (result, wanted, config) => {
   return { ...result, paths: { ...rest, manifest } }
 }
 
-/**
- * @param {import('#script/load.js').Loaded} loaded  a script from script/load.js
- * @param {Record<string, any>} [opts]  { out, voice, quality, width, height, capture, dryRun, timeout (s), onProgress, sessionNamespace }
- * @returns manifest: { title, duration, files, chapters, captions, paths } (or a dry-run summary)
- */
 /** "5" or "3-6" → [5, 5] or [3, 6] (1-based, inclusive); nothing → null */
 export const parseSteps = spec => {
   if (spec === undefined || spec === null || spec === '') return null
@@ -79,6 +74,11 @@ export const parseSteps = spec => {
   return [from, to]
 }
 
+/**
+ * @param {import('#script/load.js').Loaded} loaded  a script from script/load.js
+ * @param {Record<string, any>} [opts]  { out, voice, quality, width, height, capture, dryRun, timeout (s), onProgress, sessionNamespace }
+ * @returns manifest: { title, duration, files, chapters, captions, paths } (or a dry-run summary)
+ */
 export const render = async (loaded, opts = {}, config = loadConfig()) => {
   lowerPriority(config)
   await loadPlugins(config)
@@ -97,27 +97,35 @@ export const render = async (loaded, opts = {}, config = loadConfig()) => {
   mkdirSync(base, { recursive: true })
   const workDir = mkdtempSync(join(base, 'tourwright-'))
   let timer
+  /** @type {Promise<any> | null} */
+  let running = null
+  const stop = new AbortController()
   try {
     const timeout = (opts.timeout ?? config.queue.jobTimeout) * 1000
     const wanted = opts.export ?? loaded.script.export ?? ['video']
     const unknown = wanted.filter(e => !EXPORTS.includes(e))
     if (unknown.length) throw new UserError(`export: ${unknown.join(', ')}? Use ${EXPORTS.join(', ')}`)
     if (!wanted.length) throw new UserError(`export: choose at least one of ${EXPORTS.join(', ')}`)
+    // The subtitle files are not named after the video: players load a .srt with the video's name by themselves
+    // and draw it over the captions already on the video
+    const sidecar = join(dirname(out), steps ? `captions-step${steps[0]}${steps[1] !== steps[0] ? `-${steps[1]}` : ''}` : 'captions')
+    const options = { ...opts, out, sidecar, workDir, failureDir: opts.failureDir ?? dirname(out), signal: stop.signal }
+    running = loaded.kind === 'slides' ? renderSlides(loaded, options, config) : renderBrowser(loaded, options, config)
     const result = await Promise.race([
-      (() => {
-        // The subtitle files are not named after the video: players load a .srt with the video's name by themselves
-        // and draw it over the captions already on the video
-        const sidecar = join(dirname(out), steps ? `captions-step${steps[0]}${steps[1] !== steps[0] ? `-${steps[1]}` : ''}` : 'captions')
-        const options = { ...opts, out, sidecar, workDir, failureDir: opts.failureDir ?? dirname(out) }
-        return loaded.kind === 'slides' ? renderSlides(loaded, options, config) : renderBrowser(loaded, options, config)
-      })(),
+      running,
       new Promise((_, reject) => {
-        timer = setTimeout(() => reject(new Error(`render took more than ${timeout / 1000} s`)), timeout)
+        timer = setTimeout(() => {
+          // The render stops (its browser closes) instead of going on unseen while its folder is deleted
+          stop.abort()
+          reject(new Error(`render took more than ${timeout / 1000} s`))
+        }, timeout)
       }),
     ])
     return result.dryRun || (wanted.length === 1 && wanted[0] === 'video') ? result : await exportExtras(result, wanted, config)
   } finally {
     clearTimeout(timer)
+    // Stopped at the time limit: what it was writing in the work folder ends first (or 30 s pass)
+    if (stop.signal.aborted && running) await Promise.race([running.catch(() => {}), sleep(30_000)])
     rmSync(workDir, { recursive: true, force: true })
   }
 }
