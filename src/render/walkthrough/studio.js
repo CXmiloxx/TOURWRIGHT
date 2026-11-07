@@ -6,6 +6,7 @@ import { openDisplay, recordScreen, recordScreencast } from '#render/browser/cap
 import { launch } from '#render/browser/launch.js'
 import { maskInPage } from '#render/page/mask.js'
 import { setupNetwork } from '#render/browser/network.js'
+import { startGuardProxy } from '#render/browser/guard-proxy.js'
 import { OVERLAY } from '#render/page/overlay.js'
 import { needsPrep, prepare, saveSession } from '#render/browser/session.js'
 import { setStepTimeout } from '#render/steps/index.js'
@@ -26,12 +27,17 @@ export const openStudio = async ({ plan, script, loaded, opts, config, network, 
   let browser = null
   let display = null
   let recorder = null
+  let proxy = null
   const close = async () => {
     recorder?.kill()
     await browser?.close().catch(() => {})
     display?.close()
+    proxy?.close()
   }
   try {
+    // A strict sandbox: every connection of the browser goes through a proxy that checks it (each hop of a
+    // redirect and WebSockets too), loopback included
+    if (network.guard?.strict) proxy = await startGuardProxy(network.guard)
     if (mode === 'screen') display = await openDisplay(width, height, config)
     browser = await launch({ headless: mode !== 'screen', display: display?.display, width, height, locale: plan.locale }, config)
     const common = {
@@ -40,6 +46,7 @@ export const openStudio = async ({ plan, script, loaded, opts, config, network, 
       locale: plan.locale,
       timezoneId: opts.timezone ?? process.env.TZ ?? 'UTC',
       serviceWorkers: /** @type {'block'} */ ('block'),
+      ...(proxy ? { proxy: { server: proxy.server, bypass: '<-loopback>' } } : {}),
     }
 
     // ── Off camera: log in, warm up pages, reuse a saved session

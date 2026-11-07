@@ -4,6 +4,27 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- Sandbox: `[::ffff:127.0.0.1]` and the other ways of writing a private IPv4 inside an IPv6 address (NAT64, 6to4,
+  compatible) were let through by `TOURWRIGHT_BLOCK_PRIVATE`, and so were all of `fe80::/10`, multicast and
+  reserved ranges.
+- Sandbox: a redirect to a private or not allowed host, a WebSocket and a name that resolved elsewhere a moment
+  after it was checked (DNS rebinding) were not checked. With `TOURWRIGHT_ALLOWED_HOSTS` or
+  `TOURWRIGHT_BLOCK_PRIVATE`, every connection of the browser now goes through a proxy that checks it and connects
+  to the address it checked.
+- Webhooks no longer follow redirects, and connect to the address the network policy checked.
+- An API or MCP asset named `script.json` replaced the checked script.
+- API job `options` are checked when the job is created (`width`/`height` 320–3840, a known `quality` and
+  `capture`, a voice name, `dryRun`/`safe` as booleans): a bad one is a 400 that names the field, not a failed
+  render minutes later.
+- A `TOURWRIGHT_LINK_TTL` that is not a number made download links that never expired; with the API on `::` the
+  links pointed to `http://:::port`.
+- A slides `theme.background` went into an ffmpeg filter as written, so a script could add filters of its own
+  (`movie=` reads a file of the server): only a color gets there now.
+
 ## [2.6.0]
 
 Narration at one volume from the first sentence to the last, videos made again without touching the app, and a

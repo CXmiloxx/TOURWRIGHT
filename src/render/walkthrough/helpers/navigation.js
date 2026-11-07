@@ -1,15 +1,20 @@
 // Going somewhere and moving around the page: pages, scrolling, pauses, the cursor, what is cut or blurred.
 import { UserError } from '#core/util.js'
+import { BLOCKED_HEADER } from '#render/browser/guard-proxy.js'
+
+const blocked = path => new UserError(`${path}: blocked by the network policy of this server (TOURWRIGHT_ALLOWED_HOSTS / TOURWRIGHT_BLOCK_PRIVATE)`)
 
 /** @param {import('#render/walkthrough/stage.js').Stage} s @param {Record<string, any>} v the helpers, for the ones each step calls */
 export const navigationHelpers = (s, v) => {
   const { page, clock, resolveUrl, settle } = s
   return {
     goto: async path => {
-      await page.goto(resolveUrl(path), { waitUntil: 'domcontentloaded' }).catch(error => {
-        if (/ERR_BLOCKED_BY_CLIENT/.test(error.message)) throw new UserError(`${path}: blocked by the network policy of this server (TOURWRIGHT_ALLOWED_HOSTS / TOURWRIGHT_BLOCK_PRIVATE)`)
+      const response = await page.goto(resolveUrl(path), { waitUntil: 'domcontentloaded' }).catch(error => {
+        if (/ERR_BLOCKED_BY_CLIENT|ERR_TUNNEL_CONNECTION_FAILED/.test(error.message)) throw blocked(path)
         throw error
       })
+      // The sandbox's proxy refused the page, or a page it was redirected to
+      if (response?.headers()[BLOCKED_HEADER]) throw blocked(path)
       await settle()
     },
     back: async () => {
