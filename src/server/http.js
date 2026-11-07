@@ -101,6 +101,7 @@ export const createApp = async config => {
       const end = range[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1
       if (start > end || start < 0) return send(res, 416, undefined, { 'content-range': `bytes */${size}` })
       res.writeHead(206, { 'content-type': type, 'content-length': end - start + 1, 'content-range': `bytes ${start}-${end}/${size}`, 'accept-ranges': 'bytes' })
+      if (req.method === 'HEAD') return res.end()
       return createReadStream(path, { start, end }).pipe(res)
     }
     res.writeHead(200, { 'content-type': type, 'content-length': size, 'accept-ranges': 'bytes' })
@@ -148,7 +149,9 @@ export const createApp = async config => {
       return send(res, 202, await view(job), { location: `/v1/jobs/${job.id}` })
     }
     if (req.method === 'GET' && url.pathname === '/v1/jobs') {
-      const limit = Math.min(200, Number(url.searchParams.get('limit') ?? 50))
+      // 1 to 200; anything that is not a whole number gets the default
+      const asked = Number(url.searchParams.get('limit') ?? 50)
+      const limit = Number.isInteger(asked) && asked > 0 ? Math.min(200, asked) : 50
       const jobs = await backend.store.list({ owner, limit, status: url.searchParams.get('status') ?? undefined })
       return send(res, 200, { jobs: await Promise.all(jobs.map(view)) })
     }
