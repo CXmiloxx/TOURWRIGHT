@@ -1,11 +1,14 @@
 // Bugs found in a code review, one test each. The browser tests are skipped without one.
 import assert from 'node:assert/strict'
-import { mkdtempSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { createServer, request } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { loadConfig } from '#core/config.js'
+import { acquireLock } from '#core/lock.js'
+import { which } from '#core/util.js'
 import { launchChromium, findChromium } from '#render/browser/chromium.js'
 import { BLOCKED_HEADER, startGuardProxy } from '#render/browser/guard-proxy.js'
 import { createGuard, isPrivateAddress } from '#render/browser/network.js'
@@ -165,6 +168,44 @@ test('the TTS command gets {out} as one word, quoted once', () => {
   assert.equal(commandLine('tts --voice {voice} --out {out}', { voice: 'ana', out }, 'linux'), `tts --voice ana --out '/tmp/my cache/it'\\''s.wav'`)
   assert.equal(commandLine('tts --out {out}', { voice: 'ana', out: 'C:\\My Cache\\a.wav' }, 'win32'), 'tts --out "C:\\My Cache\\a.wav"')
   assert.equal(commandLine('tts --out "{out}"', { voice: 'ana', out: 'C:\\My Cache\\a.wav' }, 'win32'), 'tts --out "C:\\My Cache\\a.wav"')
+})
+
+test('a lock left by a dead process is taken by one waiter at a time; one being written is not taken', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'tourwright-lock-'))
+  const file = join(dir, 'browser.lock')
+  try {
+    // A pid that no longer runs
+    const dead = spawnSync(process.execPath, ['-e', '0']).pid
+    writeFileSync(`${file}.tourwright`, String(dead))
+    const order = []
+    const take = name => acquireLock(file).then(release => {
+      order.push(`${name} in`)
+      return new Promise(r => setTimeout(r, 200)).then(() => {
+        order.push(`${name} out`)
+        release()
+      })
+    })
+    await Promise.all([take('a'), take('b')])
+    // Never both inside: each one leaves before the other comes in
+    assert.match(order.join(','), /^(a in,a out,b in,b out|b in,b out,a in,a out)$/)
+
+    // A lock file just created, its pid not written yet: the waiter waits instead of taking it
+    // (with flock, on Linux, there is no lock file)
+    if (process.platform === 'linux' && which('flock')) return
+    writeFileSync(`${file}.tourwright`, '')
+    let got = false
+    const waiting = acquireLock(file).then(release => {
+      got = true
+      release()
+    })
+    await new Promise(r => setTimeout(r, 300))
+    assert.equal(got, false)
+    rmSync(`${file}.tourwright`)
+    await waiting
+    assert.equal(got, true)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
 })
 
 test('a job keeps only the options a client may choose, checked', async () => {
