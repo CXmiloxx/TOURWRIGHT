@@ -54,15 +54,36 @@ export const voiceLanguage = voice => {
 // the respellings that won; Piper also keeps the rest of the list above.
 const CALIBRATED = JSON.parse(readFileSync(new URL('./calibrated.json', import.meta.url), 'utf8'))
 
-/** @param {string} language @param {string} [engine] @returns {Record<string, string>} */
-export const lexicon = (language, engine) => {
+/**
+ * The key of a voice's own calibration: two voices of one engine read the same acronym differently (one Edge
+ * voice says "API" right as written, another needs it spelled). Its id, and its model when it has one
+ * (`pocket:lola` and `pocket:lola?model=spanish` are two voices).
+ * @param {{ id: string, options?: Record<string, string> }} voice
+ */
+export const calibrationKey = voice => (voice.options?.model ? `${voice.id}?model=${voice.options.model}` : voice.id)
+
+/** @param {string} language @param {string} [engine] @param {string} [voiceKey] from calibrationKey @returns {Record<string, string>} */
+export const lexicon = (language, engine, voiceKey) => {
   const lang = String(language ?? '').slice(0, 2).toLowerCase()
   const base = LEXICONS[lang] ?? {}
   const tuned = engine ? CALIBRATED[lang]?.[engine] : undefined
-  if (!tuned) return base
-  const said = Object.fromEntries(Object.entries(tuned).filter(([, t]) => t.say).map(([term, t]) => [term, t.say]))
-  if (engine !== 'piper') return said
-  return { ...Object.fromEntries(Object.entries(base).filter(([term]) => !(term in tuned))), ...said }
+  let words = base
+  if (tuned) {
+    const said = Object.fromEntries(Object.entries(tuned).filter(([, t]) => t.say).map(([term, t]) => [term, t.say]))
+    // Piper: a term heard right as written loses its respelling; one no writing got right keeps the hand-made one
+    const heard = new Set(Object.entries(tuned).filter(([, t]) => t.heard).map(([term]) => term))
+    words = engine === 'piper' ? { ...Object.fromEntries(Object.entries(base).filter(([term]) => !heard.has(term))), ...said } : said
+  }
+  // The voice's own measurements win over its engine's, for the terms it got right
+  const own = voiceKey ? CALIBRATED.voices?.[lang]?.[voiceKey] : undefined
+  if (!own) return words
+  const result = { ...words }
+  for (const [term, t] of Object.entries(own)) {
+    if (!t.heard) continue
+    if (t.say) result[term] = t.say
+    else delete result[term]
+  }
+  return result
 }
 
 // Acronyms no dictionary knows: "RUT" is read as a word, but "CC" or "NNA" (no vowels) and "UE" (only

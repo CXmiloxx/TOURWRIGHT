@@ -19,6 +19,15 @@ test('acronyms without vowels are spelled; the ones read as words are left alone
   assert.equal(speakable('The CC and the IVA.', 'en'), 'The CC and the IVA.')
 })
 
+test('a voice\'s own calibration wins over its engine\'s, only for the terms it got right', () => {
+  // A term the voice heard right with a respelling gets it; one heard right as written loses the engine's respelling
+  const engine = lexicon('es', 'piper')
+  const own = lexicon('es', 'piper', 'es_ES-davefx-medium')
+  assert.equal(own.API, 'a pe i')
+  assert.notEqual(engine.API, own.API)
+  assert.deepEqual(lexicon('es', 'piper', 'a-voice-never-measured'), engine)
+})
+
 test('tech words come from the lexicon of the language; a script\'s pronounce wins', () => {
   const words = { ...lexicon('es'), API: 'ei pi ai' }
   assert.equal(applyPronunciation('Conecta la API key y lee el JSON.', words), 'Conecta la a pe i qui y lee el yei son.')
