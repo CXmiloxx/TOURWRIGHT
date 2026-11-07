@@ -2,7 +2,7 @@
 // reports whether it can run on this server. `native` lists the voice options (rate, pitch, volume) it
 // applies itself; the others are applied with ffmpeg afterwards. Plugins add engines with the same shape.
 import { spawn } from 'node:child_process'
-import { existsSync, writeFileSync } from 'node:fs'
+import { existsSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { log, run, runWithInput, sleep, UserError } from '#core/util.js'
 import { findPiperVoice } from './piper-voices.js'
@@ -73,8 +73,20 @@ const edge = {
   },
 }
 
+// What else makes a sentence sound different besides its voice spec and text (`fingerprint`): part of the key of
+// the sentence cache, so changing it makes the sentences again instead of reusing the old ones
+const fileStamp = path => {
+  try {
+    const s = statSync(path)
+    return `${s.size}-${Math.round(s.mtimeMs)}`
+  } catch {
+    return ''
+  }
+}
+
 const openai = {
   native: ['rate'],
+  fingerprint: (voice, config) => `${config.tts.openai.url ?? ''}|${voice.options.model ?? config.tts.openai.model ?? ''}`,
   available: async config =>
     config.tts.openai.url ? { ok: true, url: config.tts.openai.url, model: config.tts.openai.model } : { ok: false, reason: 'set TOURWRIGHT_OPENAI_TTS_URL (and TOURWRIGHT_OPENAI_TTS_KEY)' },
   synthesize: async ({ text, voice, out, config }) => {
@@ -109,6 +121,7 @@ export const commandLine = (template, { voice, out }, platform = process.platfor
 // TOURWRIGHT_TTS_COMMAND="my-tts --voice {voice} --out {out}": text arrives on stdin. The same values are in
 // TOURWRIGHT_TTS_VOICE and TOURWRIGHT_TTS_OUT, for a command that reads them from the environment.
 const command = {
+  fingerprint: (_, config) => config.tts.command ?? '',
   available: async config => (config.tts.command ? { ok: true, command: config.tts.command } : { ok: false, reason: 'set TOURWRIGHT_TTS_COMMAND' }),
   synthesize: async ({ text, voice, out, config }) => {
     if (!config.tts.command) throw new Error('TOURWRIGHT_TTS_COMMAND not set')
@@ -133,6 +146,8 @@ const command = {
 const POCKET_MODELS = { lola: 'spanish_24l', giovanni: 'italian_24l', juergen: 'german_24l', rafael: 'portuguese_24l', estelle: 'french_24l' }
 const pocket = {
   native: [],
+  // A voice of your own: the same name with another recording is another voice
+  fingerprint: (voice, config) => fileStamp(join(config.tts.piper.voicesDir, `${voice.id}.wav`)),
   available: async config =>
     config.tts.pocket.python
       ? { ok: true, python: config.tts.pocket.python, note: 'downloads its model the first time' }
