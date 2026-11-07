@@ -34,6 +34,8 @@ All notable changes to this project are documented here. The format follows
 - A step inside `if`, `try` or `offCamera` was named by its place inside the block (`step 2`); it is now
   `step 4.2`, in errors, `check` and its report.
 - `tourwright guide` (and `narrate`) failed on a script with `export: [audio]` or `[silent]`.
+- `TOURWRIGHT_TTS_COMMAND` broke on a cache path with spaces (common on Windows): `{out}` is quoted for the shell,
+  and `TOURWRIGHT_TTS_VOICE` / `TOURWRIGHT_TTS_OUT` carry the same values.
 
 ## [2.6.0]
 
