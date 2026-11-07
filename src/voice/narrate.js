@@ -74,10 +74,17 @@ const atomic = async (target, produce) => {
   }
 }
 
+// The voice in a cache key, with the engine's own settings that change the sound (a model, a command, a
+// recording): changing them makes the sentences again. Engines without any keep the keys they always had.
+const cacheKey = (voice, config) => {
+  const extra = ENGINES[voice.engine]?.fingerprint?.(voice, config) ?? ''
+  return extra ? `${voice.spec}:${extra}` : voice.spec
+}
+
 const sentence = async (text, voice, config) => {
   const dir = join(config.cacheDir, 'voice', 'sentences')
   mkdirSync(dir, { recursive: true })
-  const file = join(dir, `${hash(`${voice.spec}:${text}`)}.wav`)
+  const file = join(dir, `${hash(`${cacheKey(voice, config)}:${text}`)}.wav`)
   if (existsSync(file)) return file
   // Two lines made at once may share a sentence: it is made once
   if (!making.has(file)) making.set(file, synthesizeSentence(file, text, voice, config).finally(() => making.delete(file)))
@@ -123,7 +130,7 @@ export const narrate = async (text, voiceSpec, config = loadConfig(), { aliases 
   if (!parts.some(p => p.text)) throw new UserError('nothing to narrate')
   const dir = join(config.cacheDir, 'voice')
   mkdirSync(dir, { recursive: true })
-  const file = join(dir, `${voice.engine}-${hash(`${voice.spec}:${pause}:${JSON.stringify(parts)}`)}.wav`)
+  const file = join(dir, `${voice.engine}-${hash(`${cacheKey(voice, config)}:${pause}:${JSON.stringify(parts)}`)}.wav`)
   // The same line asked again while it is being made (warmed up ahead, then reached on camera) waits for it
   if (!existsSync(file)) {
     if (!making.has(file)) making.set(file, build(file, parts, voice, pause, config).finally(() => making.delete(file)))

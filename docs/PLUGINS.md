@@ -34,6 +34,7 @@ export default {
       native: ['rate'],                                          // options it applies itself; the rest ffmpeg does
       available: async config => ({ ok: true }),                 // or { ok: false, reason: 'set MYTTS_URL' }
       synthesize: async ({ text, voice, out, config }) => { /* write audio of `text` to `out` */ },
+      fingerprint: (voice, config) => config.mytts?.model ?? '', // optional: a setting that changes the sound; changing it re-synthesizes cached sentences
     },
   },
   voices: { narrator: 'mytts:speaker-1?rate=-5%' },              // names usable in `voice:`
