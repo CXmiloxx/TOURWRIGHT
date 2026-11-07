@@ -12,6 +12,17 @@ export const ffmpeg = (args, config = loadConfig()) =>
     child.on('exit', code => (code === 0 ? resolve(undefined) : reject(new Error(`ffmpeg failed (${code}): ${stderr.trim()}`))))
   })
 
+/**
+ * A color for an ffmpeg filter option: #RGB, #RRGGBB or #RRGGBBAA, or a plain color name. Anything else (text from a
+ * script that could close the option and add filters of its own, like `movie=` reading a file) becomes `fallback`.
+ */
+export const ffmpegColor = (value, fallback = 'black') => {
+  const text = String(value ?? '').trim()
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(text)?.[1]
+  if (hex) return `0x${hex.length === 3 ? [...hex].map(c => c + c).join('') : hex}`
+  return /^[a-z]{3,24}$/i.test(text) ? text : fallback
+}
+
 // ffmpeg's report on stderr (loudnorm's measure is printed at info level)
 export const ffmpegReport = (args, config) =>
   new Promise((resolve, reject) => {

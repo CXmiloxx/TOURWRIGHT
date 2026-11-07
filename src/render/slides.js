@@ -4,7 +4,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { compose } from '#video/compose.js'
-import { ffmpeg } from '#video/ffmpeg.js'
+import { ffmpeg, ffmpegColor } from '#video/ffmpeg.js'
 import { qualityOf } from '#video/quality.js'
 import { loadConfig } from '#core/config.js'
 import { launchChromium } from './browser/chromium.js'
@@ -154,7 +154,7 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
   for (const s of timed) {
     const clip = join(work, `clip-${String(s.index).padStart(3, '0')}.mp4`)
     const frames = Math.round((s.duration + fade) * fps)
-    const fit = `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2:color=${theme.background.replace('#', '0x')},setsar=1`
+    const fit = `scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2:color=${ffmpegColor(theme.background)},setsar=1`
     if (s.frames) {
       // An animated title: its frames, then the last one held until the slide ends
       const hold = Math.max(0, s.duration + fade - s.frames / fps)

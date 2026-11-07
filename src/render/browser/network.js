@@ -12,27 +12,79 @@ import { request as httpsRequest } from 'node:https'
 import { isIP } from 'node:net'
 import { readFileSync } from 'node:fs'
 
+// Private networks, loopback, link-local, carrier-grade NAT, "this network", multicast and reserved
 const PRIVATE_V4 = [
   [0x0a000000, 8], [0xac100000, 12], [0xc0a80000, 16], [0x7f000000, 8], [0xa9fe0000, 16], [0x64400000, 10], [0x00000000, 8],
+  [0xe0000000, 4], [0xf0000000, 4],
 ]
 const v4ToInt = ip => ip.split('.').reduce((n, part) => (n << 8) + Number(part), 0) >>> 0
+
+// An IPv6 address as its 8 groups of 16 bits (null when it is not one). A dotted tail (::ffff:1.2.3.4) is two groups.
+const v6Groups = ip => {
+  let text = ip.toLowerCase().split('%')[0]
+  if (isIP(text) !== 6) return null
+  const tail = /(\d+\.\d+\.\d+\.\d+)$/.exec(text)
+  if (tail) {
+    const n = v4ToInt(tail[1])
+    text = `${text.slice(0, -tail[1].length)}${(n >>> 16).toString(16)}:${(n & 0xffff).toString(16)}`
+  }
+  const [head, rest] = text.split('::')
+  const groups = s => (s ? s.split(':').map(h => Number.parseInt(h, 16)) : [])
+  const a = groups(head)
+  const b = groups(rest)
+  return [...a, ...new Array(8 - a.length - b.length).fill(0), ...b]
+}
+
+// The IPv4 address an IPv6 one carries, written in any of its forms: mapped (::ffff:7f00:1, what the URL parser
+// makes of [::ffff:127.0.0.1]), compatible (::7f00:1), NAT64 (64:ff9b::…) and 6to4 (2002:7f00:1::)
+const carriedV4 = g => {
+  const v4 = (hi, lo) => `${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`
+  if (g.slice(0, 5).every(x => x === 0) && (g[5] === 0xffff || g[5] === 0)) return v4(g[6], g[7])
+  if (g[0] === 0x64 && g[1] === 0xff9b && g.slice(2, 6).every(x => x === 0)) return v4(g[6], g[7])
+  if (g[0] === 0x2002) return v4(g[1], g[2])
+  return null
+}
+
 export const isPrivateAddress = ip => {
   if (isIP(ip) === 4) {
     const n = v4ToInt(ip)
     return PRIVATE_V4.some(([base, bits]) => (n & (~0 << (32 - bits))) >>> 0 === base)
   }
-  const v = ip.toLowerCase()
-  if (v.startsWith('::ffff:')) return isPrivateAddress(v.slice(7))
-  return v === '::1' || v === '::' || v.startsWith('fc') || v.startsWith('fd') || v.startsWith('fe80')
+  const g = v6Groups(ip)
+  if (!g) return false
+  const v4 = carriedV4(g)
+  if (v4) return isPrivateAddress(v4)
+  // Unique local fc00::/7, link-local fe80::/10, site-local fec0::/10, multicast ff00::/8
+  return (g[0] & 0xfe00) === 0xfc00 || (g[0] & 0xffc0) === 0xfe80 || (g[0] & 0xffc0) === 0xfec0 || (g[0] & 0xff00) === 0xff00
 }
 
 // "*.example.com" matches example.com and its subdomains; "example.com" only itself.
 export const hostAllowed = (host, allowed) =>
   !allowed.length || allowed.some(p => (p.startsWith('*.') ? host === p.slice(2) || host.endsWith(p.slice(1)) : host === p))
 
+/**
+ * Whether a URL may be loaded. `guard.addressOf(host)` gives the address to connect to (the one that was checked,
+ * so a name that resolves elsewhere later cannot reach a private network) or null when the host is not allowed.
+ * `guard.strict`: it limits hosts or addresses, beyond the schemes.
+ */
 export const createGuard = ({ allowedHosts = [], blockPrivate = false }) => {
+  /** @type {Map<string, Promise<string | null>>} */
   const resolved = new Map()
-  return async url => {
+  /** @param {string} host @returns {Promise<string | null>} */
+  const addressOf = host => {
+    host = host.replace(/^\[|\]$/g, '')
+    if (!hostAllowed(host, allowedHosts)) return Promise.resolve(null)
+    if (!blockPrivate) return Promise.resolve(host)
+    if (!resolved.has(host)) {
+      resolved.set(host, (isIP(host) ? Promise.resolve([{ address: host }]) : lookup(host, { all: true })).then(
+        addrs => (addrs.length && addrs.every(a => !isPrivateAddress(a.address)) ? addrs[0].address : null),
+        () => null
+      ))
+    }
+    return /** @type {Promise<string | null>} */ (resolved.get(host))
+  }
+  /** @param {string} url */
+  const guard = async url => {
     let u
     try {
       u = new URL(url)
@@ -41,17 +93,9 @@ export const createGuard = ({ allowedHosts = [], blockPrivate = false }) => {
     }
     if (u.protocol === 'data:' || u.protocol === 'blob:') return true
     if (u.protocol !== 'http:' && u.protocol !== 'https:' && u.protocol !== 'ws:' && u.protocol !== 'wss:') return false
-    const host = u.hostname.replace(/^\[|\]$/g, '')
-    if (!hostAllowed(host, allowedHosts)) return false
-    if (!blockPrivate) return true
-    if (!resolved.has(host)) {
-      resolved.set(host, (isIP(host) ? Promise.resolve([{ address: host }]) : lookup(host, { all: true })).then(
-        addrs => addrs.every(a => !isPrivateAddress(a.address)),
-        () => false
-      ))
-    }
-    return resolved.get(host)
+    return (await addressOf(u.hostname)) !== null
   }
+  return Object.assign(guard, { addressOf, strict: blockPrivate || allowedHosts.length > 0 })
 }
 
 // Chromium sends empty file parts to an intercepted multipart request; the forwarder refills them from disk.

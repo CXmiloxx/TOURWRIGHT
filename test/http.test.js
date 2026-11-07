@@ -82,3 +82,13 @@ test('bad requests are refused before anything is queued', async () => {
   const link = await call('GET', '/v1/jobs/x/files/video.mp4?exp=1&sig=bad')
   assert.deepEqual([link.status, link.body.code], [403, 'forbidden'])
 })
+
+test('job options are checked before the job is queued; unknown ones are left out', async () => {
+  const bad = await call('POST', '/v1/jobs', { token: 'token-a', body: { script, options: { width: 100000, quality: 'ultra' } } })
+  assert.deepEqual([bad.status, bad.body.code], [400, 'invalid'])
+  assert.match(bad.body.error, /width/)
+  assert.match(bad.body.error, /quality/)
+  assert.equal((await call('POST', '/v1/jobs', { token: 'token-a', body: { script, options: 'fast' } })).status, 400)
+  const ok = await call('POST', '/v1/jobs', { token: 'token-a', body: { script, options: { quality: 'sd', dryRun: true, sandboxed: false } } })
+  assert.equal(ok.status, 202)
+})

@@ -2,7 +2,11 @@
 // allow: they coordinate through the queue (a shared folder or Redis).
 import { spawn } from 'node:child_process'
 import { createHmac } from 'node:crypto'
+import { lookup as dnsLookup } from 'node:dns'
 import { mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
+import { request as httpRequest } from 'node:http'
+import { request as httpsRequest } from 'node:https'
+import { isIP } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -46,6 +50,32 @@ const runChild = (input, output, options, { timeout, onProgress }) =>
     })
   })
 
+/**
+ * POSTs to a webhook without following redirects (a redirect could point at a private network the guard never
+ * saw) and connecting to the address the guard checked (a name that resolves elsewhere later gets nowhere).
+ * @returns {Promise<number>} the HTTP status
+ */
+export const postWebhook = (url, headers, body, guard) =>
+  new Promise((resolve, reject) => {
+    const u = new URL(url)
+    /** @type {any} */
+    const pinned = (hostname, options, callback) => {
+      guard.addressOf(hostname).then(address => {
+        if (!address) return callback(Object.assign(new Error(`${hostname} is not allowed`), { code: 'EBLOCKED' }))
+        if (!isIP(address)) return dnsLookup(address, options, callback)
+        const family = isIP(address)
+        return options?.all ? callback(null, [{ address, family }]) : callback(null, address, family)
+      }, callback)
+    }
+    const req = (u.protocol === 'https:' ? httpsRequest : httpRequest)(u, { method: 'POST', headers, timeout: 15_000, lookup: pinned }, res => {
+      res.resume()
+      resolve(res.statusCode ?? 0)
+    })
+    req.on('timeout', () => req.destroy(new Error('no answer in 15 s')))
+    req.on('error', reject)
+    req.end(body)
+  })
+
 export const notify = async (job, config, signLink, blobs) => {
   if (!job.webhook) return
   const guard = createGuard(config.network)
@@ -53,7 +83,10 @@ export const notify = async (job, config, signLink, blobs) => {
   const body = JSON.stringify({ event: `job.${job.status}`, job: { ...publicJob(job), result: await resultWithLinks(job, { blobs, signLink }) } })
   const headers = { 'content-type': 'application/json' }
   if (process.env.TOURWRIGHT_WEBHOOK_SECRET) headers['x-tourwright-signature'] = `sha256=${createHmac('sha256', process.env.TOURWRIGHT_WEBHOOK_SECRET).update(body).digest('hex')}`
-  await fetch(job.webhook, { method: 'POST', headers, body, signal: AbortSignal.timeout(15_000) }).catch(e => log.warn(`job ${job.id}: webhook failed: ${e.message}`))
+  await postWebhook(job.webhook, headers, body, guard).then(
+    status => status >= 300 && log.warn(`job ${job.id}: webhook answered ${status}${status < 400 ? ' (redirects are not followed)' : ''}`),
+    e => log.warn(`job ${job.id}: webhook failed: ${e.message}`)
+  )
 }
 
 // `run` renders one job; tests swap it for a fake.
