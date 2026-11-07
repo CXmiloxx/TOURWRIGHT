@@ -20,8 +20,13 @@ All notable changes to this project are documented here. The format follows
 - API job `options` are checked when the job is created (`width`/`height` 320–3840, a known `quality` and
   `capture`, a voice name, `dryRun`/`safe` as booleans): a bad one is a 400 that names the field, not a failed
   render minutes later.
+- `GET /v1/jobs?limit=` with a value that is not a whole number above zero returned nothing, or almost every job:
+  it now gets the default (50).
+- `HEAD` on a file with a `Range` header sent the file's bytes.
 - A `TOURWRIGHT_LINK_TTL` that is not a number made download links that never expired; with the API on `::` the
   links pointed to `http://:::port`.
+- A worker on a host whose name has dots (`worker.example.com`) put the jobs of a stopped worker back in the local
+  queue under a wrong name.
 - A slides `theme.background` went into an ffmpeg filter as written, so a script could add filters of its own
   (`movie=` reads a file of the server): only a color gets there now.
 

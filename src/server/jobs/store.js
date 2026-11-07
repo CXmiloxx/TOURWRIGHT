@@ -61,7 +61,8 @@ export const localStore = root => {
     /** @param {Function} handler @param {{ concurrency?: number, staleSeconds?: number, signal?: AbortSignal }} [options] */
     consume: async (handler, { concurrency = 1, staleSeconds = 120, signal = undefined } = {}) => {
       let active = 0
-      const me = `${hostname()}-${process.pid}`
+      // No dots: a running ticket is "<ticket>.<me>", and the ticket comes back to the queue by cutting the last dot
+      const me = `${hostname().replaceAll('.', '_')}-${process.pid}`
       const heartbeat = setInterval(() => {
         for (const t of readdirSync(running).filter(t => t.endsWith(`.${me}`))) {
           try {

@@ -92,3 +92,12 @@ test('job options are checked before the job is queued; unknown ones are left ou
   const ok = await call('POST', '/v1/jobs', { token: 'token-a', body: { script, options: { quality: 'sd', dryRun: true, sandboxed: false } } })
   assert.equal(ok.status, 202)
 })
+
+test('a limit that is not a whole number above zero gets the default', async () => {
+  for (const limit of ['abc', '-1', '0', '2.5']) {
+    const r = await call('GET', `/v1/jobs?limit=${limit}`, { token: 'token-a' })
+    assert.equal(r.status, 200, limit)
+    assert.ok(Array.isArray(r.body.jobs), limit)
+  }
+  assert.ok((await call('GET', '/v1/jobs?limit=1', { token: 'token-a' })).body.jobs.length <= 1)
+})
