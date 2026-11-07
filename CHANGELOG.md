@@ -36,6 +36,8 @@ All notable changes to this project are documented here. The format follows
 - `tourwright guide` (and `narrate`) failed on a script with `export: [audio]` or `[silent]`.
 - `TOURWRIGHT_TTS_COMMAND` broke on a cache path with spaces (common on Windows): `{out}` is quoted for the shell,
   and `TOURWRIGHT_TTS_VOICE` / `TOURWRIGHT_TTS_OUT` carry the same values.
+- The browser lock outside Linux could fail when it was released at the wrong moment, take a lock whose owner had
+  not written its pid yet, or let two waiters take a dead owner's lock at once.
 - Sentences cached with an OpenAI-compatible model, a TTS command or a Pocket voice recording that later changed
   were reused: those settings are now part of the cache key (other engines keep their cache). Plugin engines can
   add theirs with `fingerprint`.

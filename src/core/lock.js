@@ -6,7 +6,7 @@
 // created exclusively next to it (<file>.tourwright) holding the owner's pid; a lock left by a process that
 // died is taken over.
 import { spawn } from 'node:child_process'
-import { mkdirSync, openSync, readFileSync, rmSync, writeSync, closeSync } from 'node:fs'
+import { closeSync, mkdirSync, openSync, readFileSync, rmSync, statSync, writeSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { createInterface } from 'node:readline'
 import { log, sleep, which } from './util.js'
@@ -46,6 +46,48 @@ const alive = pid => {
   }
 }
 
+// A lock file with no pid yet is being written by its new owner; only an old one was left by a process that died
+const UNWRITTEN_STALE_MS = 10_000
+
+// The pid in the lock file; 0 when it holds none yet; null when it is gone
+const ownerOf = path => {
+  try {
+    return Number(readFileSync(path, 'utf8').trim() || 0)
+  } catch (error) {
+    if (error.code === 'ENOENT') return null
+    throw error
+  }
+}
+
+const ageOf = path => {
+  try {
+    return Date.now() - statSync(path).mtimeMs
+  } catch {
+    return 0
+  }
+}
+
+/**
+ * Takes away a lock left by a process that died. Two waiters may find the same dead owner: they take turns on a
+ * second file, and each looks again before removing, so neither removes the lock the other has just taken.
+ */
+const takeOver = (path, dead) => {
+  const turn = `${path}.takeover`
+  try {
+    closeSync(openSync(turn, 'wx'))
+  } catch (error) {
+    if (error.code !== 'EEXIST') throw error
+    // A waiter that died in the middle of a takeover
+    if (ageOf(turn) > UNWRITTEN_STALE_MS) rmSync(turn, { force: true })
+    return
+  }
+  try {
+    if (ownerOf(path) === dead) rmSync(path, { force: true })
+  } finally {
+    rmSync(turn, { force: true })
+  }
+}
+
 const withLockFile = async (file, waiting) => {
   const path = `${file}.tourwright`
   let warned = false
@@ -64,16 +106,19 @@ const withLockFile = async (file, waiting) => {
       return release
     } catch (error) {
       if (error.code !== 'EEXIST') throw error
-      const owner = Number(readFileSync(path, 'utf8').trim() || 0)
-      if (!owner || !alive(owner)) {
-        rmSync(path, { force: true })
+      const owner = ownerOf(path)
+      // Released between the two looks: try again at once
+      if (owner === null) continue
+      if (owner ? !alive(owner) : ageOf(path) > UNWRITTEN_STALE_MS) {
+        takeOver(path, owner)
+        await sleep(50)
         continue
       }
-      if (!warned) {
+      if (owner && !warned) {
         warned = true
         waiting()
       }
-      await sleep(1000)
+      await sleep(owner ? 1000 : 50)
     }
   }
 }
