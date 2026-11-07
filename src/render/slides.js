@@ -118,6 +118,8 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
   try {
     if (needsBrowser) {
       browser = await launchChromium(config, { headless: true, args: ['--disable-gpu', '--disable-dev-shm-usage'] })
+      // Past the time limit the browser closes, and what was drawing with it stops
+      opts.signal?.addEventListener('abort', () => void browser?.close().catch(() => {}), { once: true })
     }
     const page = browser && (await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 }))
     if (page && sandboxed) {

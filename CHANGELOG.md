@@ -29,6 +29,8 @@ All notable changes to this project are documented here. The format follows
   queue under a wrong name.
 - A slides `theme.background` went into an ffmpeg filter as written, so a script could add filters of its own
   (`movie=` reads a file of the server): only a color gets there now.
+- A render past its time limit went on in the background (browser open) while its work folder was deleted: it
+  now stops. A worker that kills a render at the limit also ends the browser and ffmpeg it started.
 
 ## [2.6.0]
 

@@ -95,6 +95,30 @@ export const runWithInput = (command, args, input, { timeout = 120_000, env = un
     child.stdin.end(input)
   })
 
+/**
+ * Ends a process and every process it started (a render's browser and ffmpeg). On Windows `taskkill /T`; elsewhere
+ * its process group, so the child must have been spawned with `detached: true` there (`spawnTree`).
+ * @param {import('node:child_process').ChildProcess} child
+ */
+export const killTree = child => {
+  if (!child.pid) return
+  const exited = child.exitCode !== null || child.signalCode !== null
+  if (process.platform === 'win32') {
+    // taskkill finds the children through the parent: once it has exited they are on their own
+    if (!exited) spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore', windowsHide: true }).on('error', () => child.kill())
+    return
+  }
+  // The group outlives its leader: what it left running still goes
+  try {
+    process.kill(-child.pid, 'SIGKILL')
+  } catch {
+    if (!exited) child.kill('SIGKILL')
+  }
+}
+
+/** spawn() for a process `killTree` can end with all it starts: its own process group outside Windows */
+export const spawnTree = (command, args, options = {}) => spawn(command, args, { ...options, detached: process.platform !== 'win32' })
+
 // Opens a file or folder with the system's own program (the video player, the file browser)
 export const openPath = path => {
   const [command, args] = isWindows ? ['explorer.exe', [path]] : process.platform === 'darwin' ? ['open', [path]] : ['xdg-open', [path]]
