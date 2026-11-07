@@ -21,6 +21,8 @@ Every built-in voice measured on its own, so tech words, acronyms and shortcuts 
   software, Teams on Piper; SaaS, ID, IA, email on Edge) were measured again with new writings, and English is
   calibrated on Piper too.
 - On Piper, a term no writing got right lost its respelling and was read as written; it keeps the hand-made one.
+- Keyboard shortcuts were read letter by letter or swallowed ("crlk"): in Spanish `Ctrl+K` is now "control ca" and
+  `Cmd+V` "comando ve".
 
 ## [2.6.1]
 
