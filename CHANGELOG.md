@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- A multilingual voice (`andrew`, `ava`, `emma`, `brian`) narrating in Spanish got the English lexicon and numbers
+  ("1.200" was not said as "mil doscientas"): it now speaks with the script's language.
+
 ## [2.6.1]
 
 A sandbox that checks every connection of the browser, renders that stop at their time limit, and fixes to
