@@ -19,6 +19,13 @@ test('acronyms without vowels are spelled; the ones read as words are left alone
   assert.equal(speakable('The CC and the IVA.', 'en'), 'The CC and the IVA.')
 })
 
+test('keyboard shortcuts are said the way people say them, only inside a shortcut', () => {
+  assert.equal(speakable('Abre la búsqueda con Ctrl K.', 'es'), 'Abre la búsqueda con control ca.')
+  assert.equal(speakable('Pulsa Ctrl+Shift+P y luego Cmd + v.', 'es'), 'Pulsa control Shift pe y luego comando ve.')
+  assert.equal(speakable('El control de calidad, la tecla K y el Ctrl de la izquierda.', 'es'), 'El control de calidad, la tecla K y el Ctrl de la izquierda.')
+  assert.equal(speakable('Press Ctrl K.', 'en'), 'Press Ctrl K.')
+})
+
 test('a voice\'s own calibration wins over its engine\'s, only for the terms it got right', () => {
   // A term the voice heard right with a respelling gets it; one heard right as written loses the engine's respelling
   const engine = lexicon('es', 'piper')

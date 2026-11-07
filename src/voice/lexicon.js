@@ -155,6 +155,17 @@ const numbersEs = text =>
  * The text as the voice should read it, in `language`.
  * @param {string} text @param {string | undefined} language
  */
+// Keyboard shortcuts: "Ctrl+K", "Ctrl K", "Ctrl+Shift+P". A letter on its own is read as an English word or
+// swallowed ("crlk"); after a key it gets its Spanish name, the way people say it: "control ca".
+const KEYS = '(?:control|ctrl|cmd|comando|command|alt|shift|mayús|mayus|opción|option)'
+const KEY_NAMES = { ctrl: 'control', cmd: 'comando', command: 'comando', mayus: 'mayús', option: 'opción' }
+const shortcutsEs = text =>
+  text
+    .replace(new RegExp(`(${KEYS})\\s*\\+\\s*`, 'giu'), '$1 ')
+    // Only inside a shortcut: a key followed by another key or a letter
+    .replace(new RegExp(`(?<![\\p{L}\\p{N}])(${KEYS})(?= (?:${KEYS}|[A-Z])(?![\\p{L}\\p{N}]))`, 'giu'), key => KEY_NAMES[key.toLowerCase()] ?? key)
+    .replace(new RegExp(`(${KEYS}) ([A-Z])(?![\\p{L}\\p{N}])`, 'giu'),(_, key, letter) => `${key} ${LETTERS.es[letter.toUpperCase()]}`)
+
 export const speakable = (text, language) => {
   const lang = String(language ?? '').slice(0, 2).toLowerCase()
   let s = String(text)
@@ -162,6 +173,7 @@ export const speakable = (text, language) => {
   const at = { es: ['arroba', 'punto'], en: ['at', 'dot'] }[lang]
   if (at) s = s.replace(/([\w.+-]+)@([\w-]+(?:\.[\w-]+)+)/g, (_, user, domain) => `${user.replace(/\./g, ` ${at[1]} `)} ${at[0]} ${domain.replace(/\./g, ` ${at[1]} `)}`)
   if (LETTERS[lang]) s = spellAcronyms(s, LETTERS[lang])
+  if (lang === 'es') s = shortcutsEs(s)
   if (lang === 'es') {
     // "$ 409.360": voices say dollars, pesos or nothing; in Spanish narration the sign is the local currency
     const amount = '(\\d+(?:[.,]\\d+)*)'
