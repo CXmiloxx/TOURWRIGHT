@@ -28,7 +28,9 @@ test('tech words come from the lexicon of the language; a script\'s pronounce wi
 
 test('the language of a voice comes from its name or its model', () => {
   assert.equal(voiceLanguage({ engine: 'piper', id: 'es_MX-claude-high', options: {} }), 'es')
-  assert.equal(voiceLanguage({ engine: 'edge', id: 'en-US-AvaMultilingualNeural', options: {} }), 'en')
+  // A multilingual voice speaks the script's language: its name does not decide the lexicon or the numbers
+  assert.equal(voiceLanguage({ engine: 'edge', id: 'en-US-AvaMultilingualNeural', options: {} }), undefined)
+  assert.equal(voiceLanguage({ engine: 'edge', id: 'en-US-JennyNeural', options: {} }), 'en')
   assert.equal(voiceLanguage({ engine: 'pocket', id: 'lola', options: {} }), 'es')
   assert.equal(voiceLanguage({ engine: 'pocket', id: 'alba', options: { model: 'french_24l' } }), 'fr')
   assert.equal(voiceLanguage({ engine: 'openai', id: 'alloy', options: {} }), undefined)

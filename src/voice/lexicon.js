@@ -44,6 +44,8 @@ const MODEL_LANGUAGES = { spanish: 'es', french: 'fr', german: 'de', italian: 'i
 export const voiceLanguage = voice => {
   if (!voice) return undefined
   if (voice.engine === 'pocket') return MODEL_LANGUAGES[String(voice.options.model ?? '').split('_')[0]] ?? POCKET_LANGUAGES[voice.id] ?? 'en'
+  // A multilingual voice (en-US-AndrewMultilingualNeural) speaks the script's language, not the one in its name
+  if (/Multilingual/i.test(voice.id)) return undefined
   return /(?:^|[:_-])(es|en|pt|fr|de|it)[_-]/i.exec(voice.id)?.[1]?.toLowerCase()
 }
 
