@@ -13,6 +13,7 @@ import { runSteps, setStepTimeout } from '#render/steps/index.js'
 import { createJob } from '#server/jobs/service.js'
 import { postWebhook } from '#server/worker.js'
 import { ffmpegColor } from '#video/ffmpeg.js'
+import { commandLine } from '#voice/engines.js'
 
 const config = loadConfig()
 const missing = (await findChromium(config)).source === 'missing' && 'no browser'
@@ -157,6 +158,13 @@ test('a theme color reaches ffmpeg only as a color, never as more filters', () =
   assert.equal(ffmpegColor('#abc'), '0xaabbcc')
   assert.equal(ffmpegColor('navy'), 'navy')
   for (const bad of ['#000,movie=/etc/passwd', 'black;[in]drawtext=text=x', 'rgb(0,0,0)', '', null]) assert.equal(ffmpegColor(bad), 'black', String(bad))
+})
+
+test('the TTS command gets {out} as one word, quoted once', () => {
+  const out = "/tmp/my cache/it's.wav"
+  assert.equal(commandLine('tts --voice {voice} --out {out}', { voice: 'ana', out }, 'linux'), `tts --voice ana --out '/tmp/my cache/it'\\''s.wav'`)
+  assert.equal(commandLine('tts --out {out}', { voice: 'ana', out: 'C:\\My Cache\\a.wav' }, 'win32'), 'tts --out "C:\\My Cache\\a.wav"')
+  assert.equal(commandLine('tts --out "{out}"', { voice: 'ana', out: 'C:\\My Cache\\a.wav' }, 'win32'), 'tts --out "C:\\My Cache\\a.wav"')
 })
 
 test('a job keeps only the options a client may choose, checked', async () => {

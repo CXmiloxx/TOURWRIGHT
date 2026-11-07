@@ -68,7 +68,7 @@ In `tourwright.config.json` they go under `render`: `{ "render": { "quality": "f
 | `TOURWRIGHT_OPENAI_TTS_URL` | `https://api.openai.com` if `OPENAI_API_KEY` is set | Any `/v1/audio/speech` server |
 | `TOURWRIGHT_OPENAI_TTS_KEY` | `OPENAI_API_KEY` | |
 | `TOURWRIGHT_OPENAI_TTS_MODEL` | `tts-1` | |
-| `TOURWRIGHT_TTS_COMMAND` | — | e.g. `my-tts --voice {voice} --out {out}` (text on stdin) |
+| `TOURWRIGHT_TTS_COMMAND` | — | e.g. `my-tts --voice {voice} --out {out}` (text on stdin; `{out}` is quoted for the shell; also in `TOURWRIGHT_TTS_VOICE` and `TOURWRIGHT_TTS_OUT`) |
 | `TOURWRIGHT_TTS_PAUSE` | `0.5` | Seconds between sentences |
 | `TOURWRIGHT_TTS_PARALLEL` | `4` | Narration lines made at once, ahead of the recording |
 | `TOURWRIGHT_VOICE_POLISH` | `default` | Sound of the narration: `default`, `clean`, `warm`, `radio`, `podcast`, `none`, or a raw ffmpeg audio filter. A script's `audio.polish` (presets only) wins |

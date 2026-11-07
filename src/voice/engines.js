@@ -95,15 +95,27 @@ const openai = {
   },
 }
 
-// TOURWRIGHT_TTS_COMMAND="my-tts --voice {voice} --out {out}": text arrives on stdin.
+// A path as one word for the system shell: in single quotes for sh, double quotes for cmd.exe (a Windows path
+// never holds a double quote)
+const shellWord = (path, platform = process.platform) => (platform === 'win32' ? `"${path}"` : `'${path.replaceAll("'", `'\\''`)}'`)
+
+/**
+ * The command line with {voice} and {out} filled in. {out} is quoted, so a path with spaces stays one word; when
+ * the command already quotes it ("{out}" or '{out}') the path goes inside those quotes as it is.
+ */
+export const commandLine = (template, { voice, out }, platform = process.platform) =>
+  template.replaceAll('{voice}', voice).replace(/(["']?)\{out\}\1/g, (_, quote) => (quote ? `${quote}${out}${quote}` : shellWord(out, platform)))
+
+// TOURWRIGHT_TTS_COMMAND="my-tts --voice {voice} --out {out}": text arrives on stdin. The same values are in
+// TOURWRIGHT_TTS_VOICE and TOURWRIGHT_TTS_OUT, for a command that reads them from the environment.
 const command = {
   available: async config => (config.tts.command ? { ok: true, command: config.tts.command } : { ok: false, reason: 'set TOURWRIGHT_TTS_COMMAND' }),
   synthesize: async ({ text, voice, out, config }) => {
     if (!config.tts.command) throw new Error('TOURWRIGHT_TTS_COMMAND not set')
-    const line = config.tts.command.replaceAll('{voice}', voice.id).replaceAll('{out}', out)
+    const line = commandLine(config.tts.command, { voice: voice.id, out })
     await new Promise((resolve, reject) => {
       // The system shell: sh, or cmd.exe on Windows
-      const child = spawn(line, { shell: true, stdio: ['pipe', 'ignore', 'pipe'] })
+      const child = spawn(line, { shell: true, stdio: ['pipe', 'ignore', 'pipe'], env: { ...process.env, TOURWRIGHT_TTS_VOICE: voice.id, TOURWRIGHT_TTS_OUT: out } })
       let stderr = ''
       child.stderr.on('data', c => (stderr += c))
       child.on('error', reject)
