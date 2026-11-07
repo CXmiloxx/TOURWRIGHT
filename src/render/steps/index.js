@@ -79,23 +79,25 @@ export const hideTyped = locator =>
 // Runs declarative steps with the helpers `v`. A step whose element is missing fails with what the page has
 // instead; a dry run (`v.dryRun`) goes on to the end and lists every step that failed.
 // `offset`: how many steps of the script come before these (a preview of some steps keeps their numbers)
-export const runSteps = async (steps, v, page, top = true, offset = 0) => {
+// `parent`: the number of the step these are inside (`if`, `try`, `offCamera`): the 2nd step inside step 4 is "4.2"
+export const runSteps = async (steps, v, page, top = true, offset = 0, parent = null) => {
   const failures = []
   for (const [index, step] of steps.entries()) {
+    const number = parent ? `${parent}.${index + 1}` : index + offset + 1
     // Which step of the script is on screen: findings of the review name it
     if (top) {
-      v.step = index + offset + 1
+      v.step = number
       v.progress?.(v.step)
     }
     // `tourwright guide`: a screenshot before the step, with its element marked
     if (top && v.onStep) await v.onStep(step)
     try {
-      await runStep(step, v, page)
+      await runStep(step, v, page, number)
     } catch (error) {
-      const failure = await explain(error, step, page, index + offset)
+      const failure = await explain(error, step, page, number)
       // A safe dry run did not press what came before: an element that would show up after it cannot be checked
       if (v.safe && v.skipped?.length && failure.code === 'element_not_found') {
-        log.warn(`step ${index + offset + 1}: not checked, it comes after an action the safe dry run did not perform (${failure.message.split('\n')[0].replace(/^step \d+ \(\w+\): /, '')})`)
+        log.warn(`step ${number}: not checked, it comes after an action the safe dry run did not perform (${failure.message.split('\n')[0].replace(/^step [\d.]+ \(\w+\): /, '')})`)
         v.unchecked = (v.unchecked ?? 0) + 1
         continue
       }
@@ -115,7 +117,7 @@ export const runSteps = async (steps, v, page, top = true, offset = 0) => {
 
 // A missing element, said with its target and with what the page offers instead. The error carries it as data
 // too (`failure`): the step, the target, the page and the elements on it, for `tourwright check` and `fix`.
-const explain = async (error, step, page, index) => {
+const explain = async (error, step, page, number) => {
   const [action, arg] = Object.entries(step)[0]
   const targets = targetsOf(action, arg)
   if (!targets.length || !isMissingElement(error) || error.explained) return error
@@ -128,10 +130,10 @@ const explain = async (error, step, page, index) => {
   const elements = await offeredElements(page)
   const seen = new Set()
   const offered = elements.map(e => asTarget(e.target)).filter(s => !seen.has(s) && seen.add(s)).slice(0, 15)
-  const message = `step ${index + 1} (${action}): ${what}` +
+  const message = `step ${number} (${action}): ${what}` +
     (offered.length ? `\n    on this page (${page.url()}): ${offered.join(' · ')}` : `\n    page: ${page.url()}`)
   const explained = new UserError(message, { code: 'element_not_found' })
-  const failure = { step: index + 1, action, target: absent[0] ?? targets[0], found: !absent.length, url: page.url(), message, elements }
+  const failure = { step: number, action, target: absent[0] ?? targets[0], found: !absent.length, url: page.url(), message, elements }
   Object.assign(explained, { explained: true, cause: error, failure })
   return explained
 }
@@ -140,7 +142,7 @@ const explain = async (error, step, page, index) => {
 // choosing, uploading and narrating stay close; a focus decides for itself (it may glide to the next element).
 const WIDE = new Set(['goto', 'title', 'back', 'reload', 'scroll', 'scrollTo', 'highlight', 'spotlight', 'callout', 'zoom', 'drag'])
 
-const runStep = async (step, v, page) => {
+const runStep = async (step, v, page, number) => {
     if (v.beforeStep) await v.beforeStep()
     const [action, arg] = Object.entries(step)[0]
     if (WIDE.has(action)) await v.releaseCamera?.()
@@ -208,14 +210,14 @@ const runStep = async (step, v, page) => {
         break
       case 'blur': for (const t of [arg].flat()) await v.blur(locate(page, t)); break
       case 'upload': await v.upload(await find(arg.target, false), [arg.files].flat()); break
-      case 'offCamera': await v.offCamera(() => runSteps(arg, v, page, false)); break
+      case 'offCamera': await v.offCamera(() => runSteps(arg, v, page, false, 0, number)); break
       case 'if': {
         const ok = arg.timeout ? await v.offCamera(() => holds(page, arg)) : await holds(page, arg)
-        if (ok) await runSteps(arg.then, v, page, false)
-        else if (arg.else) await runSteps(arg.else, v, page, false)
+        if (ok) await runSteps(arg.then, v, page, false, 0, number)
+        else if (arg.else) await runSteps(arg.else, v, page, false, 0, number)
         break
       }
-      case 'try': await attempt(page, v, arg); break
+      case 'try': await attempt(page, v, arg, number); break
       default: {
         const plugin = PLUGIN_STEPS.get(action)
         if (!plugin) throw new UserError(`unknown action ${action}`)
@@ -271,12 +273,12 @@ export const setStepTimeout = (page, ms) => {
 }
 
 // `try`: steps that may fail (a banner that is not always there). Each one waits briefly, not 30 s.
-const attempt = async (page, v, arg) => {
+const attempt = async (page, v, arg, number) => {
   const { steps, timeout = 3000 } = Array.isArray(arg) ? { steps: arg } : arg
   const previous = stepTimeout(page)
   setStepTimeout(page, Math.min(timeout, previous))
   try {
-    await runSteps(steps, v, page, false)
+    await runSteps(steps, v, page, false, 0, number)
   } catch (error) {
     log.info(`try: skipped the rest (${String(error.message).split('\n')[0].replace(/\u001b\[[0-9;]*m/g, '')})`)
   } finally {

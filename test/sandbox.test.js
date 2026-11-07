@@ -9,6 +9,7 @@ import { loadConfig } from '#core/config.js'
 import { launchChromium, findChromium } from '#render/browser/chromium.js'
 import { BLOCKED_HEADER, startGuardProxy } from '#render/browser/guard-proxy.js'
 import { createGuard, isPrivateAddress } from '#render/browser/network.js'
+import { runSteps, setStepTimeout } from '#render/steps/index.js'
 import { createJob } from '#server/jobs/service.js'
 import { postWebhook } from '#server/worker.js'
 import { ffmpegColor } from '#video/ffmpeg.js'
@@ -130,6 +131,25 @@ test('a webhook does not follow redirects and never reaches a host the guard ref
 test('an asset cannot take the place of the checked script', async () => {
   const request = { script: { title: 'x', steps: [{ goto: 'https://example.com' }] }, assets: { 'Script.JSON': 'e30=' } }
   await assert.rejects(createJob({ backend: {}, blobs: {} }, request, { workDir: tmpdir() }), /reserved for the script/)
+})
+
+test('a step inside if, try or offCamera is named by its place in the script', { skip: missing }, async () => {
+  const browser = await launchChromium(config, { headless: true })
+  try {
+    const page = await browser.newPage()
+    await page.goto('data:text/html,<p>hi</p>')
+    setStepTimeout(page, 300)
+    const v = { pause: async () => {}, note: () => {}, offCamera: fn => fn() }
+    const steps = [{ pause: 0 }, { pause: 0 }, { if: { visible: 'p', then: [{ pause: 0 }, { click: '#nope' }] } }]
+    await assert.rejects(runSteps(steps, v, page), (/** @type {any} */ error) => {
+      assert.match(error.message, /^step 3\.2 \(click\)/)
+      assert.equal(error.failure.step, '3.2')
+      return true
+    })
+    await assert.rejects(runSteps([{ offCamera: [{ try: { steps: [{ pause: 0 }], timeout: 300 } }, { click: '#nope' }] }], v, page), /: step 1\.2 \(click\)/)
+  } finally {
+    await browser.close()
+  }
 })
 
 test('a theme color reaches ffmpeg only as a color, never as more filters', () => {

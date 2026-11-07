@@ -31,6 +31,8 @@ All notable changes to this project are documented here. The format follows
   (`movie=` reads a file of the server): only a color gets there now.
 - A render past its time limit went on in the background (browser open) while its work folder was deleted: it
   now stops. A worker that kills a render at the limit also ends the browser and ffmpeg it started.
+- A step inside `if`, `try` or `offCamera` was named by its place inside the block (`step 2`); it is now
+  `step 4.2`, in errors, `check` and its report.
 - `tourwright guide` (and `narrate`) failed on a script with `export: [audio]` or `[silent]`.
 
 ## [2.6.0]
