@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { loadConfig } from '#core/config.js'
 import { concatEntry, hash, run, UserError } from '#core/util.js'
 import { ENGINES } from './engines.js'
-import { lexicon, speakable, voiceLanguage } from './lexicon.js'
+import { calibrationKey, lexicon, speakable, voiceLanguage } from './lexicon.js'
 import { prosodyFilter } from './sound.js'
 import { applyPronunciation, splitNarration } from './text.js'
 import { parseVoice } from './voices.js'
@@ -126,7 +126,7 @@ export const silence = async (seconds, config) => {
 export const narrate = async (text, voiceSpec, config = loadConfig(), { aliases = undefined, pause = config.tts.pause, pronounce = undefined, language = undefined } = {}) => {
   const voice = parseVoice(voiceSpec, config, aliases)
   const lang = voiceLanguage(voice) ?? language
-  const parts = splitNarration(speakable(applyPronunciation(text, { ...lexicon(lang, voice.engine), ...config.tts.pronounce, ...pronounce }), lang))
+  const parts = splitNarration(speakable(applyPronunciation(text, { ...lexicon(lang, voice.engine, calibrationKey(voice)), ...config.tts.pronounce, ...pronounce }), lang))
   if (!parts.some(p => p.text)) throw new UserError('nothing to narrate')
   const dir = join(config.cacheDir, 'voice')
   mkdirSync(dir, { recursive: true })

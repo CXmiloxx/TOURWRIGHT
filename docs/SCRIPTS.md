@@ -468,9 +468,12 @@ the name in the script: `voice: lola`.
 
 **How they were tuned.** Every built-in voice read sentences full of what narrations hold (API, JSON, PDF,
 `25.800`, `95 %`, `$ 409.360`, an email, Ctrl K…) and a speech-to-text model wrote down what it heard. Each term
-was said written several ways (as is, respelled, spelled out) and the one understood best was kept for each
-engine, in `src/voice/calibrated.json`: neural voices (Edge, Pocket TTS) say most English words right as
-written, Piper needs more respellings. If a voice still says a word wrong, `pronounce` fixes it in your script.
+was said written several ways (as is, respelled, spelled out), in two sentences each, and the one understood
+best was kept for each engine, in `src/voice/calibrated.json`: neural voices (Edge, Pocket TTS) say most English
+words right as written, Piper needs more respellings. Two voices of one engine do not always agree (one Edge voice
+says "API" right, another needs `kerl` for curl), so each built-in voice was also measured on its own and keeps
+the writings that worked for it.
+If a voice still says a word wrong, `pronounce` fixes it in your script.
 
 **Which one?** For a natural voice offline, `lola` (Pocket TTS): it takes about as long to make a sentence as the
 sentence lasts, once, and the cache keeps it. `salome` and `gonzalo` (Edge) sound as natural and are instant, but

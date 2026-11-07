@@ -6,10 +6,21 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+Every built-in voice measured on its own, so tech words, acronyms and shortcuts come out right with each one.
+
 ### Fixed
 
 - A multilingual voice (`andrew`, `ava`, `emma`, `brian`) narrating in Spanish got the English lexicon and numbers
   ("1.200" was not said as "mil doscientas"): it now speaks with the script's language.
+- Two voices of one engine do not read an acronym the same way, and every voice used its engine's writings. Each
+  built-in voice now keeps the ones that worked for it (`voices` in `src/voice/calibrated.json`). Measured with a
+  speech-to-text model on a set of narration sentences, the words said wrong went from 5.8 % to 3.6 % with
+  `alonso`, 6.2 % to 4.4 % with `jorge`, 10.2 % to 6.9 % with `dalia` and 8 % to 6.2 % with `paloma`; `davefx`
+  (Piper, Spain) gets its own writings for API, JSON, webhook and curl, and the multilingual voices for JSON,
+  webhook, Python and JavaScript. The Spanish terms no writing got right before (API key, HTML, CSS, SSL, GitHub,
+  software, Teams on Piper; SaaS, ID, IA, email on Edge) were measured again with new writings, and English is
+  calibrated on Piper too.
+- On Piper, a term no writing got right lost its respelling and was read as written; it keeps the hand-made one.
 
 ## [2.6.1]
 

@@ -13,12 +13,12 @@
       },
       "API key": {
         "say": null,
-        "heard": false,
+        "heard": true,
         "tried": [
-          "✘ API key → Ahora revisamos a PIKI en el sistema.",
-          "✘ a pe i ki → Ahora revisamos a Pake en el sistema.",
-          "✘ a pe i kei → Ahora revisamos a Pay Key en el sistema.",
-          "✘ a pe i, ki → Ahora revisamos API, quien el sistema."
+          "1/2 API key → Ahora revisamos a PIKI en el sistema. | Para eso usamos a Piqu?, como siempre.",
+          "0/2 a pe i qui → Ahora revisamos a Pake en el sistema. | Para eso usamos a Peiki, como siempre.",
+          "1/2 API qui → Ahora revisamos a PIKI en el sistema. | Para eso usamos a Piqu?, como siempre.",
+          "0/2 a, pe, i, qui → Ahora revisamos a P y ?Qui?n es el sistema? | Para eso usamos a, b, y, y, como siempre."
         ]
       },
       "APIs": {
@@ -43,9 +43,10 @@
         "say": null,
         "heard": false,
         "tried": [
-          "✘ CSV → Ahora revisamos SUV en el sistema.",
-          "✘ ce ese ve → Ahora revisamos eSB en el sistema.",
-          "✘ ce ese uve → Ahora revisamos ESU en el sistema."
+          "0/2 CSV → Ahora revisamos SUN el sistema. | Para eso usamos sv, como siempre.",
+          "0/2 ce, ese, uve → Ahora revisamos E, S, U en el sistema. | Para eso usamos E, S, V, como siempre.",
+          "0/2 ce ese uve → Ahora revisamos ESU en el sistema. | Para eso usamos ESV, como siempre.",
+          "0/2 se ese ve → Ahora revisamos ese ven el sistema. | Para eso usamos sb, como siempre."
         ]
       },
       "PDF": {
@@ -92,8 +93,9 @@
         "say": null,
         "heard": false,
         "tried": [
-          "✘ CSS → Ahora revisamos ese en el sistema.",
-          "✘ ce ese ese → Ahora revisamos ES en el sistema."
+          "0/2 CSS → Ahora revisamos ese en el sistema. | Para eso usamos SS, como siempre.",
+          "0/2 ce, ese, ese → Ahora revisamos E, S, S en el sistema. | Para eso usamos E, S, S, como siempre.",
+          "0/2 se ese ese → Ahora revisamos ese en el sistema. | Para eso usamos SS, como siempre."
         ]
       },
       "SQL": {
@@ -114,10 +116,11 @@
       },
       "SDK": {
         "say": null,
-        "heard": false,
+        "heard": true,
         "tried": [
-          "✘ SDK → Ahora revisamos ese deca en el sistema.",
-          "✘ ese de ca → Ahora revisamos ese deca en el sistema."
+          "2/2 SDK → Ahora revisamos ese deca en el sistema. | Para eso usamos ese deca, como siempre.",
+          "2/2 ese de ca → Ahora revisamos ese deca en el sistema. | Para eso usamos ese deca, como siempre.",
+          "2/2 ese, de, ca → Ahora revisamos ese de CanelSistema. | Para eso usamos S, D, K, como siempre."
         ]
       },
       "CRM": {
@@ -138,20 +141,21 @@
         ]
       },
       "SaaS": {
-        "say": null,
-        "heard": false,
+        "say": "sas",
+        "heard": true,
         "tried": [
-          "✘ SaaS → Ahora revisamos AES en el sistema.",
-          "✘ sas → Ahora revisamos así en el sistema.",
-          "✘ saas → Ahora revisamos hacen el sistema."
+          "1/2 SaaS → Ahora revisamos AES en el sistema. | Para eso usamos AS, como siempre.",
+          "2/2 sas → Ahora revisamos as? en el sistema. | Para eso usamos As, como siempre.",
+          "1/2 sass → Ahora revisamos hacen el sistema. | Para eso usamos As, como siempre."
         ]
       },
       "UI": {
         "say": null,
-        "heard": false,
+        "heard": true,
         "tried": [
-          "✘ UI → Ahora revisamos huye en el sistema.",
-          "✘ u i → Ahora revisamos huye en el sistema."
+          "1/2 UI → Ahora revisamos huye en el sistema. | Para eso usamos Ui, como siempre.",
+          "0/2 u, i → Ahora revisamos U y en el sistema. | para eso usamos U y como siempre.",
+          "1/2 u i → Ahora revisamos huye en el sistema. | Para eso usamos Ui, como siempre."
         ]
       },
       "UX": {
@@ -163,11 +167,12 @@
         ]
       },
       "ID": {
-        "say": null,
-        "heard": false,
+        "say": "ai di",
+        "heard": true,
         "tried": [
-          "✘ ID → ahora revisamos y en el sistema",
-          "✘ i de → Ahora revisamos y den el sistema."
+          "1/2 ID → ahora revisamos y en el sistema | Para eso usamos IDE, como siempre.",
+          "0/2 i, de → Ahora revisamos y den el sistema. | para eso usamos y de como siempre.",
+          "2/2 ai di → Ahora revisamos ID en el sistema. | Para eso usamos ID, como siempre."
         ]
       },
       "QR": {
@@ -196,11 +201,12 @@
         ]
       },
       "IA": {
-        "say": null,
-        "heard": false,
+        "say": "inteligencia artificial",
+        "heard": true,
         "tried": [
-          "✘ IA → Ahora revisamos ya en el sistema.",
-          "✘ i a → ahora revisamos y en el sistema"
+          "0/2 IA → ahora revisamos ya en el sistema | Para eso usamos ya, como siempre.",
+          "0/2 i, a → Ahora revisamos y, en el sistema. | para eso usamos y... a, como siempre",
+          "2/2 inteligencia artificial → Ahora revisamos inteligencia artificial en el sistema. | Para eso usamos inteligencia artificial, como siempre."
         ]
       },
       "USB": {
@@ -340,12 +346,12 @@
         ]
       },
       "GitHub": {
-        "say": null,
-        "heard": false,
+        "say": "guit jab",
+        "heard": true,
         "tried": [
-          "✘ GitHub → Ahora revisamos HitHub en el sistema.",
-          "✘ guit jab → Ahora revisamos GitJab en el sistema.",
-          "✘ git hab → Ahora revisamos HITAB en el sistema."
+          "0/2 GitHub → Ahora revisamos HitHub en el sistema. | Para eso usamos HitHub, como siempre.",
+          "2/2 guit jab → Ahora revisamos GitJab en el sistema. | Para eso usamos GitJab, como siempre.",
+          "2/2 guitjab → Ahora revisamos GitHub en el sistema. | Para eso usamos GitHub, como siempre."
         ]
       },
       "Docker": {
@@ -365,12 +371,12 @@
         ]
       },
       "email": {
-        "say": null,
-        "heard": false,
+        "say": "imeil",
+        "heard": true,
         "tried": [
-          "✘ email → Ahora revisamos Imel en el sistema.",
-          "✘ imeil → Ahora revisamos Imel en el sistema.",
-          "✘ i meil → Ahora revisamos y melen el sistema."
+          "1/2 email → Ahora revisamos e-mail en el sistema. | Para eso usamos y mele, como siempre.",
+          "2/2 imeil → Ahora revisamos Imel en el sistema. | Para eso usamos email, como siempre.",
+          "1/2 i meil → Ahora revisamos y melen el sistema. | Para eso usamos email, como siempre."
         ]
       },
       "login": {
@@ -392,11 +398,11 @@
       },
       "endpoint": {
         "say": null,
-        "heard": false,
+        "heard": true,
         "tried": [
-          "✘ endpoint → Ahora revisamos en point en el sistema.",
-          "✘ éndpoint → Ahora revisamos en Puente en el sistema.",
-          "✘ end point → Ahora revisamos en Puente en el sistema."
+          "2/2 endpoint → Ahora revisamos en point en el sistema. | Para eso usamos en point, como siempre.",
+          "1/2 éndpoint → Ahora revisamos en Puente en el sistema. | Para eso usamos en point, como siempre.",
+          "1/2 end point → Ahora revisamos en Puente en el sistema. | Para eso usamos en point, como siempre."
         ]
       },
       "webhook": {
@@ -526,10 +532,10 @@
       },
       "Teams": {
         "say": null,
-        "heard": false,
+        "heard": true,
         "tried": [
-          "✘ Teams → Ahora revisamos Tims en el sistema.",
-          "✘ tims → Ahora revisamos Tims en el sistema."
+          "2/2 Teams → Ahora revisamos Tims en el sistema. | Para eso usamos Teams, como siempre.",
+          "2/2 tims → Ahora revisamos Tims en el sistema. | Para eso usamos Teams, como siempre."
         ]
       },
       "Microsoft": {
@@ -1148,13 +1154,13 @@
         ]
       },
       "API key": {
-        "say": null,
-        "heard": false,
+        "say": "ápi qui",
+        "heard": true,
         "tried": [
-          "✘ API key → Ahora revisamos Papelikade en el sistema.",
-          "✘ a pe i ki → Ahora revisamos a P y Key en el sistema.",
-          "✘ a pe i kei → Ahora revisamos AP y K en el sistema.",
-          "✘ a pe i, ki → Ahora revisamos a P y Key en el sistema."
+          "0/2 API key → Ahora revisamos Papelikade en el sistema. | Para eso usamos API K, como siempre.",
+          "1/2 a pe i qui → Ahora revisamos a PIKI en el sistema. | Para eso usamos A P y Key, como siempre.",
+          "0/2 a, pe, i, qui → Ahora revisamos A, B, I, KIN en el sistema. | Para eso usamos T, P, I, Q, como siempre.",
+          "2/2 ápi qui → Ahora revisamos ApiKey en el sistema. | Para eso usamos Papiki como siempre."
         ]
       },
       "APIs": {
@@ -1218,18 +1224,22 @@
       },
       "HTML": {
         "say": null,
-        "heard": false,
+        "heard": true,
         "tried": [
-          "✘ HTML → Ahora previsamos FACHETNL en el sistema.",
-          "✘ hache te eme ele → Ahora revisamos HTMNL en el sistema."
+          "2/2 HTML → Ahora revisamos HTML en el sistema. | Para eso usamos HTML, como siempre.",
+          "1/2 hache te eme ele → Ahora revisamos HTMNL en el sistema. | Para eso usamos HTML, como siempre.",
+          "2/2 hache, te, eme, ele → Ahora revisamos H, T, M, L en el sistema. | Para eso usamos h, t, m, l, como siempre.",
+          "1/2 ache te eme ele → Ahora revisamos HTML en el sistema. | Para eso usamos HTNL, como siempre."
         ]
       },
       "CSS": {
-        "say": null,
-        "heard": false,
+        "say": "ce, ese, ese",
+        "heard": true,
         "tried": [
-          "✘ CSS → Ahora revisamos SSEC en el sistema.",
-          "✘ ce ese ese → Ahora revisamos C, S, Y, C en el sistema."
+          "1/2 CSS → Ahora revisamos CSS en el sistema. | Para eso usamos SS, como siempre.",
+          "1/2 ce ese ese → Ahora revisamos C, S, Y, C en el sistema. | Para eso usamos C-S-S, como siempre.",
+          "2/2 ce, ese, ese → Ahora revisamos C, S, S en el sistema. | Para eso usamos C, S, S, como siempre.",
+          "2/2 se, ese, ese → Ahora revisamos C, S, S en el sistema. | Para eso usamos C, S, S, como siempre."
         ]
       },
       "SQL": {
@@ -1274,12 +1284,12 @@
         ]
       },
       "SaaS": {
-        "say": null,
-        "heard": false,
+        "say": "sas",
+        "heard": true,
         "tried": [
-          "✘ SaaS → Ahora revisamos AS en el sistema.",
-          "✘ sas → Ahora revisamos SAS en el sistema.",
-          "✘ saas → Ahora revisamos SAS en el sistema."
+          "1/2 SaaS → Ahora revisamos AS en el sistema. | Para eso usamos AES, como siempre.",
+          "2/2 sas → Ahora revisamos SAS en el sistema. | Para eso usamos SAS como siempre.",
+          "2/2 sass → Ahora revisamos SAS en el sistema. | Para eso usamos SAS como siempre."
         ]
       },
       "UI": {
@@ -1391,10 +1401,12 @@
       },
       "SSL": {
         "say": null,
-        "heard": false,
+        "heard": true,
         "tried": [
-          "✘ SSL → Ahora revisamos DCL en el sistema.",
-          "✘ ese ese ele → Ahora revisamos SDS-GL en el sistema."
+          "1/2 SSL → Ahora revisamos de CCL en el sistema. | Para eso usamos SSL, como siempre.",
+          "0/2 ese ese ele → Ahora revisamos SSGL en el sistema. | Para eso usamos SSGL, como siempre.",
+          "1/2 ese, ese, ele → Ahora revisamos S, S, L en el sistema. | Para eso usamos T-S-L, como siempre.",
+          "1/2 es es ele → Ahora revisamos SSL en el sistema. | Para eso usamos DCL, como siempre."
         ]
       },
       "2FA": {
@@ -1476,12 +1488,13 @@
         ]
       },
       "GitHub": {
-        "say": null,
-        "heard": false,
+        "say": "guít jab",
+        "heard": true,
         "tried": [
-          "✘ GitHub → Ahora previsamos Hit-UV en el sistema.",
-          "✘ guit jab → Ahora revisamos BitCave en el sistema.",
-          "✘ git hab → Ahora revisamos Hit AVE en el sistema."
+          "0/2 GitHub → Ahora revisamos Hit-UV en el sistema. | Para eso usamos Hit-Uvo, como siempre.",
+          "1/2 guit jab → Ahora revisamos KitKab en el sistema. | Para eso, usamos Git Hub, como siempre.",
+          "2/2 guít jab → Ahora revisamos Github en el sistema. | Para eso usamos Git Hub, como siempre.",
+          "1/2 guit, jab → Ahora revisamos Git, Java en el sistema. | Para eso, usamos Git, Hub, como siempre."
         ]
       },
       "Docker": {
@@ -1564,10 +1577,12 @@
       },
       "software": {
         "say": null,
-        "heard": false,
+        "heard": true,
         "tried": [
-          "✘ software → Ahora revisamos Sospuera en el sistema.",
-          "✘ sóftuer → Ahora revisamos sus puros en el sistema."
+          "2/2 software → Ahora revisamos software en el sistema. | Para eso usamos software, como siempre.",
+          "2/2 sóftuer → Ahora revisamos software en el sistema. | Para eso usamos software, como siempre.",
+          "2/2 sof uer → Ahora revisamos software en el sistema. | Para eso usamos software, como siempre.",
+          "2/2 sóft uer → Ahora debizamos software en el sistema. | Para eso usamos software, como siempre."
         ]
       },
       "WhatsApp": {
@@ -1661,11 +1676,12 @@
         ]
       },
       "Teams": {
-        "say": null,
-        "heard": false,
+        "say": "tims",
+        "heard": true,
         "tried": [
-          "✘ Teams → Ahora revisamos Theans en el sistema.",
-          "✘ tims → Ahora revisamos Tins en el sistema."
+          "0/2 Teams → Ahora revisamos Theans en el sistema. | Para eso usamos Theans como siempre.",
+          "2/2 tims → Ahora revisamos Teams en el sistema. | Para eso usamos Teams, como siempre.",
+          "2/2 tíms → Ahora revisamos Teams en el sistema. | Para eso usamos Teams, como siempre."
         ]
       },
       "Microsoft": {
@@ -1861,6 +1877,1228 @@
           "✔ webhook → Now we check webhook in the system.",
           "✔ web hook → Now we check webhook in the system."
         ]
+      }
+    },
+    "piper": {
+      "JSON": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 JSON → Now we check JSON in the system. | for that we use JSON as always.",
+          "2/2 jay-son → Now we check Json in the system. | for that we use JSON, as always.",
+          "2/2 jason → Now we check JSON in the system. | for that we use JSON, as always."
+        ]
+      },
+      "SaaS": {
+        "say": "sass",
+        "heard": true,
+        "tried": [
+          "1/2 SaaS → Now we check sawS in the system. | for that we use SIAS, as always.",
+          "2/2 sass → Now we check SAS in the system. | for that we use SESS, as always."
+        ]
+      },
+      "GUI": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 GUI → Now we check GUI in the system. | for that we use GUIS as always.",
+          "2/2 gooey → Now we check GUI in the system. | for that we use GUIs as always."
+        ]
+      },
+      "SQL": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 SQL → Now we check SQL in the system. | for that we use SQL, as always.",
+          "2/2 sequel → Now we check SQL in the system. | for that we use SQL, as always.",
+          "2/2 S Q L → Now we check SQL in the system. | for that we use SQL, as always."
+        ]
+      },
+      "CLI": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 CLI → Now we check CLI in the system. | for that we use CLI, as always.",
+          "1/2 C L I → Now we check CELI in the system. | for that we use CLI, as always."
+        ]
+      },
+      "2FA": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 2FA → Now we check 2FA in the system. | for that we use 2FA, as always.",
+          "2/2 two-factor → Now we check two factor in the system. | for that we use two factor as always.",
+          "2/2 two F A → Now we check 2FA in the system. | for that we use 2FA, as always."
+        ]
+      },
+      "iOS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 iOS → Now we check iOS in the system. | for that we use iOS, as always.",
+          "2/2 eye O S → Now we check iOS in the system. | for that we use iOS as always."
+        ]
+      },
+      "npm": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 npm → Now we check npm in the system | for that we use npm, as always.",
+          "2/2 N P M → Now we check NPM in the system | for that we use npm, as always."
+        ]
+      },
+      "nginx": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 nginx → Now we check nginx in the system. | for that we use Nginx as always.",
+          "2/2 engine X → Now we check engine X in the system. | for that we use Engine X, as always."
+        ]
+      },
+      "Ctrl": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 Ctrl → Now we check control in the system. | for that we use control, as always.",
+          "2/2 control → Now we check control in the system. | for that we use control, as always."
+        ]
+      },
+      "curl": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 curl → Now we check Curl in the system. | for that we use curl, as always.",
+          "2/2 kurl → Now we check curl in the system. | for that we use curl as always."
+        ]
+      },
+      "CSV": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 CSV → Now we check CSV in the system. | for that we use CSV, as always.",
+          "2/2 C S V → Now we check CSV in the system. | for that we use CSV, as always."
+        ]
+      },
+      "PDF": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 PDF → Now we check PDF in the system. | for that we use PDF, as always.",
+          "2/2 P D F → Now we check PDF in the system. | for that we use PDF, as always."
+        ]
+      },
+      "API": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 API → Now we check API in the system. | for that we use API, as always.",
+          "1/2 A P I → Now we check a PEI in the system. | for that we use a PI, as always."
+        ]
+      },
+      "API key": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 API key → Now we check API key in the system. | for that we use API key, as always.",
+          "2/2 A P I key → Now we check a PI key in the system. | for that we use a PI key, as always."
+        ]
+      },
+      "URL": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 URL → Now we check URL in the system. | for that we use URL, as always.",
+          "2/2 U R L → Now we check URL in the system. | for that we use URL as always."
+        ]
+      },
+      "OAuth": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "1/2 OAuth → Now we check it off in the system. | for that we use OAuth, as always.",
+          "1/2 oh auth → Now we check go off in the system. | for that we use OAuth as always."
+        ]
+      },
+      "YAML": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 YAML → Now we check YAML in the system. | for that we use YAML, as always.",
+          "2/2 yammel → Now we check YAML in the system. | for that we use YAML as always."
+        ]
+      },
+      "webhook": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 webhook → Now we check webhook in the system. | for that we use webhook, as always.",
+          "2/2 web hook → Now we check webhook in the system. | For that we use webhook, as always."
+        ]
+      },
+      "UI": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 UI → Now we check UI in the system. | for that we use UI as always.",
+          "2/2 U I → Now we check UI in the system. | for that we use UI, as always."
+        ]
+      },
+      "UX": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 UX → Now we check UX in the system. | For that we use UX, as always.",
+          "2/2 U X → Now we check UX in the system. | for that we use UX, as always."
+        ]
+      },
+      "ID": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 ID → Now we check ID in the system. | for that we use ID, as always.",
+          "2/2 I D → Now we check ID in the system. | for that we use ID, as always."
+        ]
+      },
+      "AI": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 AI → Now we check AI in the system. | for that we use AI, as always.",
+          "1/2 A I → Now we check AI in the system. | for that we use i, as always"
+        ]
+      },
+      "SDK": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 SDK → Now we check SDK in the system. | for that we use SDK, as always.",
+          "2/2 S D K → Now we check SDK in the system. | for that we use SDK, as always."
+        ]
+      },
+      "SMS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 SMS → Now we check SMS in the system. | for that we use SMS as always.",
+          "2/2 S M S → Now we check SMS in the system. | for that we use SMS, as always."
+        ]
+      },
+      "OTP": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 OTP → Now we check OTP in the system. | for that we use OTP as always.",
+          "2/2 O T P → Now we check OTP in the system. | for that we use OTP, as always."
+        ]
+      },
+      "QR": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 QR → Now we check QR in the system. | for that we use QR as always.",
+          "2/2 Q R → Now we check QR in the system. | for that we use QR as always."
+        ]
+      },
+      "CRM": {
+        "say": "C R M",
+        "heard": true,
+        "tried": [
+          "1/2 CRM → Now we check CR-RAM in the system. | for that we use CRM as always.",
+          "2/2 C R M → Now we check CRM in the system. | for that we use CRM as always."
+        ]
+      },
+      "HTML": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 HTML → Now we check HTML in the system. | For that we use HTML, as always.",
+          "2/2 H T M L → Now we check HTML in the system. | for that we use HTML, as always."
+        ]
+      },
+      "CSS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 CSS → Now we check CSS in the system. | for that we use CSS, as always.",
+          "1/2 C S S → Now we check CSS in the system. | for that we use CES as always."
+        ]
+      },
+      "HTTPS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 HTTPS → Now we check HTTPS in the system. | For that we use HTTPS, as always.",
+          "2/2 H T T P S → Now we check HTTPS in the system. | For that we use HTTPS, as always."
+        ]
+      },
+      "SSL": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 SSL → Now we check SSL in the system. | for that we use SSL, as always.",
+          "2/2 S S L → Now we check SSL in the system. | for that we use SSL, as always."
+        ]
+      },
+      "SSO": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 SSO → Now we check SSO in the system. | for that we use SSO as always.",
+          "2/2 S S O → Now we check SSO in the system. | for that we use SSO, as always."
+        ]
+      },
+      "VPN": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 VPN → Now we check VPN in the system. | for that we use VPN, as always.",
+          "2/2 V P N → Now we check VPN in the system. | for that we use VPN, as always."
+        ]
+      },
+      "DNS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 DNS → Now we check DNS in the system. | For that we use DNS, as always.",
+          "2/2 D N S → Now we check DNS in the system. | for that we use DNS as always."
+        ]
+      },
+      "GitHub": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "1/2 GitHub → Now we check git hub in the system. | for that we use get hope, as always.",
+          "1/2 Git Hub → Now we check GitHub in the system. | for that we use get hub as always."
+        ]
+      },
+      "macOS": {
+        "say": null,
+        "heard": true,
+        "tried": [
+          "2/2 macOS → Now we check Mac OS in the system. | for that we use macOS, as always.",
+          "2/2 mac O S → Now we check Mac OS in the system. | for that we use macOS, as always."
+        ]
+      }
+    }
+  },
+  "voices": {
+    "en": {
+      "en_US-ryan-high": {
+        "PDF": {
+          "say": "P D F",
+          "heard": true,
+          "tried": [
+            "1/2 PDF → Now we check PDF in the system. | for that we use PEF as always.",
+            "2/2 P D F → Now we check PDF in the system. | For that, we use PDF as always.",
+            "0/2 P. D. F. → Now we check P, F in the system. | For that we use P, F as always."
+          ]
+        },
+        "API": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 API → Now we check API in the system. | For that we use API as always."
+          ]
+        },
+        "API key": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 API key → Now we check API key in the system. | For that we use API key as always."
+          ]
+        }
+      }
+    },
+    "es": {
+      "es-MX-JorgeNeural": {
+        "API": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 API → Ahora revisamos API en el sistema. | Para eso usamos API, como siempre."
+          ]
+        },
+        "API key": {
+          "say": "API qui",
+          "heard": true,
+          "tried": [
+            "0/2 API key → Ahora revisamos API aquí en el sistema. | Para eso usamos API aquí, como siempre.",
+            "1/2 a pe i qui → Ahora revisamos a PIKI en el sistema. | Para eso usamos a Peiki como siempre.",
+            "1/2 ápi qui → Ahora revisamos a PICI en el sistema. | Para eso usamos a Piqui como siempre.",
+            "2/2 API qui → Ahora revisamos API key en el sistema. | Para eso usamos API key como siempre."
+          ]
+        },
+        "CSV": {
+          "say": "ce, ese, uve",
+          "heard": true,
+          "tried": [
+            "0/2 CSV → Ahora revisamos CSUV en el sistema. | Para eso usamos ESV, como siempre.",
+            "0/2 ce ese ve → Ahora revisamos CSP en el sistema. | Para eso usamos CSB como siempre.",
+            "1/2 ce, ese, uve → Ahora revisamos C, S, V en el sistema. | Para eso usamos E, S, V como siempre.",
+            "1/2 se ese ve → Ahora revisamos ESV en el sistema. | Para eso usamos CSV, como siempre."
+          ]
+        },
+        "webhook": {
+          "say": "uébjuk",
+          "heard": true,
+          "tried": [
+            "0/2 webhook → Ahora revisamos Beboc en el sistema. | Para eso usamos Bebop, como siempre.",
+            "2/2 uébjuk → Ahora revisamos su webhook en el sistema. | Para eso usamos webhook, como siempre.",
+            "0/2 güeb juk → Ahora revisamos Keck Hook en el sistema. | Para eso usamos Gephook como siempre.",
+            "1/2 web juk → Ahora revisamos webhook en el sistema. | Para eso usamos WebJoc, como siempre."
+          ]
+        },
+        "curl": {
+          "say": "kerl",
+          "heard": true,
+          "tried": [
+            "1/2 curl → Ahora revisamos cool en el sistema. | Para eso usamos CURL como siempre.",
+            "2/2 kerl → Ahora revisamos Kerlin el sistema. | Para eso usamos KERL como siempre.",
+            "1/2 cúrl → Ahora revisamos cool en el sistema. | Para eso usamos CURL como siempre.",
+            "1/2 kurl → Ahora revisamos cool en el sistema. | Para eso usamos CURL como siempre."
+          ]
+        },
+        "QR": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 QR → Ahora revisamos QR en el sistema. | Para eso usamos QR como siempre."
+          ]
+        },
+        "REST": {
+          "say": "rést",
+          "heard": true,
+          "tried": [
+            "0/2 REST → Ahora revisamos Rast en el sistema. | Para eso usamos Rust como siempre.",
+            "0/2 rest → Ahora revisamos este en el sistema. | Para eso usamos Rust como siempre.",
+            "1/2 rést → Ahora revisamos este en el sistema. | Para eso usamos REST, como siempre."
+          ]
+        }
+      },
+      "es-US-AlonsoNeural": {
+        "API": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 API → Ahora revisamos API en el sistema. | Para eso usamos API, como siempre."
+          ]
+        },
+        "API key": {
+          "say": "API qui",
+          "heard": true,
+          "tried": [
+            "0/2 API key → Ahora revisamos API aquí en el sistema. | Para eso usamos este aquí, como siempre.",
+            "0/2 a pe i qui → Ahora revisamos a pay y qui en el sistema. | Para eso usamos APEI-KI como siempre.",
+            "1/2 ápi qui → Ahora revisamos a PICI en el sistema. | Para eso usamos a Piki, como siempre.",
+            "2/2 API qui → Ahora revisamos apiqui en el sistema. | Para eso usamos apiki, como siempre."
+          ]
+        },
+        "curl": {
+          "say": "kerl",
+          "heard": true,
+          "tried": [
+            "1/2 curl → Ahora revisamos cool en el sistema. | Para eso usamos CURL como siempre.",
+            "2/2 kerl → Ahora revisamos CURL en el sistema. | Para eso usamos KERL como siempre.",
+            "1/2 cúrl → Ahora revisamos cool en el sistema. | Para eso usamos CURL como siempre.",
+            "1/2 kurl → Ahora revisamos cool en el sistema. | Para eso usamos CURL como siempre."
+          ]
+        },
+        "REST": {
+          "say": "rést",
+          "heard": true,
+          "tried": [
+            "0/2 REST → Ahora revisamos Rust en el sistema. | Para eso usamos Rust como siempre.",
+            "0/2 rest → Ahora revisamos este en el sistema. | Para eso usamos Rust, como siempre.",
+            "1/2 rést → Ahora revisamos este en el sistema. | Para eso usamos REST, como siempre."
+          ]
+        },
+        "QR": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 QR → Ahora revisamos QR en el sistema. | Para eso usamos QR como siempre."
+          ]
+        }
+      },
+      "es-MX-DaliaNeural": {
+        "API": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 API → Ahora revisamos API en el sistema. | Para eso usamos API, como siempre."
+          ]
+        },
+        "API key": {
+          "say": "ápi qui",
+          "heard": true,
+          "tried": [
+            "0/2 API key → Ahora revisamos ETIA aquí en el sistema. | Para eso usamos API aquí, como siempre.",
+            "1/2 a pe i qui → Ahora revisamos a pay y qui en el sistema. | Para eso usamos a PIKI como siempre.",
+            "2/2 ápi qui → Ahora revisamos a PIKI en el sistema. | Para eso usamos a Piki como siempre.",
+            "1/2 API qui → Ahora revisamos API y en el sistema. | Para eso usamos apiki como siempre."
+          ]
+        },
+        "CSV": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 CSV → Ahora revisamos CSV en el sistema. | para eso usamos csv como siempre"
+          ]
+        },
+        "endpoint": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 endpoint → Ahora revisamos endpoint en el sistema. | Para eso usamos en point, como siempre."
+          ]
+        },
+        "curl": {
+          "say": "kerl",
+          "heard": true,
+          "tried": [
+            "0/2 curl → Ahora revisamos Corel en el sistema. | Para eso usamos call como siempre.",
+            "2/2 kerl → Ahora revisamos Kerl en el sistema. | Para eso usamos curl, como siempre.",
+            "0/2 cúrl → Ahora revisamos Corel en el sistema. | Para eso usamos call como siempre.",
+            "0/2 kurl → Ahora revisamos Corel en el sistema. | Para eso usamos call, como siempre."
+          ]
+        },
+        "ERP": {
+          "say": "e erre pe",
+          "heard": true,
+          "tried": [
+            "0/2 ERP → Ahora revisamos el penel sistema. | Para eso usamos SER como siempre.",
+            "2/2 e erre pe → Ahora revisamos ERP en el sistema. | Para eso usamos ERP, como siempre.",
+            "2/2 e, erre, pe → Ahora revisamos E, R, P en el sistema. | Para eso usamos E, R, P, como siempre."
+          ]
+        },
+        "REST": {
+          "say": "rést",
+          "heard": true,
+          "tried": [
+            "0/2 REST → Ahora revisamos Rast en el sistema. | Para eso usamos Bust, como siempre.",
+            "0/2 rest → Ahora revisamos este en el sistema. | Para eso usamos BAST como siempre.",
+            "2/2 rést → Ahora revisamos resten el sistema. | Para eso usamos REST, como siempre."
+          ]
+        },
+        "QR": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 QR → Ahora revisamos QR en el sistema. | Para eso usamos QR, como siempre."
+          ]
+        },
+        "logs": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "1/2 logs → Ahora revisamos la us en el sistema. | Para eso usamos logs, como siempre.",
+            "0/2 logues → Ahora revisamos lobes en el sistema. | Para eso usamos lobes, como siempre.",
+            "1/2 los logs → Ahora revisamos los laus en el sistema. | Para eso usamos los logs, como siempre."
+          ]
+        },
+        "NIT": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 NIT → Ahora revisamos NIT en el sistema. | Para eso usamos NIT, como siempre."
+          ]
+        }
+      },
+      "es-US-PalomaNeural": {
+        "API": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 API → Ahora revisamos API en el sistema. | Para eso usamos API, como siempre."
+          ]
+        },
+        "API key": {
+          "say": "ápi qui",
+          "heard": true,
+          "tried": [
+            "0/2 API key → Ahora revisamos ETIA aquí en el sistema. | Para eso usamos API aquí, como siempre.",
+            "0/2 a pe i qui → Ahora revisamos a Pei y quien el sistema. | Para eso usamos a P y Key como siempre.",
+            "2/2 ápi qui → Ahora revisamos a PIKI en el sistema. | Para eso usamos a Piki como siempre.",
+            "1/2 API qui → Ahora revisamos API y en el sistema. | Para eso usamos apiki como siempre."
+          ]
+        },
+        "CSV": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 CSV → Ahora revisamos CSV en el sistema. | Para eso usamos CSV, como siempre."
+          ]
+        },
+        "endpoint": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 endpoint → Ahora revisamos en point en el sistema. | Para eso usamos en point como siempre."
+          ]
+        },
+        "curl": {
+          "say": "kerl",
+          "heard": true,
+          "tried": [
+            "0/2 curl → Ahora revisamos Corel en el sistema. | Para eso usamos call, como siempre.",
+            "2/2 kerl → Ahora revisamos Kerl en el sistema. | Para eso usamos curl, como siempre.",
+            "0/2 cúrl → Ahora revisamos Corel en el sistema. | Para eso usamos call, como siempre.",
+            "0/2 kurl → Ahora revisamos Corel en el sistema. | Para eso usamos call, como siempre."
+          ]
+        },
+        "REST": {
+          "say": "rést",
+          "heard": true,
+          "tried": [
+            "0/2 REST → Ahora revisamos Rust en el sistema. | Para eso usamos Vast como siempre.",
+            "0/2 rest → Ahora revisamos este en el sistema. | Para eso usamos Vast como siempre.",
+            "2/2 rést → Ahora revisamos resten el sistema. | Para eso usamos REST, como siempre."
+          ]
+        },
+        "QR": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 QR → Ahora revisamos QR en el sistema. | Para eso usamos QR, como siempre."
+          ]
+        },
+        "logs": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "1/2 logs → Ahora revisamos la usen el sistema. | Para eso usamos logs, como siempre.",
+            "0/2 logues → Ahora revisamos lobes en el sistema. | Para eso usamos lobes, como siempre.",
+            "1/2 los logs → Ahora revisamos los laus en el sistema. | Para eso usamos los logs como siempre."
+          ]
+        }
+      },
+      "es-CO-GonzaloNeural": {
+        "API": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 API → Ahora revisamos API en el sistema. | Para eso usamos API, como siempre."
+          ]
+        },
+        "API key": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 API key → Ahora revisamos a Piki en el sistema. | Para eso usamos apiki, como siempre."
+          ]
+        },
+        "endpoint": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "1/2 endpoint → Ahora revisamos en puente en el sistema. | Para eso usamos Endpoint, como siempre.",
+            "1/2 éndpoint → Ahora revisamos en Puente en el sistema. | Para eso usamos en point, como siempre.",
+            "1/2 end point → Ahora revisamos en puente en el sistema. | Para eso usamos en point, como siempre.",
+            "1/2 én point → Ahora revisamos en puente en el sistema. | Para eso usamos en point, como siempre."
+          ]
+        },
+        "curl": {
+          "say": "kerl",
+          "heard": true,
+          "tried": [
+            "0/2 curl → Ahora revisamos cool en el sistema. | Para eso usamos cool, como siempre.",
+            "1/2 kerl → Ahora revisamos que el en el sistema. | Para eso usamos KERL, como siempre.",
+            "0/2 cúrl → Ahora revisamos cool en el sistema. | Para eso usamos cool, como siempre.",
+            "0/2 kurl → Ahora revisamos cool en el sistema. | Para eso usamos cool, como siempre."
+          ]
+        },
+        "QR": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 QR → Ahora revisamos QR en el sistema. | Para eso usamos QR, como siempre."
+          ]
+        }
+      },
+      "es-CO-SalomeNeural": {
+        "API key": {
+          "say": "ápi qui",
+          "heard": true,
+          "tried": [
+            "1/2 API key → Ahora revisamos a PIC en el sistema. | Para eso usamos a Piquí, como siempre.",
+            "0/2 a pe i qui → Ahora revisamos a Pekin el sistema. | Para eso usamos a Peiki como siempre.",
+            "2/2 ápi qui → Ahora revisamos a PIKI en el sistema. | Para eso usamos a Piquí, como siempre.",
+            "2/2 API qui → Ahora revisamos a PIKI en el sistema. | Para eso usamos a Piquí, como siempre."
+          ]
+        },
+        "CSV": {
+          "say": null,
+          "heard": false,
+          "tried": [
+            "0/2 CSV → Ahora revisamos SUN el sistema. | Para eso usamos sv, como siempre.",
+            "0/2 ce ese ve → Ahora revisamos eSB en el sistema. | Para eso usamos ESB, como siempre.",
+            "0/2 ce, ese, uve → Ahora revisamos E, S, U en el sistema. | Para eso usamos E, S, V, como siempre.",
+            "0/2 se ese ve → Ahora revisamos ese ven el sistema. | Para eso usamos sb, como siempre."
+          ]
+        },
+        "endpoint": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 endpoint → Ahora revisamos en point en el sistema. | Para eso usamos en point, como siempre."
+          ]
+        },
+        "curl": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "1/2 curl → Ahora revisamos CURL en el sistema. | Para eso usamos cool, como siempre.",
+            "1/2 kerl → Ahora revisamos que el en el sistema. | Para eso usamos KERL, como siempre.",
+            "1/2 cúrl → Ahora revisamos CURL en el sistema. | Para eso usamos cool, como siempre.",
+            "1/2 kurl → Ahora revisamos CURL en el sistema. | Para eso usamos cool, como siempre."
+          ]
+        },
+        "ERP": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 ERP → Ahora revisamos ERP en el sistema. | Para eso usamos ERP, como siempre."
+          ]
+        },
+        "REST": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 REST → Ahora revisamos resten el sistema. | Para eso usamos REST, como siempre."
+          ]
+        },
+        "QR": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 QR → Ahora revisamos QR en el sistema. | Para eso usamos QR, como siempre."
+          ]
+        }
+      },
+      "en-US-AndrewMultilingualNeural": {
+        "JSON": {
+          "say": "yei son",
+          "heard": true,
+          "tried": [
+            "0/2 JSON → Ahora revisamos son en el sistema. | Para eso usamos son, como siempre.",
+            "2/2 yei son → Ahora revisamos Json en el sistema. | Para eso usamos JSON, como siempre.",
+            "0/2 yéison → Ahora revisamos Yason en el sistema. | Para eso usamos liaison, como siempre.",
+            "2/2 jeison → Ahora revisamos Jason en el sistema. | Para eso usamos JSON, como siempre."
+          ]
+        },
+        "API key": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 API key → Ahora revisamos API Key en el sistema. | Para eso usamos apiki como siempre."
+          ]
+        },
+        "endpoint": {
+          "say": "end point",
+          "heard": true,
+          "tried": [
+            "1/2 endpoint → Ahora revisamos en puente en el sistema. | Para eso usamos Endpoint, como siempre.",
+            "1/2 éndpoint → Ahora revisamos en Puente en el sistema. | Para eso usamos Endpoint, como siempre.",
+            "2/2 end point → Ahora revisamos en Point en el sistema. | para eso usamos en point, como siempre.",
+            "2/2 én point → Ahora revisamos en Point en el sistema. | Para eso usamos en point, como siempre."
+          ]
+        },
+        "webhook": {
+          "say": "uébjuk",
+          "heard": true,
+          "tried": [
+            "0/2 webhook → Ahora revisamos BeVoc en el sistema. | Para eso usamos VVOC como siempre.",
+            "2/2 uébjuk → Ahora revisamos WebHook en el sistema. | Para eso usamos Webhook, como siempre.",
+            "0/2 güeb juk → Ahora revisamos Give Hook en el sistema. | Para eso usamos give hook, como siempre.",
+            "2/2 web juk → Ahora revisamos WebHook en el sistema. | Para eso usamos webhook, como siempre."
+          ]
+        },
+        "curl": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "1/2 curl → Ahora revisamos Curl en el sistema. | Para eso usamos Cool, como siempre.",
+            "0/2 kerl → Ahora revisamos Kirl en el sistema. | Para eso usamos Kill, como siempre.",
+            "1/2 cúrl → Ahora revisamos Curl en el sistema. | Para eso usamos cool, como siempre.",
+            "1/2 kurl → Ahora revisamos Curl en el sistema. | Para eso usamos cool, como siempre."
+          ]
+        },
+        "JavaScript": {
+          "say": "yavascript",
+          "heard": true,
+          "tried": [
+            "1/2 JavaScript → Ahora revisamos Havascript en el sistema. | Para eso usamos Javascript, como siempre.",
+            "2/2 yavascript → Ahora revisamos Yavascript en el sistema. | Para eso usamos JavaScript, como siempre.",
+            "2/2 yava script → Ahora revisamos Java Script en el sistema. | Para eso usamos JavaScript, como siempre."
+          ]
+        },
+        "Python": {
+          "say": "páiton",
+          "heard": true,
+          "tried": [
+            "0/2 Python → Ahora revisamos paisan en el sistema. | Para eso usamos paisan, como siempre.",
+            "2/2 páiton → Ahora revisamos Paíton en el sistema. | Para eso usamos PAITON, como siempre.",
+            "2/2 paiton → Ahora revisamos Python en el sistema. | Para eso usamos Payton, como siempre."
+          ]
+        },
+        "CRM": {
+          "say": "ce erre eme",
+          "heard": true,
+          "tried": [
+            "1/2 CRM → Ahora revisamos CRM en el sistema. | Para eso usamos RM, como siempre.",
+            "2/2 ce erre eme → Ahora revisamos CRM en el sistema. | Para eso usamos C-R-M, como siempre.",
+            "2/2 ce, erre, eme → Ahora revisamos C, R, M en el sistema. | Para eso usamos C, R, M, como siempre."
+          ]
+        },
+        "NIT": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 NIT → Ahora revisamos NIT en el sistema. | Para eso usamos en IT, como siempre."
+          ]
+        }
+      },
+      "en-US-AvaMultilingualNeural": {
+        "JSON": {
+          "say": "yei son",
+          "heard": true,
+          "tried": [
+            "0/2 JSON → Ahora revisamos Xon en el sistema. | Para eso usamos son, como siempre.",
+            "2/2 yei son → Ahora revisamos JSON en el sistema. | Para eso usamos JSON, como siempre.",
+            "0/2 yéison → Ahora revisamos si Eison en el sistema. | Para eso usamos Eison, como siempre.",
+            "2/2 jeison → Ahora revisamos Jason en el sistema. | Para eso usamos JSON, como siempre."
+          ]
+        },
+        "webhook": {
+          "say": "uébjuk",
+          "heard": true,
+          "tried": [
+            "0/2 webhook → Ahora revisamos Beboc en el sistema. | Para eso usamos Bebop, como siempre.",
+            "2/2 uébjuk → Ahora revisamos Webhook en el sistema. | Para eso usamos Webhook como siempre.",
+            "0/2 güeb juk → Ahora revisamos Gephook en el sistema. | Para eso usamos GapHook, como siempre.",
+            "2/2 web juk → Ahora revisamos WebHook en el sistema. | Para eso usamos webhook, como siempre."
+          ]
+        },
+        "curl": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 curl → Ahora revisamos Curl en el sistema. | Para eso usamos CURL, como siempre."
+          ]
+        },
+        "Python": {
+          "say": "páiton",
+          "heard": true,
+          "tried": [
+            "0/2 Python → Ahora revisamos Paísan en el sistema. | Para eso usamos paisan, como siempre.",
+            "2/2 páiton → Ahora revisamos PAITON en el sistema. | Para eso usamos Python, como siempre.",
+            "2/2 paiton → Ahora revisamos Payton en el sistema. | Para eso usamos paitón, como siempre."
+          ]
+        },
+        "NIT": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 NIT → Ahora revisamos NIT en el sistema. | Para eso usamos Zenite, como siempre."
+          ]
+        }
+      },
+      "en-US-EmmaMultilingualNeural": {
+        "JSON": {
+          "say": "yei son",
+          "heard": true,
+          "tried": [
+            "0/2 JSON → Ahora revisamos son en el sistema. | Para eso usamos Zon, como siempre.",
+            "2/2 yei son → Ahora revisamos JSON en el sistema. | Para eso usamos JSON, como siempre.",
+            "0/2 yéison → Ahora revisamos eISON en el sistema. | Para eso usamos e-ison, como siempre.",
+            "2/2 jeison → Ahora revisamos Jason en el sistema. | Para eso usamos JSON, como siempre."
+          ]
+        },
+        "API key": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 API key → Ahora revisamos a Piki en el sistema. | Para eso usamos apiki, como siempre."
+          ]
+        },
+        "endpoint": {
+          "say": "end point",
+          "heard": true,
+          "tried": [
+            "0/2 endpoint → Ahora revisamos en Porrent en el sistema. | Para eso usamos Emporrent, como siempre.",
+            "1/2 éndpoint → Ahora revisamos en Puente en el sistema. | Para eso usamos endpoint, como siempre.",
+            "2/2 end point → Ahora revisamos en Point en el sistema. | Para eso usamos en point, como siempre.",
+            "2/2 én point → Ahora revisamos en Point en el sistema. | Para eso usamos en point, como siempre."
+          ]
+        },
+        "webhook": {
+          "say": "uébjuk",
+          "heard": true,
+          "tried": [
+            "0/2 webhook → Ahora revisamos Beboc en el sistema. | Para eso usamos bVoc, como siempre.",
+            "2/2 uébjuk → Ahora revisamos WebHook en el sistema. | Para eso usamos Webhook, como siempre.",
+            "0/2 güeb juk → Ahora revisamos Gamehook en el sistema. | Para eso usamos givehook, como siempre.",
+            "2/2 web juk → Ahora revisamos webhook en el sistema. | Para eso usamos webhook, como siempre."
+          ]
+        },
+        "JavaScript": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 JavaScript → Ahora revisamos Javascript en el sistema. | Para eso usamos Javascript, como siempre."
+          ]
+        },
+        "Python": {
+          "say": "páiton",
+          "heard": true,
+          "tried": [
+            "0/2 Python → Ahora revisamos paisan en el sistema. | Para eso usamos paisan, como siempre.",
+            "2/2 páiton → Ahora revisamos Paíton en el sistema. | Para eso usamos PAITON, como siempre.",
+            "2/2 paiton → Ahora revisamos Payton en el sistema. | Para eso usamos paitón, como siempre."
+          ]
+        },
+        "NIT": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 NIT → Ahora revisamos NIT en el sistema. | Para eso usamos NIT como siempre."
+          ]
+        }
+      },
+      "en-US-BrianMultilingualNeural": {
+        "JSON": {
+          "say": "yei son",
+          "heard": true,
+          "tried": [
+            "1/2 JSON → Ahora revisamos Json en el sistema. | Para eso usamos zon, como siempre.",
+            "2/2 yei son → Ahora revisamos Json en el sistema. | Para eso usamos JSON, como siempre.",
+            "0/2 yéison → Ahora revisamos IEISON en el sistema. | Para eso usamos iEason, como siempre.",
+            "2/2 jeison → Ahora revisamos JSON en el sistema. | Para eso usamos JSON, como siempre."
+          ]
+        },
+        "API key": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "1/2 API key → Ahora revisamos API y en el sistema. | Para eso usamos API key, como siempre.",
+            "0/2 a pe i qui → Ahora revisa MOS AP y quíen el sistema. | Para eso usamos A P y Q, como siempre.",
+            "1/2 ápi qui → Ahora revisamos API y en el sistema. | Para eso usamos apiki como siempre.",
+            "1/2 API qui → Ahora revisamos API y en el sistema. | Para eso usamos API key, como siempre."
+          ]
+        },
+        "webhook": {
+          "say": "uébjuk",
+          "heard": true,
+          "tried": [
+            "0/2 webhook → Ahora revisamos Beboc en el sistema. | Para eso usamos Beboc, como siempre.",
+            "2/2 uébjuk → Ahora revisamos su webhook en el sistema. | Para eso usamos su webhook, como siempre.",
+            "0/2 güeb juk → Ahora revisamos GebHook en el sistema. | Para eso usamos Gap Hook, como siempre.",
+            "2/2 web juk → Ahora revisamos WebHook en el sistema. | Para eso usamos webhook, como siempre."
+          ]
+        },
+        "JavaScript": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 JavaScript → Ahora revisamos Javascript en el sistema. | Para eso usamos Javascript, como siempre."
+          ]
+        },
+        "Python": {
+          "say": "páiton",
+          "heard": true,
+          "tried": [
+            "0/2 Python → Ahora revisamos paisan en el sistema. | Para eso usamos paisan, como siempre.",
+            "2/2 páiton → Ahora revisamos Paíton en el sistema. | Para eso usamos PAITON, como siempre.",
+            "2/2 paiton → Ahora revisamos Payton en el sistema. | Para eso usamos paitón como siempre."
+          ]
+        },
+        "ERP": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 ERP → Ahora revisamos ERP en el sistema. | Para eso usamos SERP como siempre."
+          ]
+        },
+        "NIT": {
+          "say": "nit",
+          "heard": true,
+          "tried": [
+            "1/2 NIT → Ahora revisamos NIT en el sistema. | Para eso usamos N y T, como siempre.",
+            "2/2 nit → Ahora revisamos NIT en el sistema. | Para eso usamos knit como siempre.",
+            "0/2 ene i te → Ahora revisamos N y T en el sistema. | Para eso usamos N y T, como siempre."
+          ]
+        }
+      },
+      "es_MX-claude-high": {
+        "API key": {
+          "say": "ápi qui",
+          "heard": true,
+          "tried": [
+            "0/2 API key → Ahora revisamos FAPiK en el sistema. | Para eso usamos API K, como siempre.",
+            "1/2 a pe i qui → Ahora revisamos AP y TI en el sistema. | Para eso, usamos a P, Iki, como siempre.",
+            "2/2 ápi qui → Ahora revisamos Papiki en el sistema. | Para eso, usamos apiki, como siempre.",
+            "0/2 API qui → Ahora revisamos Faperiki en el sistema. | Para eso usamos ApeIki, como siempre."
+          ]
+        },
+        "CSV": {
+          "say": "ce, ese, uve",
+          "heard": true,
+          "tried": [
+            "1/2 CSV → Ahora revisamos sb en el sistema. | Para eso usamos CSV, como siempre.",
+            "0/2 ce ese ve → Ahora revisamos C, SB en el sistema. | Para eso usamos C-S-B, como siempre.",
+            "2/2 ce, ese, uve → Ahora revisamos C, S, V en el sistema. | Para eso usamos C, S, V, como siempre.",
+            "1/2 se ese ve → Ahora revisamos CDCB en el sistema. | Para eso usamos CSV, como siempre."
+          ]
+        },
+        "Ctrl": {
+          "say": "control",
+          "heard": true,
+          "tried": [
+            "1/2 Ctrl → Ahora revisamos CTRL en el sistema. | Para eso usamos ETRL, como siempre.",
+            "2/2 control → Ahora revisamos control en el sistema. | Para eso usamos control, como siempre."
+          ]
+        },
+        "CRM": {
+          "say": "ce erre eme",
+          "heard": true,
+          "tried": [
+            "0/2 CRM → Ahora previsamos RM en el sistema. | Para eso usamos CRN, como siempre.",
+            "2/2 ce erre eme → Ahora revisamos C, R, M en el sistema. | Para eso, usamos CRM, como siempre.",
+            "2/2 ce, erre, eme → Ahora revisamos C, R, M en el sistema. | Para eso usamos C, R, M, como siempre."
+          ]
+        },
+        "REST": {
+          "say": "rest",
+          "heard": true,
+          "tried": [
+            "1/2 REST → Ahora revisamos REST en el sistema. | Para eso usamos Lest, como siempre.",
+            "2/2 rest → Ahora revisamos REST en el sistema. | Para eso usamos REST como siempre.",
+            "2/2 rést → Ahora revisamos REST en el sistema. | Para eso usamos REST, como siempre."
+          ]
+        }
+      },
+      "es_ES-davefx-medium": {
+        "API": {
+          "say": "a pe i",
+          "heard": true,
+          "tried": [
+            "0/2 API → ahora revisamos apellido en el sistema | Para eso os vamos a pedir, como siempre.",
+            "2/2 a pe i → Ahora revisamos API en el sistema. | para eso usamos API como siempre.",
+            "1/2 a, pe, i → Ahora revisamos a Pi en el sistema. | para eso usamos A, P y como siempre.",
+            "2/2 ápi → Ahora revisamos a PID en el sistema. | para eso usamos api, como siempre.",
+            "0/2 ei pi ai → ahora revisamos APJ ahí en el sistema | para eso usamos IP ahí, como siempre."
+          ]
+        },
+        "JSON": {
+          "say": "yéison",
+          "heard": true,
+          "tried": [
+            "1/2 JSON → ahora revisamos json en el sistema | Para eso usamos Cotason como siempre.",
+            "0/2 yei son → Ahora revisamos Deison en el sistema. | Para eso usamos Dishon, como siempre.",
+            "2/2 yéison → ahora revisamos Jason en el sistema | para eso usamos JSON como siempre",
+            "0/2 jeison → Ahora revisamos Heison en el sistema. | Para eso usamos Gison como siempre."
+          ]
+        },
+        "API key": {
+          "say": "ápi qui",
+          "heard": true,
+          "tried": [
+            "0/2 API key → Ahora revisamos a Peikei en el sistema. | para eso usamos a pay cake como siempre",
+            "1/2 a pe i qui → Ahora revisamos a PIKID en el sistema. | para eso usamos apeiki como siempre.",
+            "2/2 ápi qui → ahora revisamos a pikig en el sistema | para eso usamos a Piki como siempre",
+            "0/2 API qui → Ahora revisamos a PayKey en el sistema. | Para eso usamos apeiki como siempre."
+          ]
+        },
+        "PDF": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 PDF → Ahora revisamos PDF en el sistema. | Para eso usamos PDF, como siempre."
+          ]
+        },
+        "webhook": {
+          "say": "güeb juk",
+          "heard": true,
+          "tried": [
+            "0/2 webhook → ahora revisamos huevoque en el sistema | para eso usamos huevo aque como siempre",
+            "0/2 uébjuk → Ahora revisamos Goku en el sistema. | para eso usamos webcube, como siempre.",
+            "2/2 güeb juk → ahora revisamos webhook en el sistema | para eso usamos webhooking como siempre.",
+            "2/2 web juk → ahora revisamos webhook en el sistema | Para eso usamos webhook, como siempre."
+          ]
+        },
+        "IVA": {
+          "say": "iva",
+          "heard": true,
+          "tried": [
+            "0/2 IVA → Ahora revisamos y lo vea en el sistema. | para eso usamos y lo vea como siempre.",
+            "2/2 iva → ahora revisamos IVA en el sistema | Para eso usamos IVA como siempre.",
+            "0/2 í va → Ahora revisamos si la acentuada va en el sistema. | para eso usamos y acentuada va, como siempre."
+          ]
+        },
+        "curl": {
+          "say": "cúrl",
+          "heard": true,
+          "tried": [
+            "1/2 curl → ahora revisamos cool en el sistema | Para eso usamos Curl, como siempre.",
+            "1/2 kerl → Ahora revisamos que es en el sistema. | para eso usamos KERL como siempre",
+            "2/2 cúrl → ahora revisamos Curl en el sistema | a eso usamos curlo, como siempre.",
+            "1/2 kurl → ahora revisamos Curle en el sistema | Para eso usamos Curve, como siempre."
+          ]
+        },
+        "Ctrl": {
+          "say": "control",
+          "heard": true,
+          "tried": [
+            "1/2 Ctrl → Ahora revisamos CTRL en el sistema. | para eso usamos TTRL como siempre.",
+            "2/2 control → ahora revisamos control en el sistema | para eso usamos control, como siempre."
+          ]
+        },
+        "REST": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 REST → ahora revisamos resten el sistema | Para eso usamos REST como siempre."
+          ]
+        },
+        "NIT": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 NIT → ahora revisamos en IT en el sistema | Para eso usamos Zenite como siempre."
+          ]
+        }
+      },
+      "lola": {
+        "API": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 API → Ahora revisamos API en el sistema. | Para eso usamos api como siempre."
+          ]
+        },
+        "API key": {
+          "say": "ápi qui",
+          "heard": true,
+          "tried": [
+            "0/2 API key → Ahora revisamos a Pige en el sistema. | para eso usamos a pk como siempre.",
+            "0/2 a pe i qui → Y ahora revisamos a Peike en el sistema. | Para eso usamos a Teiki, como siempre.",
+            "2/2 ápi qui → Ahora revisamos ApiKey en el sistema. | Para eso usamos a Piqui como siempre.",
+            "2/2 API qui → Ahora revisamos a Piki en el sistema. | Para eso usamos a Piki como siempre."
+          ]
+        },
+        "endpoint": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 endpoint → Ahora revisamos en point en el sistema. | Para eso usamos en point como siempre."
+          ]
+        },
+        "webhook": {
+          "say": "web juk",
+          "heard": true,
+          "tried": [
+            "1/2 webhook → Ahora revisamos WebVoc en el sistema. | Para eso usamos Webhook, como siempre.",
+            "1/2 uébjuk → Ahora revisamos Webhook en el sistema. | Para eso usamos web como siempre.",
+            "0/2 güeb juk → Ahora revisamos webhub en el sistema. | Para eso usamos webhue como siempre.",
+            "2/2 web juk → Ahora revisamos Webhook en el sistema. | Para eso usamos webhook como siempre."
+          ]
+        },
+        "curl": {
+          "say": "kurl",
+          "heard": true,
+          "tried": [
+            "1/2 curl → Ahora revisamos Curve en el sistema. | Para eso usamos Curl como siempre.",
+            "1/2 kerl → Ahora revisamos Kerl en el sistema. | Para eso usamos KER, como siempre.",
+            "1/2 cúrl → Ahora revisamos Curle en el sistema. | Para eso usamos Curve como siempre.",
+            "2/2 kurl → Y ahora revisamos CURL en el sistema. | Para eso usamos CURL como siempre."
+          ]
+        },
+        "CRM": {
+          "say": "ce erre eme",
+          "heard": true,
+          "tried": [
+            "0/2 CRM → Ahora revisamos creme en el sistema. | Para eso usamos cram como siempre.",
+            "2/2 ce erre eme → Ahora revisamos CRM en el sistema. | Para eso usamos CRM, como siempre.",
+            "2/2 ce, erre, eme → Ahora revisamos C, R, M en el sistema. | Para eso usamos C, R, M como siempre."
+          ]
+        },
+        "ERP": {
+          "say": "e, erre, pe",
+          "heard": true,
+          "tried": [
+            "0/2 ERP → Ahora revisamos el penel sistema. | Para eso usamos RP, como siempre.",
+            "1/2 e erre pe → Ahora revisamos ERP en el sistema. | Para eso usamos Rp como siempre.",
+            "2/2 e, erre, pe → Ahora revisamos ERP en el sistema. | Para eso usamos ERP como siempre."
+          ]
+        },
+        "REST": {
+          "say": "rest",
+          "heard": true,
+          "tried": [
+            "1/2 REST → Ahora revisamos Rsten en el sistema. | Para eso usamos reste como siempre.",
+            "2/2 rest → Ahora revisamos resta en el sistema. | Para eso usamos REST como siempre.",
+            "1/2 rést → Ahora revisamos este en el sistema. | Para eso usamos REST como siempre."
+          ]
+        },
+        "URL": {
+          "say": "u erre ele",
+          "heard": true,
+          "tried": [
+            "1/2 URL → Ahora revisamos Urlen el sistema. | Para eso usamos URI, como siempre.",
+            "2/2 u erre ele → Ahora revisamos URL en el sistema. | Para eso usamos URL como siempre."
+          ]
+        },
+        "app": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 app → Ahora revisamos apenas el sistema. | Para eso usamos a PAP como siempre."
+          ]
+        }
+      },
+      "lola?model=spanish": {
+        "API": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 API → Ahora revisamos a PIE en el sistema. | Para eso usamos api como siempre."
+          ]
+        },
+        "API key": {
+          "say": "ápi qui",
+          "heard": true,
+          "tried": [
+            "0/2 API key → Ahora revisamos a PK en el sistema. | Para eso usamos a PK como siempre.",
+            "0/2 a pe i qui → Ahora revisamos a Peiky en el sistema. | Para eso usamos a Peiki como siempre.",
+            "2/2 ápi qui → Ahora revisamos a piquí en el sistema. | Para eso usamos a Piquí, como siempre.",
+            "2/2 API qui → Ahora revisamos a Piquier en el sistema. | Para eso usamos a Piki, como siempre."
+          ]
+        },
+        "email": {
+          "say": "imeil",
+          "heard": true,
+          "tried": [
+            "1/2 email → Ahora revisamos el maíz en el sistema. | Para eso usamos EMAIL como siempre.",
+            "2/2 imeil → Ahora revisamos e-mail en el sistema. | Para eso usamos e-mail, como siempre.",
+            "2/2 i meil → Ahora revisamos e-mail en el sistema. | Para eso usamos email, como siempre."
+          ]
+        },
+        "curl": {
+          "say": null,
+          "heard": true,
+          "tried": [
+            "2/2 curl → Ahora revisamos CURL en el sistema. | Para eso usamos CURL, como siempre."
+          ]
+        },
+        "REST": {
+          "say": "rest",
+          "heard": true,
+          "tried": [
+            "1/2 REST → Ahora revisamos RESTEN el sistema. | Para eso usamos Veste como siempre.",
+            "2/2 rest → Ahora revisamos resten el sistema. | Para eso usamos REST, como siempre.",
+            "2/2 rést → Ahora revisamos resten el sistema. | Para eso usamos REST como siempre."
+          ]
+        }
       }
     }
   }
