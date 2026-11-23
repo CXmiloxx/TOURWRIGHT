@@ -52,14 +52,28 @@ const piper = {
   },
 }
 
+// Edge takes pitch in Hz only. A pitch in percent or semitones (the shape of a line, audio.dynamic) is turned
+// into Hz against a speaking voice of about 180 Hz, so Edge says it itself: the same change made afterwards by
+// ffmpeg (resampling) sounds metallic
+const EDGE_BASE_HZ = 180
+export const edgePitch = pitch => {
+  const hz = signed(pitch, 'Hz')
+  if (hz) return hz
+  const m = /^([+-]?\d+(?:\.\d+)?)(%|st)$/.exec(String(pitch ?? '').trim())
+  if (!m) return null
+  const factor = m[2] === '%' ? 1 + Number(m[1]) / 100 : 2 ** (Number(m[1]) / 12)
+  const n = Math.round(EDGE_BASE_HZ * (factor - 1))
+  return `${n >= 0 ? '+' : ''}${n}Hz`
+}
+
 const edge = {
-  native: options => ['rate', ...(signed(options.pitch, 'Hz') ? ['pitch'] : []), ...(signed(options.volume, '%') ? ['volume'] : [])],
+  native: options => ['rate', ...(edgePitch(options.pitch) ? ['pitch'] : []), ...(signed(options.volume, '%') ? ['volume'] : [])],
   available: async config =>
     config.tts.edge.bin ? { ok: true, bin: config.tts.edge.bin, note: 'needs internet' } : { ok: false, reason: 'edge-tts not found (pip install edge-tts)' },
   synthesize: async ({ text, voice, out, config }) => {
     if (!config.tts.edge.bin) throw new Error('edge-tts not installed (pip install edge-tts or set TOURWRIGHT_EDGE_TTS_BIN)')
     const o = voice.options
-    const args = ['--voice', voice.id, `--rate=${signed(o.rate, '%') ?? '+0%'}`, `--pitch=${signed(o.pitch, 'Hz') ?? '+0Hz'}`,
+    const args = ['--voice', voice.id, `--rate=${signed(o.rate, '%') ?? '+0%'}`, `--pitch=${edgePitch(o.pitch) ?? '+0Hz'}`,
       `--volume=${signed(o.volume, '%') ?? '+0%'}`, '--text', text, '--write-media', out]
     // An online service: a dropped connection or "No audio was received" usually works on the next try
     for (let attempt = 1; ; attempt++) {

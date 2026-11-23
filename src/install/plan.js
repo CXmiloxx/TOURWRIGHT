@@ -8,16 +8,17 @@ import { findChromium } from '#render/browser/chromium.js'
 import { findPiperVoice } from '#voice/piper-voices.js'
 import { isInside, log } from '#core/util.js'
 import { download } from './download.js'
-import { installChromium, installEdge, installFfmpeg, installPiper, installPocket, installVoice } from './parts.js'
+import { installChromium, installEdge, installFfmpeg, installMusic, installPiper, installPocket, installVoice } from './parts.js'
 import { usable, usablePython, venvWorks } from './python.js'
-import { DEFAULT_VOICES, FFMPEG, FFMPEG_SERIES, PIPER_TTS, PIPER_WHEELS, PYTHON_VERSION } from './sources.js'
+import { DEFAULT_VOICES, FFMPEG, FFMPEG_SERIES, MUSIC_PACK, PIPER_TTS, PIPER_WHEELS, PYTHON_VERSION } from './sources.js'
+import { listTracks } from '#voice/music-library.js'
 
 /**
  * What `install` would use from the PC and what it would download, without changing anything.
- * @param {{ voices?: string[], edge?: boolean, chromium?: boolean, pocket?: boolean }} [options]
+ * @param {{ voices?: string[], edge?: boolean, chromium?: boolean, pocket?: boolean, music?: boolean }} [options]
  * @returns {Promise<{ name: string, use?: string, download?: string, mb?: number }[]>}
  */
-export const planInstall = async ({ voices = DEFAULT_VOICES, edge = true, chromium = true, pocket = false } = {}, config = loadConfig()) => {
+export const planInstall = async ({ voices = DEFAULT_VOICES, edge = true, chromium = true, pocket = false, music = false } = {}, config = loadConfig()) => {
   const key = `${platform()}-${arch()}`
   const plan = []
   const venvReady = existsSync(join(config.home, 'venv', 'pyvenv.cfg')) && (await venvWorks(config.home))
@@ -52,6 +53,13 @@ export const planInstall = async ({ voices = DEFAULT_VOICES, edge = true, chromi
     const py = await usablePython()
     plan.push(py ? { name: 'Python', use: py } : { name: 'Python', download: `Python ${PYTHON_VERSION} (and uv)`, mb: 60 })
   }
+  if (music) {
+    const have = new Set(listTracks(config).map(t => t.name))
+    const missing = MUSIC_PACK.filter(t => !have.has(t.name))
+    plan.push(missing.length
+      ? { name: 'music', download: `${missing.length} public-domain tracks (CC0)`, mb: Math.round(missing.reduce((a, t) => a + t.mb, 0)) }
+      : { name: 'music', use: config.musicDir })
+  }
   if (chromium) {
     const found = await findChromium(config)
     if (found.source === 'missing') plan.push({ name: 'Chromium', download: `Playwright's Chromium into ${config.browsersPath}`, mb: 250 })
@@ -61,9 +69,9 @@ export const planInstall = async ({ voices = DEFAULT_VOICES, edge = true, chromi
 }
 
 /**
- * @param {{ voices?: string[], edge?: boolean, chromium?: boolean, pocket?: boolean }} [options]
+ * @param {{ voices?: string[], edge?: boolean, chromium?: boolean, pocket?: boolean, music?: boolean }} [options]
  */
-export const installAll = async ({ voices = DEFAULT_VOICES, edge = true, chromium = true, pocket = false } = {}, config = loadConfig()) => {
+export const installAll = async ({ voices = DEFAULT_VOICES, edge = true, chromium = true, pocket = false, music = false } = {}, config = loadConfig()) => {
   const key = `${platform()}-${arch()}`
   log.info(`installing into ${config.home} (${key})`)
   await installFfmpeg(config, key)
@@ -72,6 +80,7 @@ export const installAll = async ({ voices = DEFAULT_VOICES, edge = true, chromiu
   if (edge) await installEdge(config)
   if (pocket) await installPocket(config)
   if (chromium) await installChromium(config)
+  if (music) await installMusic(config)
   if (platform() === 'linux' && !config.xvfb) log.info('Optional, for the sharpest capture: install Xvfb (apt install xvfb)')
   // Without Pocket the natural voices need internet (Microsoft's): say how to have them offline too
   if (!pocket && !config.tts.pocket?.python) {

@@ -2,10 +2,11 @@
 // sounds, and the eye on the page that feeds the review (a caption in the way, a page too small, a date shown).
 import { existsSync } from 'node:fs'
 import { UserError } from '#core/util.js'
-import { builtInSound } from '#voice/effects.js'
+import { BUILT_IN_SOUNDS, builtInSound } from '#voice/effects.js'
 import { narrate, withProsody } from '#voice/index.js'
+import { lineProsody } from '#voice/lively.js'
 import { centerOf, createCursor } from '#render/page/cursor.js'
-import { checkLayout } from '#render/page/review.js'
+import { checkLanguage, checkLayout } from '#render/page/review.js'
 import { setStepTimeout } from '#render/steps/index.js'
 import { safePath } from '#render/page/theme.js'
 import { captionClear } from '#render/page/visuals.js'
@@ -54,8 +55,12 @@ export const createStage = async ({ page, context, loaded, script, plan, clock, 
   const laidOut = new Set()
   const lookAtLayout = async () => {
     const address = page.url().split('#')[0]
-    if (dryRun || laidOut.has(address)) return
+    if (laidOut.has(address)) return
     laidOut.add(address)
+    // The language too, in a dry run as well: `check` finds it before anything is filmed
+    const language = await checkLanguage(page, script.language)
+    if (language) watcher.add({ kind: 'language', message: `${address}: ${language}` })
+    if (dryRun) return
     for (const message of await checkLayout(page, { density: plan.density, height: plan.height })) watcher.add({ kind: 'layout', message: `${address}: ${message}` })
   }
 
@@ -94,6 +99,14 @@ export const createStage = async ({ page, context, loaded, script, plan, clock, 
   }
   const { audio } = plan
   const clickSound = audio.clicks && !dryRun ? await soundFile(audio.clicks === true ? 'click' : audio.clicks) : null
+  // `audio.transitions` is found now, not at the first title card halfway through the recording; a dry run
+  // checks that a file of the script is there
+  const sound = name => (name === true ? 'whoosh' : name)
+  const transitionSound = audio.transitions && !dryRun ? await soundFile(sound(audio.transitions)) : null
+  for (const name of dryRun ? [audio.transitions, audio.clicks] : []) {
+    if (name && name !== true && !BUILT_IN_SOUNDS.includes(name) && !existsSync(safePath(name, loaded.dir, loaded.sandboxed)))
+      throw new UserError(`sound not found: ${name} (built-in: ${BUILT_IN_SOUNDS.join(', ')})`)
+  }
   const effect = (file, volume = 1, kind = 'sound') => clock.effect(file, volume * (audio.effects ?? 1), kind)
   // The sound of a click, when the script asks for it
   const clickNoise = () => {
@@ -102,10 +115,13 @@ export const createStage = async ({ page, context, loaded, script, plan, clock, 
 
   // A line may name its own voice (from the cast) and how to say it. A failed narration fails the job (like
   // slides) instead of finishing a silent video as done.
-  const synth = async (text, prosody = {}) => {
+  // `line`: the whole line `text` is part of. Its shape (a question rises…) comes from the whole line, so a part
+  // synthesized to time a focus is said exactly as it is in the line: never at another speed
+  const synth = async (text, prosody = {}, line = text) => {
     const base = prosody.voice ?? plan.voice
     if (dryRun || !text || !base || base === 'none') return null
-    const spec = withProsody(base, prosody)
+    // The narration's speed and, with `audio.dynamic`, the shape of the line
+    const spec = withProsody(base, lineProsody(line, prosody, plan.audio))
     const n = await clock.offClock(() => narrate(text, spec, config, plan.speech))
     return { ...n, text, spec }
   }
@@ -130,6 +146,7 @@ export const createStage = async ({ page, context, loaded, script, plan, clock, 
     lookForDates,
     settle,
     soundFile,
+    transitionSound,
     effect,
     clickNoise,
     synth,

@@ -31,7 +31,7 @@ const LANGUAGES = { es: 'spa', en: 'eng', pt: 'por', fr: 'fra', de: 'deu', it: '
  *                                Those inside a cut are dropped
  * @param {Array}  p.captions     [{ start, end, text }] recording seconds
  * @param {Array}  p.marks        [{ start, title }] recording seconds (chapters)
- * @param {Record<string, any>} [p.music] { file, volume = 0.15, duck = true, fadeIn = 0, fadeOut = 2 }
+ * @param {Record<string, any>} [p.music] { file, volume = 0.15, duck = true, fadeIn = 0, fadeOut = 2, start = 0 }
  * @param {string} [p.polish]     narration sound preset (default, clean, warm, radio, podcast, none)
  * @param {string} p.out          output path without extension
  * @param {string} [p.sidecar]    path without extension of the .srt and .vtt (default: captions, next to the video).
@@ -110,8 +110,10 @@ export const compose = async (p, config = loadConfig()) => {
     voiceBus = '[voice]'
   }
   if (p.music?.file) {
+    // A `start` was already cut off by placeMusic (voice/music.js): the loop plays the track from there each round
     inputs.push('-stream_loop', '-1', '-i', p.music.file)
-    const volume = p.music.volume ?? 0.15
+    // `gain` brings the track to the music loudness first (voice/music.js): `volume` means the same for any track
+    const volume = Number(((p.music.volume ?? 0.15) * (p.music.gain ?? 1)).toFixed(4))
     const fadeIn = p.music.fadeIn ?? 0
     const fadeOut = Math.min(p.music.fadeOut ?? 2, total)
     filters.push(`[${next++}:a]aresample=48000,aformat=channel_layouts=stereo,volume=${volume}${fadeIn ? `,afade=t=in:st=0:d=${fadeIn}` : ''}` +
@@ -167,6 +169,8 @@ export const compose = async (p, config = loadConfig()) => {
     chapters: chapters.map(c => ({ ...c, start: Number(c.start.toFixed(3)), end: Number(c.end.toFixed(3)) })),
     captions: captions.map(c => ({ ...c, start: Number(c.start.toFixed(3)), end: Number(c.end.toFixed(3)) })),
     voice: p.voice ?? null,
+    // Which music played: one of your tracks by name, else the file's name
+    music: p.music?.file ? (p.music.track ?? basename(p.music.file)) : null,
     createdAt: new Date().toISOString(),
   }
   writeFileSync(files.manifest, JSON.stringify(manifest, null, 2))

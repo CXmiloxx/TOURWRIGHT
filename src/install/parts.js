@@ -1,4 +1,4 @@
-// Each part on its own: ffmpeg, Piper and its voices, edge-tts, Pocket TTS, Chromium. Each one uses what the PC
+// Each part on its own: ffmpeg, Piper and its voices, edge-tts, Pocket TTS, Chromium, the music pack. Each one uses what the PC
 // already has first.
 import { chmodSync, copyFileSync, existsSync, mkdirSync, renameSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -6,11 +6,12 @@ import { platform } from 'node:os'
 import { dirname, join } from 'node:path'
 import { loadConfig, venvBin } from '#core/config.js'
 import { findChromium } from '#render/browser/chromium.js'
+import { addTrack, listTracks } from '#voice/music-library.js'
 import { findPiperVoice } from '#voice/piper-voices.js'
 import { findBinary, isInside, log, run, UserError } from '#core/util.js'
 import { download, fetchAndExtract, findFile, inScratch, runVisible } from './download.js'
 import { pipInstall, usable } from './python.js'
-import { FFMPEG, PIPER, PIPER_RELEASE, PIPER_TTS, PIPER_VOICES, PIPER_WHEELS, exe } from './sources.js'
+import { FFMPEG, MUSIC_BASE, MUSIC_LICENSE, MUSIC_PACK, PIPER, PIPER_RELEASE, PIPER_TTS, PIPER_VOICES, PIPER_WHEELS, exe } from './sources.js'
 
 export const installVoice = async (voice, config = loadConfig()) => {
   const m = /^([a-z]{2,3})_([A-Z]{2})-([\w]+)-(x_low|low|medium|high)$/.exec(voice)
@@ -110,4 +111,21 @@ export const installChromium = async config => {
   const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: config.browsersPath }
   await runVisible(process.execPath, [cli, 'install', ...(withDeps ? ['--with-deps'] : []), 'chromium'], env)
   if (platform() === 'linux' && !withDeps) log.info('If Chromium misses system libraries: sudo npx playwright install-deps chromium')
+}
+
+/** The public-domain music pack into the music folder: each track once, checked by its sha256 */
+export const installMusic = async (config = loadConfig()) => {
+  const have = new Set(listTracks(config).map(t => t.name))
+  mkdirSync(config.musicDir, { recursive: true })
+  for (const t of MUSIC_PACK) {
+    if (have.has(t.name)) continue
+    const tmp = join(config.musicDir, `.${t.name}.download.mp3`)
+    try {
+      await download(`${MUSIC_BASE}/${t.path}`, tmp, 3, t.sha256)
+      await addTrack(tmp, { name: t.name, mood: t.mood, title: t.title, artist: t.artist, license: MUSIC_LICENSE }, config)
+      log.info(`music: ${t.name} (${t.mood})`)
+    } finally {
+      rmSync(tmp, { force: true })
+    }
+  }
 }

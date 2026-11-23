@@ -41,6 +41,11 @@ test('a kept video is made again with new captions, a blur and without clicks; i
     const result = await recompose(folder, { clicks: false }, cfg)
     assert.equal(result.duration, 4)
     assert.match(readFileSync(join(dir, 'videos', 'demo', 'captions.srt'), 'utf8'), /Hola de nuevo/)
+    // A video with music from the library keeps the track's level and name: it can be made again
+    timeline.music = { file: 'voice/001.wav', volume: 0.2, gain: 1.6, track: 'advertime' }
+    writeFileSync(file, JSON.stringify(timeline))
+    await recompose(folder, {}, cfg)
+    delete timeline.music
     // A box bigger than the video, past its edge, is cut to it
     timeline.blurs = [{ x: 300, y: 200, width: 5000, height: 5000 }]
     writeFileSync(file, JSON.stringify(timeline))

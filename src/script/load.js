@@ -12,6 +12,7 @@ import { codeMarker, getSecret, secretName, totpKey } from '#core/secrets.js'
 import { hideSecret, UserError } from '#core/util.js'
 import { expandScript } from './expand.js'
 import { validateScript } from './schema.js'
+import { withStyle } from './style.js'
 
 /**
  * A script ready to render: `kind` tells which script it holds.
@@ -44,7 +45,9 @@ export const fromData = (data, { name = 'video', dir = process.cwd(), sandboxed 
   const r = validateScript(expand ? expandScript(data, { vars, missing }) : data)
   if (!r.ok) throw new UserError(`invalid script:\n  ${r.errors.join('\n  ')}`)
   const base = { name, dir, sandboxed }
-  return r.script.type === 'slides' ? { ...base, kind: 'slides', script: r.script } : { ...base, kind: 'browser', script: r.script }
+  // The style's defaults (music, voice, sounds) under what the script sets itself
+  const script = withStyle(r.script)
+  return script.type === 'slides' ? { ...base, kind: 'slides', script } : { ...base, kind: 'browser', script }
 }
 
 /** @param {string} file @param {{ allowJs?: boolean, vars?: Record<string, unknown>, missing?: Set<string> }} [options] @returns {Promise<Loaded>} */
@@ -60,7 +63,7 @@ export const loadFile = async (file, { allowJs = true, vars = undefined, missing
     const r = validateScript({ ...rest, steps: [{ pause: 0 }] })
     if (!r.ok) throw new UserError(`invalid options in ${file}:\n  ${r.errors.join('\n  ')}`)
     const { steps: _ignored, ...options } = /** @type {any} */ (r.script)
-    return { kind: 'browser', name, dir: dirname(path), sandboxed: false, script: { ...options, steps: [] }, run: mod.default, setupFn: mod.setup }
+    return { kind: 'browser', name, dir: dirname(path), sandboxed: false, script: withStyle({ ...options, steps: [] }), run: mod.default, setupFn: mod.setup }
   }
   const text = readFileSync(path, 'utf8')
   return fromData(parseText(text, ext === '.json' ? 'json' : 'yaml'), { name, dir: dirname(path), vars, missing })

@@ -63,3 +63,22 @@ export const SHA256 = {
 }
 
 export const exe = name => (isWindows ? `${name}.exe` : name)
+
+// Background music for `tourwright install --music`: public-domain tracks (CC0 1.0, no attribution needed) from the
+// FreePD catalogue, kept on the Internet Archive since freepd.com closed. Each lands in the music folder with its
+// mood, so `music: upbeat` in a script picks a real track instead of the built-in loop.
+// License: https://web.archive.org/web/20241231185827/https://freepd.com/ ("all licensed CC0 1.0 Universal")
+export const MUSIC_BASE = 'https://archive.org/download/freepd'
+export const MUSIC_LICENSE = 'CC0 1.0 (FreePD)'
+/** @type {{ name: string, mood: string, title: string, artist: string, path: string, sha256: string, mb: number }[]} */
+export const MUSIC_PACK = [
+  { name: 'city-sunshine', mood: 'upbeat', title: 'City Sunshine', artist: 'Kevin MacLeod', path: 'upbeat/City%20Sunshine.mp3', sha256: 'e05c1bd683174cff77d492b7ac77262ff4617f99f69d82564b66831cf48352d6', mb: 7.4 },
+  { name: 'advertime', mood: 'upbeat', title: 'Advertime', artist: 'Rafael Krux', path: 'upbeat/Advertime.mp3', sha256: '6f0d4433cf788304d60add551cc460dd877865e6d84a2ab3fa7d15ba3f55d6ce', mb: 5.4 },
+  { name: 'inspiration', mood: 'corporate', title: 'Inspiration', artist: 'Rafael Krux', path: 'upbeat/Inspiration.mp3', sha256: 'a254227da398809c79a0c753073a3a92c7341672abc92bb0166b6326e126f0b4', mb: 5.5 },
+  { name: 'motions', mood: 'corporate', title: 'Motions', artist: 'Rafael Krux', path: 'upbeat/Motions.mp3', sha256: 'af6380fde14f41dc4762a0a69c558bfd03a8a88c10cb5c8f578a6d0bcb4750be', mb: 4.7 },
+  { name: 'wisdom-in-the-sun', mood: 'calm', title: 'Wisdom in the Sun', artist: 'Kevin MacLeod', path: 'misc/Wisdom%20in%20the%20Sun.mp3', sha256: '07ac4ab1f6d54893615d48aeee8bb3f2e5c1f2d16c6385973c97b28ef83c7ee0', mb: 5 },
+  { name: 'river-meditation', mood: 'calm', title: 'River Meditation', artist: 'Jason Shaw', path: 'misc/River%20Meditation.mp3', sha256: 'de0dc7fc73e83312bc5d3ef13f197f0900cedd904ed46b50cc2ee74b4db3dc3f', mb: 2.7 },
+  { name: 'happy-whistling-ukulele', mood: 'acoustic', title: 'Happy Whistling Ukulele', artist: 'Rafael Krux', path: 'upbeat/Happy%20Whistling%20Ukulele.mp3', sha256: 'ed4059c8fba8673d657e85175ff54eaa32cef9e43f688f164bef585e6e65cf15', mb: 4.9 },
+  { name: 'arpent', mood: 'tech', title: 'Arpent', artist: 'Kevin MacLeod', path: 'electronic/Arpent.mp3', sha256: 'ef06d8b524c196a31954dfb1f3261e7d37459e43f4afd9df31ee2965c6094a56', mb: 6.5 },
+  { name: 'kings-trailer', mood: 'cinematic', title: 'Kings Trailer', artist: 'Rafael Krux', path: 'epic/Kings%20Trailer.mp3', sha256: '872747c75bd9dcb12134e7d6b4870238eb72c5557753a77232ee22fa1d2fd21a', mb: 6.5 },
+]

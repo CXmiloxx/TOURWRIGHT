@@ -6,6 +6,7 @@ import { join } from 'node:path'
 import { loadConfig } from '#core/config.js'
 import { UserError } from '#core/util.js'
 import { ENGINES } from './engines.js'
+import { applyShifts } from './lively.js'
 import { voiceLanguage } from './lexicon.js'
 
 // Built-in aliases: tested voices that sound good. Config `tts.aliases` adds or overrides.
@@ -66,6 +67,8 @@ export const parseVoice = (spec, config = loadConfig(), aliases = {}) => {
   }
   const m = /^([a-z][a-z0-9]*):(.+)$/.exec(value)
   if (!m) throw new UserError(`unknown voice "${spec}": use engine:id (${Object.keys(ENGINES).map(e => `${e}:…`).join(', ')}) or a name (${Object.keys(names).join(', ')})`)
+  // A line's shape (audio.dynamic, audio.rate) shifts the voice's own rate and pitch, never replaces them
+  options = applyShifts(options)
   const [, engine, id] = m
   if (!ENGINES[engine]) throw new UserError(`unknown TTS engine "${engine}" (${Object.keys(ENGINES).join(', ')})`)
   // The id ends up in file paths (piper) and in a shell line (command): letters, digits, . _ - only
@@ -110,9 +113,9 @@ export const autoVoice = async (language, config = loadConfig()) => {
 }
 
 // A voice with some options changed: `withProsody('ana', { rate: '+10%' })` → 'ana?rate=+10%'.
-/** @param {string} spec @param {{ rate?: string, pitch?: string, volume?: string, style?: string }} [prosody] */
-export const withProsody = (spec, { rate, pitch, volume, style } = {}) => {
-  const extra = Object.fromEntries(Object.entries({ rate, pitch, volume, instructions: style }).filter(([, v]) => v !== undefined))
+/** @param {string} spec @param {{ rate?: string, pitch?: string, volume?: string, style?: string, rateShift?: string, pitchShift?: string }} [prosody] */
+export const withProsody = (spec, { rate, pitch, volume, style, rateShift, pitchShift } = {}) => {
+  const extra = Object.fromEntries(Object.entries({ rate, pitch, volume, instructions: style, rateShift, pitchShift }).filter(([, v]) => v !== undefined))
   if (!Object.keys(extra).length) return spec
   const [base, query] = String(spec).split(/\?(.*)/s)
   return withOptions(base, { ...parseOptions(query), ...extra })

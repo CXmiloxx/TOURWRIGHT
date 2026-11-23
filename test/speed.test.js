@@ -34,4 +34,6 @@ test('spokenLines lists what a walkthrough will say, as the helpers say it', () 
   ])
   assert.deepEqual(lines.map(([text]) => text), ['Hola mundo.', 'Se dice', 'Bienvenido', 'Luego pulsa Pagar.', 'Luego pulsa', 'Aquí empieza.', 'Fuera', 'Sí', 'No', 'Quizá'])
   assert.equal(lines[1][1].rate, '+10%')
+  // The words before the mark keep the line they belong to: they are said with its shape
+  assert.equal(lines[4][2], 'Luego pulsa Pagar.')
 })
