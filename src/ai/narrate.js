@@ -42,14 +42,37 @@ const describe = step => {
   }
 }
 
-const SYSTEM = language => `You write the spoken narration of a short video that shows how to use a web app. The viewer is a new user, not a programmer.
+const LANGUAGE = language => (language === 'en' ? 'English' : `the language "${language}" (Spanish: tú, neutral Latin American)`)
 
-For each step marked REWRITE, write what is said at that step, in ${language === 'en' ? 'English' : `the language "${language}" (Spanish: tú, neutral Latin American)`}:
-- One or two short sentences, at most 25 words, easy to say aloud. Warm and plain: say what the screen or the element is for, then what to do.
-- Use what the screenshots show and the names in the steps. Never invent buttons, numbers, menus or features that are not visible or named.
+// The rules every narration keeps, whatever its style
+const RULES = `- Use what the screenshots show and the names in the steps. Never invent buttons, numbers, menus, prices or features that are not visible or named.
+- A current line with a word in {braces} marks the element the camera focuses on when that word is heard. Your line must contain exactly one pair of braces, around the name of that same element as the viewer sees it on screen, as early in the line as reads naturally: the picture should arrive with the words, not after them.
+- Never write a password, a code, an email or any value typed into a field.`
+
+/**
+ * What the AI is asked for: a tutorial (warm and plain, what each thing is for) or a promo (a hook, benefits,
+ * rhythm and a call to action), the same safety rules in both.
+ * @param {string} language @param {'tutorial' | 'promo' | 'calm'} [style]
+ */
+export const SYSTEM = (language, style = 'tutorial') => style === 'promo'
+  ? `You write the spoken narration of a short promotional video of a product, filmed on its real website. The viewer does not know it yet and can stop watching at any second.
+
+For each step marked REWRITE, write what is said at that step, in ${LANGUAGE(language)}:
+- The first line is a hook: a question or a pain the viewer recognizes ("¿Tu equipo sigue copiando datos a mano?"), never "Welcome to…" or the product's name alone.
+- Sell the change, not the feature: what the viewer gains (time, money, calm, control), then the feature that gives it. Talk to the viewer ("tú"), in the present.
+- Rhythm: one idea per line, 4 to 16 words. Mix short punchy lines (3 to 5 words) with longer ones. A question or an exclamation now and then, never two in a row.
+- Concrete beats vague: a number or a fact on screen ("en 48 horas") over adjectives ("rápido", "innovador", "solución integral").
+- Each line continues from the previous one without repeating it; together they tell one story: problem, how it is solved, proof, invitation.
+- The last line rewritten is a call to action: one clear thing to do now.
+${RULES}
+
+Answer one entry per REWRITE step, with the same step number.`
+  : `You write the spoken narration of a short video that shows how to use a web app. The viewer is a new user, not a programmer.
+
+For each step marked REWRITE, write what is said at that step, in ${LANGUAGE(language)}:
+- One or two short sentences, at most 25 words, easy to say aloud. ${style === 'calm' ? 'Calm and reassuring' : 'Warm and plain'}: say what the screen or the element is for, then what to do.
 - Follow the order: each line continues from the previous one without repeating it. The first line welcomes and says what the video shows.
-- A current line with a word in {braces} marks the element the camera focuses on when that word is heard. Your line must contain exactly one pair of braces, around the name of that same element as the viewer sees it on screen.
-- Never write a password, a code, an email or any value typed into a field.
+${RULES}
 
 Answer one entry per REWRITE step, with the same step number.`
 
@@ -96,10 +119,11 @@ export const checkLine = (line, said) => {
 }
 
 /**
- * The new narration of a script: one proposal per line it says.
+ * The new narration of a script: one proposal per line it says. `style`: promo, tutorial or calm (default the
+ * script's own `style`).
  * @param {any} loaded  a browser script from loadFile
  */
-export const proposeNarration = async (loaded, config) => {
+export const proposeNarration = async (loaded, config, { style = undefined } = {}) => {
   if (loaded.kind !== 'browser') throw new UserError('narrate works on browser walkthroughs')
   const lines = narratable(loaded.script.steps)
   if (!lines.length) throw new UserError('this script says nothing yet: add say or focus lines, or record it with tourwright record')
@@ -124,7 +148,7 @@ export const proposeNarration = async (loaded, config) => {
       images++
     }
   }
-  const answer = await askAi({ system: SYSTEM(language), parts, schema: SCHEMA }, config)
+  const answer = await askAi({ system: SYSTEM(language, style ?? loaded.script.style), parts, schema: SCHEMA }, config)
   const said = new Map((answer?.lines ?? []).map(l => [Number(l.step), l.say]))
   return lines.map(line => ({ ...line, ...checkLine(line, said.get(line.step)) }))
 }

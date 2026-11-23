@@ -41,6 +41,7 @@ In `tourwright.config.json` they go under `render`: `{ "render": { "quality": "f
 | `TOURWRIGHT_SECRETS_FILE` | `$TOURWRIGHT_HOME/secrets.json` | Credentials saved with `tourwright secret set` (readable only by its owner) |
 | `TOURWRIGHT_SECRET_<NAME>` | — | A secret for `${secret:NAME}`; wins over the saved one |
 | `TOURWRIGHT_CACHE_DIR` | `$TOURWRIGHT_HOME/cache` | Voice cache (safe to delete) |
+| `TOURWRIGHT_MUSIC_DIR` | `$TOURWRIGHT_HOME/music` | Your background music (`tourwright music`, `install --music`), used by name or mood |
 | `TOURWRIGHT_TMP_DIR` | `/dev/shm` if it exists | Work files of each render |
 | `TOURWRIGHT_FFMPEG`, `TOURWRIGHT_FFPROBE` | from `PATH`, then where winget, scoop, Chocolatey or Homebrew put it, then `$TOURWRIGHT_HOME/bin` | `ffprobe` is looked for next to `ffmpeg` first |
 | `TOURWRIGHT_XVFB` | `Xvfb` from `PATH` | Without it, capture is `screencast` |

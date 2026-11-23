@@ -5,6 +5,7 @@ import { compose } from '#video/compose.js'
 import { keepSource } from '#video/recompose.js'
 import { drawFrame } from '#render/page/frame.js'
 import { reportFindings, reviewAudio, reviewVideo } from '#video/review.js'
+import { placeMusic } from '#voice/music.js'
 import { safePath } from '#render/page/theme.js'
 
 /**
@@ -15,8 +16,7 @@ import { safePath } from '#render/page/theme.js'
  * }} p
  */
 export const deliver = async ({ source, end, clock, plan, script, loaded, browser, findings, opts, config }) => {
-  const music = typeof script.music === 'string' ? { file: script.music } : script.music
-  const placedMusic = music ? { ...music, file: safePath(music.file, loaded.dir, loaded.sandboxed) } : null
+  const placedMusic = await placeMusic(script.music, file => safePath(file, loaded.dir, loaded.sandboxed), config, { seed: plan.title, sandboxed: loaded.sandboxed })
   const studioFrame = plan.theme.frame === 'window'
     ? await drawFrame(browser, { width: plan.width, height: plan.height, theme: plan.theme, title: plan.title, workDir: opts.workDir })
     : null

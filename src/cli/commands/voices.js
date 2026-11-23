@@ -11,6 +11,28 @@ import { doctor } from '#cli/doctor.js'
 
 /** @type {Record<string, (cli: import('#cli/args.js').Cli) => Promise<void>>} */
 export const voicesCommands = {
+  // Your background music: `tourwright music` lists it, `music add <file|url>` and `music remove <name>`
+  music: async ({ values, positionals, config }) => {
+    const { addTrack, listTracks, MOODS, removeTrack } = await import('#voice/music-library.js')
+    const [action, target] = positionals
+    if (action === 'add') {
+      if (!target) throw new UserError(`usage: tourwright music add <file|url> [--name n] [--mood ${MOODS.join('|')}] [--title t] [--artist a] [--license l]`)
+      const t = await addTrack(target, { name: values.name, mood: values.mood, title: values.title, artist: values.artist, license: values.license }, config)
+      return void log.info(`added ${t.name}${t.mood ? ` (${t.mood})` : ''}: write music: ${t.name}${t.mood ? ` — or music: ${t.mood} for any track of that mood` : ''}`)
+    }
+    if (action === 'remove') {
+      if (!target) throw new UserError('usage: tourwright music remove <name>')
+      if (!removeTrack(target, config)) throw new UserError(`no track named ${target} (tourwright music lists them)`)
+      return void log.info(`removed ${target}`)
+    }
+    if (action) throw new UserError('usage: tourwright music [add <file|url> | remove <name>]')
+    const tracks = listTracks(config)
+    if (values.json) return void process.stdout.write(`${JSON.stringify({ folder: config.musicDir, moods: MOODS, tracks }, null, 2)}\n`)
+    process.stdout.write(`${config.musicDir}\n\n`)
+    if (!tracks.length) process.stdout.write('  no tracks yet: tourwright install --music adds public-domain ones, tourwright music add <file|url> yours\n')
+    for (const t of tracks) process.stdout.write(`  ${t.name.padEnd(28)} ${(t.mood ?? '').padEnd(10)} ${[t.title, t.artist, t.license].filter(Boolean).join(' · ')}\n`)
+    process.stdout.write(`\nIn a script: music: <name>, or a mood (${MOODS.join(', ')}) for one of yours of that mood. With none of a mood, a built-in loop plays.\n`)
+  },
   voices: async ({ values, positionals, config }) => {
     if (values.check) log.warn('voices --check was retired: every voice comes calibrated. If one says a word wrong, `pronounce` in the script fixes it')
     if (values.samples) {
@@ -53,7 +75,7 @@ export const voicesCommands = {
   install: async ({ values, config }) => {
     const voices = values.voices === undefined ? DEFAULT_VOICES : values.voices.split(/[\s,]+/).filter(Boolean)
     if (values.whisper) log.warn('--whisper: Whisper is no longer needed (the voices come calibrated), skipped')
-    const options = { voices, edge: !values['no-edge'], chromium: !values['no-chromium'], pocket: values.pocket }
+    const options = { voices, edge: !values['no-edge'], chromium: !values['no-chromium'], pocket: values.pocket, music: values.music }
     // What is already on this PC is used; only the rest is downloaded, and it is said first
     const plan = await planInstall(options, config)
     const downloads = plan.filter(p => p.download && p.mb)

@@ -19,6 +19,8 @@ export const narrationHelpers = (s, v) => {
       ms ??= speak ? 700 : 2500
       await clock.waitVoice()
       await showTitle(page, titleHtml({ text, subtitle, kicker: look.kicker, animation: look.animation ?? theme.titleAnimation, background: look.background ?? theme.titleBackground, logo: theme.logo }))
+      // `audio.transitions`: a sound as the card comes in (true = whoosh)
+      if (s.transitionSound) s.effect(s.transitionSound, 0.7, 'sound')
       await page.waitForTimeout(150)
       clock.markStart()
       clock.addMark(text)

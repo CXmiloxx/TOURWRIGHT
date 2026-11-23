@@ -10,7 +10,9 @@ import { loadConfig } from '#core/config.js'
 import { launchChromium } from './browser/chromium.js'
 import { reportFindings, reviewAudio } from '#video/review.js'
 import { concatEntry, escapeHtml, log, mapLimit, plainText, UserError } from '#core/util.js'
-import { builtInSound } from '#voice/effects.js'
+import { BUILT_IN_SOUNDS, builtInSound } from '#voice/effects.js'
+import { lineProsody } from '#voice/lively.js'
+import { checkMusic, placeMusic } from '#voice/music.js'
 import { autoVoice, narrate, stripMarks, withProsody } from '#voice/index.js'
 import { resolveTheme, safePath, themeCss, titleHtml, toDataUrl } from './page/theme.js'
 
@@ -88,6 +90,16 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
   const work = opts.workDir
   const fade = script.transition ?? 0.4
   const audio = script.audio ?? {}
+  // A sound of the script: built in, or a file next to it (inside the job folder for the API)
+  const soundPath = async file => {
+    const built = await builtInSound(file, config)
+    if (built) return built
+    const path = safePath(file, dir, sandboxed)
+    if (!existsSync(path)) throw new UserError(`sound not found: ${file} (built-in: ${BUILT_IN_SOUNDS.join(', ')})`)
+    return path
+  }
+  // What would fail only after the slides are drawn is checked first: the music
+  await checkMusic(script.music, file => safePath(file, dir, sandboxed), config, { sandboxed })
   const speech = { aliases: script.voices, pause: audio.pause, pronounce: script.pronounce, language: script.language }
   if (!opts.dryRun && !config.ffmpeg) throw new Error('ffmpeg not found (install ffmpeg or set TOURWRIGHT_FFMPEG)')
 
@@ -97,7 +109,7 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
   const narrations = await mapLimit(script.slides, config.tts.parallel, s => {
     // A slide may have its own voice from the cast, and its own way of speaking
     const spec = opts.dryRun ? null : (s.voice ?? voice)
-    return spec && spec !== 'none' && s.say ? narrate(s.say, withProsody(spec, s), config, speech) : null
+    return spec && spec !== 'none' && s.say ? narrate(s.say, withProsody(spec, lineProsody(s.say, s, audio)), config, speech) : null
   })
   const timed = []
   let t = 0
@@ -194,16 +206,16 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
   const effects = []
   for (const s of timed.filter(s => s.sound)) {
     const { file, volume = 1 } = typeof s.sound === 'string' ? { file: s.sound } : s.sound
-    let path = await builtInSound(file, config)
-    if (!path) {
-      path = safePath(file, dir, sandboxed)
-      if (!existsSync(path)) throw new UserError(`sound not found: ${file} (built-in: click, pop, ding, whoosh)`)
-    }
-    effects.push({ at: s.start, file: path, volume: volume * (audio.effects ?? 1) })
+    effects.push({ at: s.start, file: await soundPath(file), volume: volume * (audio.effects ?? 1) })
+  }
+  // `audio.transitions` (on with `style: promo`): a sound as each slide comes in, unless it has its own
+  if (audio.transitions) {
+    const whoosh = await soundPath(audio.transitions === true ? 'whoosh' : audio.transitions)
+    for (const s of timed.filter(s => !s.sound)) effects.push({ at: s.start, file: whoosh, volume: 0.7 * (audio.effects ?? 1) })
   }
 
-  const music = typeof script.music === 'string' ? { file: script.music } : script.music
-  log.debug(`slides: ${timed.length} slides, ${end.toFixed(1)} s`)
+  const music = await placeMusic(script.music, file => safePath(file, dir, sandboxed), config, { seed: script.title ?? '', sandboxed })
+  log.debug(`slides: ${timed.length} slides, ${end.toFixed(1)} s, ${effects.length} sounds`)
   const result = await compose({
     video: raw,
     fps,
@@ -214,7 +226,7 @@ export const renderSlides = async (loaded, opts, config = loadConfig()) => {
     effects,
     captions: timed.filter(s => s.say || s.caption).map(s => ({ start: s.start, end: s.start + s.duration, text: plainText(stripMarks(s.caption ?? s.say)) })),
     marks: timed.filter(s => s.chapter || (s.title && !s.image && !s.html)).map(s => ({ start: s.start, title: s.chapter ?? s.title })),
-    music: music ? { ...music, file: safePath(music.file, dir, sandboxed) } : null,
+    music,
     polish: audio.polish,
     out: opts.out,
     sidecar: opts.sidecar,

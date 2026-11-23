@@ -125,7 +125,9 @@ const timelineSchema = z.object({
   blurs: z.array(blur).optional(),
   // Everything that reaches ffmpeg's filters is a number or a file inside the folder
   music: z.object({ file: z.string(), volume: z.number().finite().min(0).max(1).optional(), duck: z.boolean().optional(),
-    fadeIn: seconds.optional(), fadeOut: seconds.optional() }).strict().nullish(),
+    fadeIn: seconds.optional(), fadeOut: seconds.optional(),
+    // The track's own level (voice/music.js) and which track of the library it is
+    gain: z.number().finite().min(0).max(4).optional(), track: z.string().max(80).optional() }).strict().nullish(),
   frame: z.object({ background: z.string(), mask: z.string(), x: z.number().int().min(0), y: z.number().int().min(0),
     width: z.number().int().positive(), height: z.number().int().positive() }).strict().nullish(),
   quality: z.string().nullish(),
