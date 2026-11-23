@@ -47,7 +47,7 @@ const prosodyOf = a => ({ voice: a.voice, rate: a.rate, pitch: a.pitch, volume: 
 
 // What steps will say, the way the helpers of browser.js say it: [text, prosody] for each line, to make them
 // ahead while the browser starts. Steps inside offCamera, if and try count too (they may run).
-/** @param {any[]} steps @returns {[string, Record<string, any>][]} */
+/** @param {any[]} steps @returns {([string, Record<string, any>] | [string, Record<string, any>, string])[]} */
 export const spokenLines = steps => steps.flatMap(step => {
   if (!step || typeof step !== 'object') return []
   const [action, arg] = Object.entries(step)[0] ?? []
@@ -60,8 +60,9 @@ export const spokenLines = steps => steps.flatMap(step => {
     case 'focus': {
       const { spoken, before } = markedLine(arg.say)
       if (!spoken) return []
-      // The words before the {marked} one are made on their own too: their length times the focus
-      return /[\p{L}\p{N}]/u.test(before ?? '') ? [[plainText(spoken), prosodyOf(arg)], [plainText(before), prosodyOf(arg)]] : [[plainText(spoken), prosodyOf(arg)]]
+      // The words before the {marked} one are made on their own too: their length times the focus. They are said
+      // the way the whole line says them (its third item: the line their shape comes from)
+      return /[\p{L}\p{N}]/u.test(before ?? '') ? [[plainText(spoken), prosodyOf(arg)], [plainText(before), prosodyOf(arg), plainText(spoken)]] : [[plainText(spoken), prosodyOf(arg)]]
     }
     case 'offCamera': return Array.isArray(arg) ? spokenLines(arg) : []
     case 'if': return [...spokenLines(arg.then ?? []), ...spokenLines(arg.else ?? [])]
@@ -218,6 +219,10 @@ const runStep = async (step, v, page, number) => {
         break
       }
       case 'try': await attempt(page, v, arg, number); break
+      // Content for the documents: the guide collects it (render/guide/collect.js); a video has nothing to show
+      case 'md': case 'note': case 'table': case 'pageBreak': case 'shot': case 'gallery':
+        if (v.document) await v.document(action, arg)
+        break
       default: {
         const plugin = PLUGIN_STEPS.get(action)
         if (!plugin) throw new UserError(`unknown action ${action}`)

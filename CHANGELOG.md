@@ -4,6 +4,65 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+The same script now hands over documents: a step-by-step guide as HTML, Markdown, a PDF in the script's brand and
+a Word file, kept in step with the app.
+
+### Added
+
+- `tourwright guide --pdf` and `--docx`: the guide as a PDF (cover with contents, the `theme`'s accent, font and
+  logo, «page / pages» footer, bookmarks, tagged for screen readers) and as a Word file, without new dependencies.
+- Branded documents: the theme logo on the cover and at the top of every page over a line in the accent, a
+  footer with your text and «Page N of M» (`document.header`, `document.footer`, `document.coverLogo` for a
+  light logo on a dark cover), in the PDF and the Word file.
+- `export` takes `guide`, `pdf` and `docx` besides `video`, `audio` and `silent`. Only what is asked for is made,
+  one thing after another: `--export pdf` alone is fast and needs no voice; with a video, the guide comes from a
+  quick second pass once the recording's browser has closed, so the video does not change.
+- Content steps for the documents: `md`, `note`, `table`, `shot`, `gallery` and `pageBreak`, and the `document`
+  options (`paper`, `cover`, `subtitle`, `toc`, `marks`). A video skips them. See `examples/manual.yaml`.
+- `tourwright guide --compare`: which steps changed on screen since the last guide (SSIM per picture), with
+  `--threshold` and `--fail-on-change`; the GitHub Action's `command: guide` and `export` input.
+- The review of a guide before it is printed: pages left mostly blank, pictures taller than a page, a pale
+  accent, a PDF over 20 MB.
+- API and MCP: `options.export`; the result links each document.
+
+- `style: promo | calm | tutorial`: the feel of a video in one word. `promo` puts upbeat music under the voice,
+  a livelier voice, a whoosh on title cards and clicks; `calm` soft music and a slower voice.
+- Background music that sounds like music: `tourwright install --music` adds nine public-domain tracks (CC0,
+  every mood); `tourwright music add <file|url> --mood upbeat` adds yours, and a script names one (`music:
+  launch-theme`) or a mood (`music: upbeat`, `calm`, `corporate`, `acoustic`, `tech`, `cinematic`). URLs work from
+  the command line, assets through the API; `GET /v1/music` and the `tourwright_music` MCP tool list them. Every
+  track is brought to the same loudness first, so `volume` means the same with any of them; `start` skips an
+  intro. With no track of a mood, an eight-bar loop made by ffmpeg plays.
+- `audio.dynamic`: each line said with a shape (a question rises, an exclamation speeds up, a short line lands
+  slower), `audio.rate` for the whole narration and `audio.transitions` for a sound on title cards.
+- `tourwright narrate --style promo`: your AI writes like an ad (a hook, what the viewer gains, rhythm, a call to
+  action) instead of a tutorial; "Writing a promo" in the script guide.
+
+- A walkthrough that names no colors wears the site's own: background, text, brand color and font are read from
+  its first page before filming, for title cards, captions, the cursor and the studio window.
+- A page in another language than the narration is reported, with the address of its version in the right language
+  when the site declares one.
+
+### Fixed
+
+- Text in recordings and pictures on Linux had uneven letter spacing: Chromium starts without font hinting.
+- A `goto` that failed for a moment (connection reset, changed network, timeout) is tried twice more.
+- A `{ role: button, name }` target finds a toggle that is a radio, checkbox, switch or tab (Radix, shadcn), with
+  a warning naming the target to write.
+- Guide pictures no longer show the blinking text caret.
+- The studio window, its wallpaper and the aurora title cards had navy and indigo built in: with a brand's own
+  colors they clashed. Everything comes from the theme now.
+- A `{ role: link }` that is a button on the page (`<a role="button">`, common for calls to action) is found, and
+  the other way round; the targets listed when one is missing name the role the page really announces.
+- With an Edge voice, the shape of each line (`audio.dynamic`) changed the pitch with ffmpeg and sounded metallic:
+  Edge now says it itself.
+- The picture ran behind the voice when the browser was busy (an animated title card, a big page): screencast
+  frames are now placed where Chromium drew them, not where they arrived.
+- The camera's focus came late on long lines: it lands on the marked word, and at the latest before half the line
+  is said, while the cursor is still travelling; the words before a mark are said with the whole line's shape.
+
 ## [2.6.2]
 
 Every built-in voice measured on its own, so tech words, acronyms and shortcuts come out right with each one.

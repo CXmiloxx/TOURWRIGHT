@@ -65,6 +65,10 @@ a alguien que grabe, y cada rediseño obliga a grabar otra vez. Los videos de To
   elemento, un anillo lo marca, un globo con un contador `2/4` lo explica y la cámara se acerca, justo en la
   palabra que está diciendo la voz.
 - **Diapositivas narradas**: carteles, imágenes (con paneo o zoom lento), HTML, fundidos. Sin sitio web.
+- **Guías, PDF y Word desde el mismo guion**: una guía paso a paso con una captura marcada por paso, en HTML,
+  Markdown, un PDF con tu marca y un `.docx`, con notas, tablas y galerías. Cuando la app cambia, la guía se hace
+  de nuevo, no se graba de nuevo, y `--compare` dice qué pasos cambiaron: en CI puede abrir un pull request con la
+  guía nueva.
 - **La voz que quieras**: [Pocket TTS](https://github.com/kyutai-labs/pocket-tts) (sin internet, abierta y natural:
   `tourwright install --pocket`), [Piper](https://github.com/rhasspy/piper) (sin internet, open source, ligera),
   voces neuronales de Microsoft Edge, cualquier servidor TTS compatible con OpenAI (OpenAI,
@@ -109,7 +113,7 @@ tourwright install                    # ffmpeg, Piper y voces, edge-tts, Chromiu
 tourwright install --plan             # solo muestra qué usaría del PC y qué descargaría
 tourwright config set quality fullhd  # tus valores por defecto: calidad, voz, fps… (tourwright config los lista)
 tourwright record https://app.example.com --out tour.yaml   # haces el recorrido a mano: sale el guion y el video
-tourwright guide tour.yaml --open     # el mismo recorrido como guía paso a paso con capturas (HTML, PDF, Markdown)
+tourwright guide tour.yaml --pdf --docx   # el mismo recorrido como guía paso a paso: HTML, Markdown, PDF y Word
 tourwright narrate tour.yaml --write  # tu IA (Claude, OpenAI, Ollama) reescribe la narración viendo las pantallas
 tourwright translate tour.yaml --to en  # el mismo video en inglés (o pt, fr, de, it): tour.en.yaml
 tourwright check videos/*.yaml        # qué videos se rompieron tras un despliegue, en qué paso, y el arreglo

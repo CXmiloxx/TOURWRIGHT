@@ -14,6 +14,7 @@ import { loadConfig } from '#core/config.js'
 import { interpolate, secretsShown } from '#script/load.js'
 import { hash, log, mapLimit, UserError } from '#core/util.js'
 import { narrate, withProsody } from '#voice/index.js'
+import { lineProsody } from '#voice/lively.js'
 import { writeGuide } from '#render/guide/write.js'
 import { urlResolver } from '#render/browser/launch.js'
 import { createGuard } from '#render/browser/network.js'
@@ -23,7 +24,8 @@ import { sessionPath } from '#render/browser/session.js'
 import { plainHelpers } from '#render/steps/quick.js'
 import { dismissing, runSteps, spokenLines } from '#render/steps/index.js'
 import { markOffered } from '#render/steps/targets.js'
-import { safePath } from '#render/page/theme.js'
+import { safePath, toDataUrl } from '#render/page/theme.js'
+import { checkMusic } from '#voice/music.js'
 import { createClock } from './clock.js'
 import { deliver } from './deliver.js'
 import { collectGuide } from '#render/guide/collect.js'
@@ -43,9 +45,9 @@ export { DEVICES } from './plan.js'
 const warmVoices = (script, plan, opts, config) => {
   let warming = true
   const filmed = opts.steps ? script.steps.slice(opts.steps[0] - 1, opts.steps[1]) : script.steps
-  mapLimit(spokenLines(filmed), config.tts.parallel, async ([text, prosody]) => {
+  mapLimit(spokenLines(filmed), config.tts.parallel, async ([text, prosody, line = text]) => {
     if (!warming) return
-    await narrate(text, withProsody(prosody.voice ?? plan.voice, prosody), config, plan.speech).catch(e => log.debug(`voice ahead: ${e.message}`))
+    await narrate(text, withProsody(prosody.voice ?? plan.voice, lineProsody(line, prosody, plan.audio)), config, plan.speech).catch(e => log.debug(`voice ahead: ${e.message}`))
   })
   return () => {
     warming = false
@@ -76,6 +78,9 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
   const progress = opts.onProgress ?? (() => {})
   const plan = await planWalkthrough(loaded, script, opts, config)
   const { dryRun, safe } = plan
+  // What would fail only after the whole recording is checked now: the music, the cover's logo
+  if (!opts.guide) await checkMusic(script.music, file => safePath(file, loaded.dir, loaded.sandboxed), config, { sandboxed: loaded.sandboxed })
+  const docOptions = documentOptions(script.document, loaded)
 
   const { resolveUrl, origin } = urlResolver(script, dir, sandboxed)
   const uploads = new Map()
@@ -102,7 +107,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
     const watcher = watchPage(page, () => v.step)
     const stage = await createStage({ page, context, loaded, script, plan, clock, watcher, resolveUrl, uploads, config })
     v = createHelpers(stage, { blocker, progress, total: opts.steps ? opts.steps[1] : script.steps.length })
-    const guide = opts.guide ? collectGuide(page, v, script.language) : null
+    const guide = opts.guide ? collectGuide(page, v, script.language, { marks: script.document?.marks !== false, phone: /^(iphone|android)/.test(script.device ?? '') }) : null
 
     try {
       await runScript({ loaded, script, v, page, opts, resolveUrl, uploads })
@@ -125,7 +130,7 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
       reportFindings(watcher.findings)
       // `collect`: the steps and their pictures, for `tourwright narrate`; else the guide's files
       if (guide && opts.guide === 'collect') return { entries: guide, title: plan.title, language: script.language }
-      if (guide) return { guide: writeGuide({ title: plan.title, language: script.language, entries: guide, out: opts.out }), title: plan.title }
+      if (guide) return { guide: writeGuide({ title: plan.title, language: script.language, entries: guide, out: opts.out, theme: plan.theme, document: docOptions, docx: opts.docx }), title: plan.title }
       if (safe && v.skipped.length) {
         log.info(`safe dry run: ${v.skipped.length} action${v.skipped.length > 1 ? 's' : ''} found but not performed${v.unchecked ? `; ${v.unchecked} step${v.unchecked > 1 ? 's' : ''} after them could not be checked` : ''}`)
       }
@@ -142,3 +147,13 @@ export const renderBrowser = async (loaded, opts, config = loadConfig()) => {
 }
 
 export const sessionNamespaceFor = token => (token ? `api-${hash(token, 12)}` : 'local')
+
+// The script's `document` options, its cover logo read like the theme's (a data URL, inside the job folder)
+const documentOptions = (document, loaded) => {
+  if (!document) return document
+  try {
+    return { ...document, coverLogo: toDataUrl(document.coverLogo, loaded.dir, { sandboxed: loaded.sandboxed }) }
+  } catch (error) {
+    throw new UserError(`document.coverLogo: ${error.message}`, { code: 'not_found' })
+  }
+}

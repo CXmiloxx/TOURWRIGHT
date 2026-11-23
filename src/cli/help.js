@@ -14,7 +14,9 @@ Usage:
   tourwright render <script> [options]        render a video (.yaml, .json, .js)
       --out <file.mp4|dir>                    where to write it (default: ./videos/<script>/<script>.mp4)
       --export video,audio,silent             what to deliver: the narrated video (default), only the sound
-                                              (.mp3), the video without sound; subtitles and poster always come
+                                              (.mp3), the video without sound; subtitles and poster always come.
+                                              guide, pdf, docx: the step-by-step guide as HTML, PDF or Word,
+                                              made after the video (or alone, fast, without one)
       --open                                  open the video (or its folder) when it is ready
       --voice <voice>                         engine:id or alias (see \`tourwright voices\`); "none" = silent
       --quality sd|hd|fullhd|vertical|square
@@ -54,9 +56,20 @@ Usage:
       --no-clicks                             without click and typing sounds
       --quality, --out                        as in render
   tourwright guide <script> [--out d] [--open] the script as a step-by-step guide with screenshots: one HTML file
-                                              to send or print as PDF, and Markdown with its images
+                                              to send, and Markdown with its images
+      --pdf                                   also a PDF with the script's brand (theme), a cover and page numbers
+      --docx                                  also a Word file (.docx) with the same brand
+      --compare                               say which steps changed on screen since the guide already at --out
+      --threshold <0-1>                       how alike a picture must stay (SSIM, default 0.97)
+      --fail-on-change                        exit with 1 when a step changed, was added or removed (for CI)
+  tourwright music                            your background music: name, mood, title, license
+  tourwright music add <file|url>             add a track (--name n, --mood upbeat|corporate|calm|acoustic|tech|
+                                              cinematic, --title, --artist, --license); then music: <name|mood>
+  tourwright music remove <name>              take one out
   tourwright narrate <script> [--write]       the narration rewritten by your AI from what each screen shows
                                               (tourwright config set ai anthropic|openai|ollama); --write saves it
+      --style promo|tutorial|calm             how it is written (default the script's style): promo opens with a
+                                              hook, sells what the viewer gains and ends with a call to action
   tourwright translate <script> --to en       the same video in another language (es, en, pt, fr, de, it), by your
                                               AI: narration, captions and titles; the app's own words stay.
                                               Writes <script>.en.yaml (--out to choose, --yes to replace)
@@ -77,6 +90,8 @@ Usage:
       --yes, -y                               download without asking (it asks only in a terminal)
       --pocket                                Pocket TTS: open, natural voices (Spanish: pocket:lola), CPU only;
                                               about 1 GB with PyTorch. Becomes the default voice
+      --music                                 nine public-domain background tracks (CC0, ~48 MB): music: upbeat,
+                                              calm, corporate, acoustic, tech or cinematic then plays a real one
   tourwright install-voice <piper-voice>      download a Piper voice (es_MX-claude-high, en_US-lessac-medium…)
   tourwright doctor                           check ffmpeg, Xvfb, Chromium and TTS engines
   tourwright config [--json]                  your defaults (quality, voice, fps…) and where each one comes from

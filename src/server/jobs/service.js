@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { z } from 'zod'
 import { CAPTURE_NAMES } from '#core/config.js'
 import { fromData, parseText } from '#script/load.js'
+import { EXPORTS } from '#script/schema.js'
 import { newId, UserError } from '#core/util.js'
 import { QUALITIES } from '#video/quality.js'
 
@@ -19,6 +20,8 @@ const OPTIONS = z.object({
   safe: z.boolean().optional(),
   width: z.number().int().min(320).max(3840).optional(),
   height: z.number().int().min(320).max(3840).optional(),
+  // What the job delivers, overriding the script's `export`: the same names (video, audio, silent, guide, pdf, docx)
+  export: z.array(z.enum(EXPORTS)).min(1).max(6).optional(),
 })
 
 const checkOptions = given => {

@@ -15,9 +15,11 @@ import { loadPlugins } from '#plugins/index.js'
 import { applyFixes, checkScript } from '#authoring/repair.js'
 import { outputBase, render } from '#render/index.js'
 import { loadFile, fromData, parseText } from '#script/load.js'
+import { EXPORTS } from '#script/schema.js'
 import { fromRoot, version } from '#core/paths.js'
 import { log, sleep, UserError } from '#core/util.js'
 import { listVoices } from '#voice/index.js'
+import { musicCatalog } from '#voice/music.js'
 
 const GUIDE = fromRoot('docs', 'SCRIPTS.md')
 
@@ -34,6 +36,7 @@ const remoteClient = (base, token) => {
   }
   return {
     voices: () => call('GET', '/v1/voices'),
+    music: () => call('GET', '/v1/music'),
     validate: body => call('POST', '/v1/validate', body),
     create: body => call('POST', '/v1/jobs', body),
     job: id => call('GET', `/v1/jobs/${encodeURIComponent(id)}`),
@@ -56,6 +59,7 @@ const localClient = async config => {
   }
   return {
     voices: () => listVoices(config),
+    music: async () => musicCatalog(config),
     validate: async body => {
       try {
         fromData(typeof body.script === 'string' ? parseText(body.script) : body.script, { sandboxed: true, vars: body.vars })
@@ -119,6 +123,13 @@ export const startMcp = async config => {
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   }, safe(async () => text(await client.voices())))
 
+  server.registerTool('tourwright_music', {
+    title: 'List background music',
+    description: 'Background music the scripts can name: the tracks on the server (name, mood, title, license), the moods and the built-in loops. In a script, music: <track name> or a mood (upbeat, corporate, calm, acoustic, tech, cinematic). To use a track of your own, send the audio file in `assets` of tourwright_render and write its asset name in music.',
+    inputSchema: {},
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  }, safe(async () => text(await client.music())))
+
   server.registerTool('tourwright_validate', {
     title: 'Validate a script',
     description: 'Check the structure of a script (fields, actions, variables) without opening any website: fast, offline. Returns { ok } or the list of errors to fix. To know whether its targets still exist on the live site, use tourwright_check.',
@@ -127,17 +138,19 @@ export const startMcp = async config => {
   }, safe(async ({ script, vars }) => text(await client.validate({ script, vars }))))
 
   server.registerTool('tourwright_render', {
-    title: 'Render a video',
-    description: 'Queue a script for rendering. With wait=true (default) it waits until the video is ready and returns its links (and local paths), duration, chapters and captions; otherwise it returns the job id to poll with tourwright_job.',
+    title: 'Render a video or a guide',
+    description: 'Queue a script for rendering: a video, and/or a step-by-step guide as HTML, PDF or Word (options.export). With wait=true (default) it waits until it is ready and returns its links (and local paths), duration, chapters and captions; otherwise it returns the job id to poll with tourwright_job.',
     inputSchema: {
       script: scriptInput,
       vars: varsInput,
-      assets: z.record(z.string(), z.string()).optional().describe('Files the script refers to by name (images, music, uploads), base64-encoded'),
+      assets: z.record(z.string(), z.string()).optional().describe('Files the script refers to by name (images, your own background music, uploads), base64-encoded: { "theme.mp3": "<base64>" } and music: theme.mp3'),
       options: z.object({
         voice: z.string().optional().describe('Voice for the whole video, overriding the script: a name from tourwright_voices'),
         quality: z.enum(['sd', 'hd', 'fullhd', 'vertical', 'square']).optional().describe('Size of the video: sd 480p, hd 720p, fullhd 1080p, vertical 1080x1920, square 1080x1080'),
         dryRun: z.boolean().optional().describe('Run the script fast without voice or video, to test it'),
         safe: z.boolean().optional().describe('A dry run that finds every element but presses, types and chooses nothing: nothing real happens in the app'),
+        export: z.array(z.enum(EXPORTS)).optional()
+          .describe('What to deliver (default the script\'s, else [video]): guide = a step-by-step guide (HTML, Markdown), pdf / docx = that guide as a branded PDF or Word file. ["pdf"] alone makes only the document, fast and without voice'),
       }).optional().describe('Render settings that override the script'),
       wait: z.boolean().optional().describe('Wait for the video (default true); false returns the job id at once, to poll with tourwright_job'),
       waitSeconds: z.number().int().min(5).max(3600).optional().describe('How long to wait for the video before returning the job as it is (default 900)'),

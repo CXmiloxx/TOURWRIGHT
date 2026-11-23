@@ -64,6 +64,10 @@ every redesign means recording again. Tourwright videos are **code**:
   ring marks it, a bubble with a `2/4` badge explains it and the camera pushes in, right on the word the
   voice is saying.
 - **Narrated slides**: title cards, images (with slow pan/zoom), HTML, crossfades. No website needed.
+- **Guides, PDFs and Word files from the same script**: a step-by-step guide with a marked picture per step, as
+  HTML, Markdown, a PDF in your brand and a `.docx`, with notes, tables and galleries. When the app changes, the
+  guide is made again, not recorded again, and `--compare` says which steps changed: in CI it can open a pull
+  request with the new guide.
 - **Voices, your choice**: [Pocket TTS](https://github.com/kyutai-labs/pocket-tts) (offline, open, natural:
   `tourwright install --pocket`), [Piper](https://github.com/rhasspy/piper) (offline, open source, light),
   Microsoft Edge neural voices, any OpenAI-compatible TTS server (OpenAI, Kokoro, LocalAI…), or your own
@@ -108,7 +112,7 @@ tourwright install                    # ffmpeg, Piper + voices, edge-tts, Chromi
 tourwright install --plan             # only show what it would use from this PC and what it would download
 tourwright config set quality fullhd  # your own defaults: quality, voice, fps… (tourwright config lists them)
 tourwright record https://app.example.com --out tour.yaml   # do the tour by hand: you get the script and the video
-tourwright guide tour.yaml --open     # the same tour as a step-by-step guide with screenshots (HTML, PDF, Markdown)
+tourwright guide tour.yaml --pdf --docx   # the same tour as a step-by-step guide: HTML, Markdown, PDF and Word
 tourwright narrate tour.yaml --write  # your AI (Claude, OpenAI, Ollama) rewrites the narration from the screens
 tourwright translate tour.yaml --to en  # the same video in English (or pt, fr, de, it): tour.en.yaml
 tourwright check videos/*.yaml        # which videos broke after a deploy, at which step, and the fix
@@ -214,7 +218,7 @@ Any other MCP client (Claude Desktop, Cursor, VS Code…):
 { "mcpServers": { "tourwright": { "command": "tourwright", "args": ["mcp"] } } }
 ```
 
-Tools: `tourwright_guide`, `tourwright_voices`, `tourwright_validate`, `tourwright_check`, `tourwright_render`, `tourwright_job`,
+Tools: `tourwright_guide`, `tourwright_voices`, `tourwright_music`, `tourwright_validate`, `tourwright_check`, `tourwright_render`, `tourwright_job`,
 `tourwright_jobs`, `tourwright_delete_job` (and
 `tourwright_render_file` with `TOURWRIGHT_MCP_ALLOW_FILES=true`). Point it at a remote API with `TOURWRIGHT_API_URL`
 and `TOURWRIGHT_API_TOKEN`. Details: [docs/AGENTS.md](docs/AGENTS.md).

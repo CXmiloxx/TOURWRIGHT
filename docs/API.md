@@ -38,12 +38,17 @@ POST /v1/jobs
 
 - `script`: a script object, or YAML/JSON text (`"format": "json"` for JSON text). JavaScript scripts are
   not accepted through the API.
-- `assets`: files the script refers to by name (images, music, uploads), base64. Names: letters, digits,
+- `assets`: files the script refers to by name (images, music, uploads), base64. Your own background music:
+  `"assets": { "theme.mp3": "<base64>" }` and `music: theme.mp3` in the script. `GET /v1/music` lists the
+  tracks and moods the server already has (`music: <name>` or `music: upbeat`). Names: letters, digits,
   `. _ -`. Total body up to `TOURWRIGHT_MAX_BODY_MB` (50 MB).
 - `vars`: values for the script's `{{variables}}`, over its own `vars`. One script, one video per set of values.
   `POST /v1/validate` takes them too.
-- `options`: `voice`, `quality`, `width`, `height`, `capture`, `dryRun`, `safe` override the script. `safe` is a dry
-  run that presses, types and chooses nothing: nothing real happens in the app.
+- `options`: `voice`, `quality`, `width`, `height`, `capture`, `dryRun`, `safe`, `export` override the script. `safe`
+  is a dry run that presses, types and chooses nothing: nothing real happens in the app. `export` chooses what the
+  job delivers: `video`, `audio`, `silent`, `guide`, `pdf`, `docx` (`["pdf"]` alone makes only the document, fast and
+  without voice). The result's `files` and `links` name each one (`guide`, `guideMarkdown`, `pdf`, `docx`); a guide's
+  HTML is served as a download, never as a page, and its Markdown comes as a `.guide.zip` with the pictures it links.
 - `webhook`: called when the job ends.
 
 ## Job

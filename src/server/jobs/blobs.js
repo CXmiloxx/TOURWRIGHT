@@ -73,7 +73,10 @@ export const s3 = cfg => {
     return response
   }
 
-  const TYPES = { mp4: 'video/mp4', jpg: 'image/jpeg', srt: 'application/x-subrip', vtt: 'text/vtt', json: 'application/json', png: 'image/png' }
+  const TYPES = {
+    mp4: 'video/mp4', mp3: 'audio/mpeg', jpg: 'image/jpeg', srt: 'application/x-subrip', vtt: 'text/vtt', json: 'application/json', png: 'image/png',
+    pdf: 'application/pdf', md: 'text/markdown', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', zip: 'application/zip', html: 'application/octet-stream',
+  }
   return {
     kind: 's3',
     put: async (key, file) => {

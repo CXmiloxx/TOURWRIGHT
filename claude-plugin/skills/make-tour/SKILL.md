@@ -15,7 +15,13 @@ and returns an MP4 with captions, chapters and a poster. The `tourwright` MCP se
    `{ text }`, never brittle CSS. When a shell is available, `npx tourwright explore <url> --json` lists the
    sections of a site and the targets of each page, and `--draft tour.yaml` writes a first script.
 3. Write the script: a `title` per section, one idea per `say`, sentences of 6 to 18 words that describe what
-   is on screen now. `focus` (dims everything but the element, explains it, can zoom and click) is the most
+   is on screen now. For a promo or an ad, `style: promo` (built-in upbeat music, a livelier voice that rises
+   on questions, a whoosh on title cards) and write it like an ad, not a reading of the page: a hook question
+   first, what the viewer gains before the feature, short lines mixed with longer ones, numbers seen on screen,
+   and a call to action last (see "Writing a promo" in the script guide).
+   Music: `tourwright_music` lists the tracks and moods on the server; write `music: <name>` or a mood
+   (upbeat, corporate, calm, acoustic, tech, cinematic). A track the user gives you goes in `assets` of
+   `tourwright_render` (base64) with `music: <its asset name>`. `focus` (dims everything but the element, explains it, can zoom and click) is the most
    effective step for onboarding videos.
    Make it look finished: `theme: { frame: window, accent: <the app's main color>, titleBackground: aurora }`,
    `zoom: 1.3` on the focus steps, `step: 2/4` badges and `pulse` on the button to press, a `title` with
@@ -23,6 +29,10 @@ and returns an MP4 with captions, chapters and a poster. The `tourwright` MCP se
 4. `tourwright_validate`, then `tourwright_render` with `options.dryRun: true`: it runs every step in seconds and
    reports the step that fails with the targets its page offers. Fix and repeat.
 5. Render for real and give the user `links.video` (or the local path).
+   A guide, a PDF or a Word file instead of (or besides) the video: `options.export`, e.g. `["pdf"]` (only the
+   document, fast and without voice) or `["video", "pdf", "docx"]`. Give the user `links.pdf` / `links.docx`.
+   For a manual, add `md`, `note`, `table`, `shot` and `gallery` steps (they write only in the documents) and
+   `document: { cover: dark, subtitle }`; the brand comes from `theme`.
 6. A video that used to work broke after a deploy: `tourwright_check` names the step and proposes the new target.
 
 ## Rules
