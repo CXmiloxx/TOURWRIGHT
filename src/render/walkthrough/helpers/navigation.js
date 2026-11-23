@@ -1,6 +1,7 @@
 // Going somewhere and moving around the page: pages, scrolling, pauses, the cursor, what is cut or blurred.
 import { UserError } from '#core/util.js'
 import { BLOCKED_HEADER } from '#render/browser/guard-proxy.js'
+import { gotoRetrying } from '#render/browser/goto.js'
 
 const blocked = path => new UserError(`${path}: blocked by the network policy of this server (TOURWRIGHT_ALLOWED_HOSTS / TOURWRIGHT_BLOCK_PRIVATE)`)
 
@@ -9,7 +10,8 @@ export const navigationHelpers = (s, v) => {
   const { page, clock, resolveUrl, settle } = s
   return {
     goto: async path => {
-      const response = await page.goto(resolveUrl(path), { waitUntil: 'domcontentloaded' }).catch(error => {
+      // A try that failed (an error page, the wait before the next) is cut from the video
+      const response = await gotoRetrying(page, resolveUrl(path), {}, clock.offClock).catch(error => {
         if (/ERR_BLOCKED_BY_CLIENT|ERR_TUNNEL_CONNECTION_FAILED/.test(error.message)) throw blocked(path)
         throw error
       })

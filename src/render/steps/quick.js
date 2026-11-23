@@ -2,6 +2,7 @@
 // filmed ones, with no animation, captions or narration.
 import { basename } from 'node:path'
 import { sleep } from '#core/util.js'
+import { gotoRetrying } from '#render/browser/goto.js'
 import { isNativeSelect, listOption, listSearch, markFields, missingOption } from './lists.js'
 import { maskedText } from './targets.js'
 
@@ -21,7 +22,7 @@ export const plainHelpers = (page, resolveUrl, uploads, toPath) => {
   const noop = async () => {}
   return {
     goto: async path => {
-      await page.goto(resolveUrl(path), { waitUntil: 'domcontentloaded', timeout: 60_000 })
+      await gotoRetrying(page, resolveUrl(path), { timeout: 60_000 })
       await page.waitForLoadState('networkidle', { timeout: 30_000 }).catch(() => {})
       // Forms often ignore input until hydrated
       await sleep(500)
