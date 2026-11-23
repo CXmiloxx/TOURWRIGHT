@@ -4,10 +4,11 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.7.0]
 
 The same script now hands over documents: a step-by-step guide as HTML, Markdown, a PDF in the script's brand and
-a Word file, kept in step with the app.
+a Word file, kept in step with the app. Videos sell too: `style: promo` brings real music, a voice with life and
+sounds, a video wears the site's own colors, and the picture stays with the voice.
 
 ### Added
 
@@ -533,6 +534,7 @@ First release.
 - Quality checks: lint (Biome), types (JSDoc checked by `tsc`), tests and a real render on the three
   systems in CI.
 
+[2.7.0]: https://github.com/CXmiloxx/tourwright/compare/v2.6.2...v2.7.0
 [2.6.2]: https://github.com/CXmiloxx/tourwright/compare/v2.6.1...v2.6.2
 [2.6.1]: https://github.com/CXmiloxx/tourwright/compare/v2.6.0...v2.6.1
 [2.6.0]: https://github.com/CXmiloxx/tourwright/compare/v2.5.0...v2.6.0
