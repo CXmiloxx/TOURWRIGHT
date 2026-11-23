@@ -62,9 +62,45 @@ export const safePath = (ref, baseDir, sandboxed) => {
   return path
 }
 
+/** @param {Record<string, any>} [scriptTheme] @param {Record<string, any>} [configTheme] @param {string} [baseDir] @param {Record<string, any>} [opts] */
 export const resolveTheme = (scriptTheme = {}, configTheme = {}, baseDir = process.cwd(), opts = {}) => {
-  const t = { ...DEFAULT_THEME, ...configTheme, ...scriptTheme }
-  return { ...t, logo: t.logo ? toDataUrl(t.logo, baseDir, opts) : null }
+  /** @type {Record<string, any>} */
+  const own = { ...configTheme, ...scriptTheme }
+  const t = { ...DEFAULT_THEME, ...own }
+  // A brand that sets its own colors gets every color from them: the default navy gradient and the indigo glow
+  // belong to the default theme only, and would clash with a brand's background
+  if (own.background && !own.gradient) {
+    const bg = cssValue(t.background)
+    t.gradient = `radial-gradient(ellipse at 30% 20%, color-mix(in srgb, ${bg} 88%, ${cssValue(t.accent)}) 0%, ${bg} 55%, color-mix(in srgb, ${bg} 80%, #000) 100%)`
+  }
+  const glow = own.accent ? `color-mix(in srgb, ${cssValue(t.accent)} 55%, ${cssValue(t.text)})` : '#6366F1'
+  return { ...t, glow, logo: t.logo ? toDataUrl(t.logo, baseDir, opts) : null }
+}
+
+const luminance = color => {
+  const m = /^#([\da-f]{6})$/i.exec(String(color))
+  if (!m) return null
+  const [r, g, b] = [0, 2, 4].map(i => Number.parseInt(m[1].slice(i, i + 2), 16) / 255).map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+const contrastOf = (a, b) => {
+  const [x, y] = [luminance(a), luminance(b)]
+  return x === null || y === null ? 0 : (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
+}
+
+/**
+ * The theme in the site's own colors (render/page/brand.js), for a script that names none. Its gradient and glow
+ * come from them too. A color that would not read on the background (an accent lost in it, text the same tone)
+ * keeps the default.
+ * @param {Record<string, any>} theme  resolved @param {{ background?: string, text?: string, accent?: string, font?: string }} brand
+ */
+export const brandTheme = (theme, brand) => {
+  const background = brand.background ?? theme.background
+  const text = brand.text && contrastOf(brand.text, background) >= 4.5 ? brand.text : contrastOf('#f8fafc', background) >= 4.5 ? '#f8fafc' : '#111827'
+  const accent = brand.accent && contrastOf(brand.accent, background) >= 1.8 ? brand.accent : theme.accent
+  const own = { background, text, accent, ...(brand.font ? { font: brand.font } : {}) }
+  return { ...resolveTheme({ ...own, logo: undefined }), logo: theme.logo, titleAnimation: theme.titleAnimation, titleBackground: theme.titleBackground, frame: theme.frame,
+    muted: `color-mix(in srgb, ${cssValue(text)} 62%, ${cssValue(background)})` }
 }
 
 // Plain CSS values only: a theme from the API must not be able to inject rules.
@@ -72,7 +108,8 @@ const cssValue = v => String(v ?? '').replace(/[;{}<>]/g, '')
 
 export const themeCss = t => `
   :root { --tw-accent: ${cssValue(t.accent)}; --tw-bg: ${cssValue(t.background)}; --tw-text: ${cssValue(t.text)};
-    --tw-muted: ${cssValue(t.muted)}; --tw-gradient: ${cssValue(t.gradient)}; --tw-font: ${cssValue(t.font)}; }
+    --tw-muted: ${cssValue(t.muted)}; --tw-gradient: ${cssValue(t.gradient)}; --tw-font: ${cssValue(t.font)};
+    --tw-glow: ${cssValue(t.glow ?? '#6366F1')}; }
   #tw-cursor { position: fixed; z-index: 2147483647; width: 32px; height: 32px; margin: -4px 0 0 -4px;
     pointer-events: none; transition: transform .08s; filter: drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
   #tw-cursor.tw-down { transform: scale(.82); }
@@ -111,7 +148,7 @@ export const themeCss = t => `
     border-radius: 50%; filter: blur(70px); opacity: .55; }
   #tw-title.tw-bg-aurora .tw-bg::before { top: -38vmax; left: -22vmax; background: radial-gradient(circle, var(--tw-accent), transparent 62%);
     animation: tw-drift-a 9s ease-in-out infinite alternate; }
-  #tw-title.tw-bg-aurora .tw-bg::after { bottom: -42vmax; right: -24vmax; background: radial-gradient(circle, color-mix(in srgb, var(--tw-accent) 25%, #6366F1), transparent 62%);
+  #tw-title.tw-bg-aurora .tw-bg::after { bottom: -42vmax; right: -24vmax; background: radial-gradient(circle, color-mix(in srgb, var(--tw-accent) 25%, var(--tw-glow)), transparent 62%);
     animation: tw-drift-b 11s ease-in-out infinite alternate; }
   @keyframes tw-drift-a { to { transform: translate(18vw, 14vh) scale(1.15); } }
   @keyframes tw-drift-b { to { transform: translate(-16vw, -12vh) scale(.9); } }

@@ -28,15 +28,15 @@ const wallpaper = (theme, width, height, title, l) => `<!doctype html><html><hea
   html, body { margin: 0; width: ${width}px; height: ${height}px; overflow: hidden; background: ${css(theme.background)}; font-family: ${css(theme.font)}; }
   .glow { position: absolute; border-radius: 50%; filter: blur(${Math.round(width * 0.06)}px); opacity: .7; }
   .a { width: 70vmax; height: 70vmax; left: -22vmax; top: -34vmax; background: radial-gradient(circle, ${css(theme.accent)}, transparent 62%); }
-  .b { width: 80vmax; height: 80vmax; right: -30vmax; bottom: -44vmax; background: radial-gradient(circle, color-mix(in srgb, ${css(theme.accent)} 25%, #6366F1), transparent 62%); }
+  .b { width: 80vmax; height: 80vmax; right: -30vmax; bottom: -44vmax; background: radial-gradient(circle, color-mix(in srgb, ${css(theme.accent)} 25%, ${css(theme.glow ?? '#6366F1')}), transparent 62%); }
   .grain { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,.35)); }
   .win { position: absolute; left: ${l.x}px; top: ${l.y - l.bar}px; width: ${l.w}px; height: ${l.h + l.bar}px; border-radius: ${l.radius}px;
-    background: #0B1120; box-shadow: 0 ${Math.round(height * 0.03)}px ${Math.round(height * 0.09)}px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.12); overflow: hidden; }
+    background: ${css(theme.background)}; box-shadow: 0 ${Math.round(height * 0.03)}px ${Math.round(height * 0.09)}px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.12); overflow: hidden; }
   .bar { height: ${l.bar}px; display: flex; align-items: center; padding: 0 ${Math.round(l.bar * 0.45)}px; gap: ${Math.round(l.bar * 0.22)}px;
-    background: linear-gradient(#1F2937, #161E2E); border-bottom: 1px solid rgba(255,255,255,.06); box-sizing: border-box; position: relative; }
+    background: linear-gradient(color-mix(in srgb, ${css(theme.background)} 88%, #fff), color-mix(in srgb, ${css(theme.background)} 93%, #fff)); border-bottom: 1px solid rgba(255,255,255,.06); box-sizing: border-box; position: relative; }
   .dot { width: ${Math.round(l.bar * 0.26)}px; height: ${Math.round(l.bar * 0.26)}px; border-radius: 50%; }
   .title { position: absolute; left: 50%; transform: translateX(-50%); max-width: 60%; padding: ${Math.round(l.bar * 0.1)}px ${Math.round(l.bar * 0.6)}px;
-    border-radius: 999px; background: rgba(255,255,255,.07); color: #CBD5E1; font-size: ${Math.round(l.bar * 0.36)}px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    border-radius: 999px; background: rgba(255,255,255,.07); color: color-mix(in srgb, ${css(theme.text)} 75%, transparent); font-size: ${Math.round(l.bar * 0.36)}px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style></head><body><div class="glow a"></div><div class="glow b"></div><div class="grain"></div>
 <div class="win"><div class="bar"><span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span>${title ? `<span class="title">${escapeHtml(title)}</span>` : ''}</div></div></body></html>`
 

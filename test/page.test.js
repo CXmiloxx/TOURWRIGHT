@@ -92,3 +92,47 @@ test('why an element cannot be used comes from the call log of Playwright', () =
   assert.equal(whyUnusable(error), '<div class="loader">…</div> intercepts pointer events')
   assert.equal(whyUnusable(new Error('Timeout')), null)
 })
+
+test('a { role: button } names a toggle that is a radio (Radix, shadcn): it is found, with the target to write', { skip: missing }, async () => {
+  const page = await open('<div role="radiogroup"><button role="radio" aria-checked="false" id="m">Mensual</button><button role="radio" aria-checked="true">Anual</button></div>')
+  const l = await resolveTarget(page, { role: 'button', name: 'Mensual' }, 2000)
+  assert.equal(await l.first().getAttribute('id'), 'm')
+  await page.context().close()
+})
+
+test('a page still loading: the real button that comes a moment after a toggle of that name wins', { skip: missing }, async () => {
+  const page = await open(`<div role="radiogroup"><button role="radio" id="r">Guardar</button></div>
+    <script>setTimeout(() => document.body.insertAdjacentHTML('beforeend', '<button id="b">Guardar</button>'), 300)</script>`)
+  const l = await resolveTarget(page, { role: 'button', name: 'Guardar' }, 2000)
+  assert.equal(await l.first().getAttribute('id'), 'b')
+  await page.context().close()
+})
+
+test('a call to action that is an <a role="button">: a { role: link } target finds it, and the page lists it as a button', { skip: missing }, async () => {
+  const page = await open('<a href="#" role="button" id="cta">Empezar la prueba</a>')
+  const l = await resolveTarget(page, { role: 'link', name: 'Empezar la prueba' }, 2000)
+  assert.equal(await l.first().getAttribute('id'), 'cta')
+  const { pageInventory } = await import('#render/steps/targets.js')
+  assert.ok((await pageInventory(page)).some(t => /role: button, name: Empezar la prueba/.test(t)))
+  await page.context().close()
+})
+
+test('the site\'s own colors become the theme; a page in another language than the voice is said', { skip: missing }, async () => {
+  const { readBrand } = await import('#render/page/brand.js')
+  const { brandTheme, resolveTheme } = await import('#render/page/theme.js')
+  const { checkLanguage } = await import('#render/page/review.js')
+  const page = await open(`<style>:root { --primary: 145 25% 70% } body { background: #0f1112; color: #f1f2f0 }</style>
+    <link rel="alternate" hreflang="es" href="/es/precios"><h1>Pricing</h1>`)
+  await page.evaluate(() => { document.documentElement.lang = 'en' })
+  const brand = await readBrand(page)
+  assert.equal(brand.background, '#0f1112')
+  assert.equal(brand.text, '#f1f2f0')
+  assert.ok(brand.accent && brand.accent !== '#0f1112')
+  const theme = brandTheme(resolveTheme(), brand)
+  assert.equal(theme.background, '#0f1112')
+  // The gradient and the glow come from the brand, not the default navy and indigo
+  assert.doesNotMatch(`${theme.gradient} ${theme.glow}`, /1E3A5F|6366F1/i)
+  assert.match(String(await checkLanguage(page, 'es')), /"en" and the narration in "es".*\/es\/precios/)
+  assert.equal(await checkLanguage(page, 'en'), null)
+  await page.context().close()
+})
