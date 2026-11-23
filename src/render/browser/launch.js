@@ -33,6 +33,8 @@ export const launch = async ({ headless, display, width, height, locale }, confi
     args: ['--disable-gpu', '--disable-dev-shm-usage', '--disable-extensions', '--no-first-run', '--mute-audio', '--hide-scrollbars',
       '--renderer-process-limit=2', '--disable-background-networking', '--disable-component-update', `--lang=${locale}`,
       '--disable-infobars', '--password-store=basic',
+      // Without it, Linux draws text with uneven letter spacing in recordings and screenshots
+      '--font-render-hinting=none',
       ...(display ? [`--window-size=${width},${height + CHROME_MAX}`, '--window-position=0,0', '--force-device-scale-factor=1'] : [])],
   })
 }
