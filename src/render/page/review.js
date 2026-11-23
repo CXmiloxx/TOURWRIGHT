@@ -108,3 +108,25 @@ export const checkLayout = (page, video) =>
       return problems
     }, { ...video, small: SMALL_TEXT })
     .catch(() => [])
+
+/**
+ * The page in another language than the narration: viewers would see one and hear the other. The page's own
+ * version in the narration's language (its hreflang link), when it has one, is named so the script can go there.
+ * @param {import('playwright').Page} page @param {string | undefined} language  the script's
+ * @returns {Promise<string | null>}
+ */
+export const checkLanguage = (page, language) =>
+  page
+    .evaluate(want => {
+      const short = l => String(l ?? '').toLowerCase().split(/[-_]/)[0]
+      const lang = short(document.documentElement.lang)
+      if (!lang || !want || lang === short(want)) return null
+      const other = [...document.querySelectorAll('link[rel=alternate][hreflang]')].find(l => short(l.getAttribute('hreflang')) === short(want))
+      let href = other?.getAttribute('href')
+      try {
+        if (href) href = new URL(href, location.href).pathname
+      } catch {}
+      return `the page is in "${lang}" and the narration in "${short(want)}": viewers see one language and hear another. ` +
+        (href ? `Its ${short(want)} version is ${href}: go there in \`goto\`` : `Open the site's ${short(want)} version, or set \`language: ${lang}\``)
+    }, language ?? null)
+    .catch(() => null)

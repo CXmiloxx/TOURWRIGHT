@@ -10,7 +10,8 @@ import { startGuardProxy } from '#render/browser/guard-proxy.js'
 import { OVERLAY } from '#render/page/overlay.js'
 import { needsPrep, prepare, saveSession } from '#render/browser/session.js'
 import { setStepTimeout } from '#render/steps/index.js'
-import { themeCss } from '#render/page/theme.js'
+import { brandTheme, themeCss } from '#render/page/theme.js'
+import { readBrand } from '#render/page/brand.js'
 
 // A dry run is for finding mistakes: a missing element is reported in seconds, and the run goes on
 const DRY_RUN_TIMEOUT = 5000
@@ -65,6 +66,9 @@ export const openStudio = async ({ plan, script, loaded, opts, config, network, 
       ...(mode === 'playwright' ? { recordVideo: { dir: rawFile, size: { width, height } } } : {}),
     })
     const closeStreams = await setupNetwork(context, network)
+    // A script that names no colors wears the site's own: read off camera from its first page
+    // (a plain dry run shows nothing: it skips the page load; a guide prints in these colors, so it reads them)
+    if (plan.brandFromSite && (!dryRun || opts.guide)) Object.assign(theme, await siteBrand({ browser, common, network, theme, url: firstPage(script, resolveUrl) }))
     const blurCss = (script.blur ?? []).filter(t => typeof t === 'string').map(sel => `${sel} { filter: blur(8px) !important; }`).join('\n')
     await context.addInitScript(OVERLAY, [themeCss(theme), blurCss, theme.logo])
     // Real data on screen becomes invented data, on every page (and frame) of the video
@@ -116,3 +120,34 @@ export const openStudio = async ({ plan, script, loaded, opts, config, network, 
 }
 
 /** @typedef {Awaited<ReturnType<typeof openStudio>>} Studio */
+
+/** The address the script opens first: its first `goto`, else its base URL */
+const firstPage = (script, resolveUrl) => {
+  const go = (script.steps ?? []).find(step => step && typeof step === 'object' && 'goto' in step)?.goto
+  return go ? resolveUrl(go) : script.baseUrl ? resolveUrl('/') : null
+}
+
+/**
+ * The site's colors as a theme, from a page of its own (its own context, through the same network rules). Nothing
+ * changes when the page cannot be read: the default theme stays.
+ */
+const siteBrand = async ({ browser, common, network, theme, url }) => {
+  if (!url) return {}
+  const context = await browser.newContext(common)
+  try {
+    await setupNetwork(context, network)
+    const page = await context.newPage()
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30_000 })
+    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {})
+    const brand = await readBrand(page)
+    if (!brand.accent && !brand.background) return {}
+    const branded = brandTheme(theme, brand)
+    log.info(`theme from the site: background ${branded.background}, accent ${branded.accent} (set \`theme\` to choose your own)`)
+    return branded
+  } catch (error) {
+    log.debug(`theme from the site: ${error.message.split('\n')[0]}`)
+    return {}
+  } finally {
+    await context.close().catch(() => {})
+  }
+}

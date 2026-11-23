@@ -77,6 +77,8 @@ export const planWalkthrough = async (loaded, script, opts, config) => {
     density,
     pageSize: { width: Math.round(width / density), height: Math.round(height / density), scale: density },
     theme: resolveTheme(script.theme, config.theme, dir, { sandboxed }),
+    // No colors in the script or the settings: the site's own are read before filming (studio.js)
+    brandFromSite: !['accent', 'background', 'gradient'].some(k => script.theme?.[k] || config.theme?.[k]),
     audio,
     speech: { aliases: script.voices, pause: audio.pause, pronounce: script.pronounce, language: script.language },
     locale: script.language === 'en' ? 'en-US' : script.language ?? 'es-CO',
