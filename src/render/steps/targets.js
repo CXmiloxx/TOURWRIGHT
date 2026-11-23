@@ -111,6 +111,7 @@ const noted = new WeakMap()
  */
 export const resolveTarget = async (page, t, timeout, opts = {}) => {
   const direct = await locateShown(page, t)
+  if (typeof t === 'object' && Object.hasOwn(SAME_LOOK, t.role) && t.name && !t.css) return buttonLike(page, t, direct, timeout, opts)
   if (typeof t !== 'object' || !t.label || t.role || t.css || t.testId) {
     // Not there yet: the step waits for it as it always did, and says so if it never comes
     await direct.first().waitFor({ state: 'attached', timeout })
@@ -144,6 +145,39 @@ export const resolveTarget = async (page, t, timeout, opts = {}) => {
   const error = new Error(`Timeout ${timeout}ms exceeded waiting for ${describeTarget(t)}`)
   error.name = 'TimeoutError'
   throw error
+}
+
+// What looks like a button or a link and is announced as something else: toggle groups and tabs (Radix, shadcn)
+// use role=radio, checkbox, switch or tab on a <button>; a call to action is often an <a role="button">, and a
+// "button" a plain link. A person names what they see, not the role behind it
+const SAME_LOOK = {
+  button: ['radio', 'checkbox', 'switch', 'tab', 'menuitem', 'option', 'link'],
+  link: ['button', 'menuitem', 'tab'],
+}
+
+/** A `{ role: button | link, name }` target; when none has that name, the element that looks the same and does, with a warning */
+const buttonLike = async (page, t, direct, timeout, opts) => {
+  const nth = l => (t.nth !== undefined ? l.nth(t.nth) : l)
+  // The name as written, or as `mask` shows it on screen
+  const masked = await maskedTarget(page, t)
+  const byRole = (role, name) => page.getByRole(/** @type {any} */ (role), { name, exact: t.exact })
+  const others = SAME_LOOK[t.role].map(role => [role, nth(masked ? byRole(role, t.name).or(byRole(role, masked.name)) : byRole(role, t.name))])
+  await others.reduce((any, [, l]) => any.or(l), direct).first().waitFor({ state: 'attached', timeout })
+  if (await direct.count().catch(() => 0)) return narrow(page, t, direct, opts)
+  // A page still loading may show the toggle before the real button: the button gets a moment to come, and wins
+  await direct.first().waitFor({ state: 'attached', timeout: Math.min(800, timeout) }).catch(() => {})
+  if (await direct.count().catch(() => 0)) return narrow(page, t, direct, opts)
+  for (const [role, l] of others) {
+    if (!(await l.count().catch(() => 0))) continue
+    const said = warned.get(page) ?? new Set()
+    warned.set(page, said)
+    if (!said.has(`${t.role}:${t.name}`)) {
+      said.add(`${t.role}:${t.name}`)
+      log.warn(`${asTarget(t)}: no ${t.role} has that name; used the ${role} that does. Write ${asTarget({ ...t, role })} to target it directly`)
+    }
+    return narrow(page, { ...t, role }, l, opts)
+  }
+  return narrow(page, t, direct, opts)
 }
 
 /** Why Playwright could not use an element, from its call log: covered by another, disabled, moving… */
@@ -185,8 +219,12 @@ export const offeredElements = page =>
       }
       for (const el of document.querySelectorAll('button, [role=button], input[type=submit], a[href]')) {
         if (!visible(el)) continue
-        const name = clean(el.getAttribute('aria-label') || el.textContent || el.getAttribute('value'))
-        const kind = el.tagName === 'A' ? 'link' : 'button'
+        // What it is announced as, which is what a { role } target finds: an <a role="button"> is a button
+        // innerText, not textContent: text hidden on screen (a label for small screens) is not part of the name
+        // biome-ignore lint/performance/useDomNodeTextContent: the visible words are what a person names
+        const name = clean(el.getAttribute('aria-label') || /** @type {HTMLElement} */ (el).innerText || el.getAttribute('value'))
+        const role = el.getAttribute('role')
+        const kind = role === 'button' || role === 'link' ? role : el.tagName === 'A' ? 'link' : 'button'
         if (name) out.push({ target: { role: kind, name }, kind, hint: name, rect: rectOf(el) })
       }
       return out
@@ -222,9 +260,11 @@ export const markOffered = async page => {
 // The targets a step names, to say which one was missing
 export const targetsOf = (action, arg) => {
   if (arg === null || arg === undefined || typeof arg === 'number' || typeof arg === 'boolean') return []
-  if (['goto', 'say', 'caption', 'title', 'chapter', 'press', 'scroll', 'pause', 'cursor', 'back', 'reload', 'sound', 'offCamera', 'try', 'if', 'wait'].includes(action)) return []
+  if (['goto', 'say', 'caption', 'title', 'chapter', 'press', 'scroll', 'pause', 'cursor', 'back', 'reload', 'sound', 'offCamera', 'try', 'if', 'wait',
+    'md', 'note', 'table', 'pageBreak', 'gallery'].includes(action)) return []
   if (typeof arg === 'string') return [arg]
   if (arg.from && arg.to) return [arg.from, arg.to]
+  if (action === 'shot') return arg.target ? [arg.target] : []
   if ('target' in arg) return [arg.target]
   return [arg]
 }
