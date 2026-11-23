@@ -2,7 +2,8 @@
 // Each command gets the parsed options (`values`, `positionals`), the config and the script variables (--var).
 import { existsSync, writeFileSync } from 'node:fs'
 import { basename, dirname } from 'node:path'
-import { render } from '#render/index.js'
+import { outputBase, render } from '#render/index.js'
+import { compareGuides, keepGuide } from '#video/compare.js'
 import { loadFile, missingSecretsMessage, secretsIn, secretsShown } from '#script/load.js'
 import { jsonSchema } from '#script/schema.js'
 import { checkScript, markdownReport, textReport, writeFixes } from '#authoring/repair.js'
@@ -35,15 +36,19 @@ export const videosCommands = {
     }, config).finally(progress.done)
     if (values.json) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
     else if (result.dryRun) log.info(`${result.safe ? 'safe ' : ''}dry run: script ran to the end in ${result.seconds} s`)
+    // Only documents were asked for (export: [guide, pdf, docx]): no video, no manifest
+    else if (!result.paths) return void reportGuide(result.guide, values)
     else {
-      const { video, audio, silent, thumbnail, srt, vtt, manifest } = result.paths
+      const { video, audio, silent, thumbnail, srt, vtt, manifest, guide, pdf, docx } = result.paths
       const row = (label, file) => (file ? `  ${label.padEnd(11)}${file}\n` : '')
       process.stderr.write(`\n  ${Math.round(result.duration)} s · ${result.chapters.length} chapters · ${result.captions.length} captions\n` +
         row('video', video && basename(video)) + row('audio', audio && basename(audio)) + row('silent', silent && basename(silent)) +
         row('subtitles', srt && [srt, vtt].filter(Boolean).map(f => basename(f)).join(', ')) + row('poster', thumbnail && basename(thumbnail)) +
+        row('guide', guide && basename(guide)) + row('pdf', pdf && basename(pdf)) + row('word', docx && basename(docx)) +
         `  folder     ${dirname(manifest)}\n\n`)
+      for (const f of result.guide?.review ?? []) log.warn(`document: ${f.message}`)
     }
-    if (values.open && !result.dryRun) await openPath(result.paths.video ?? dirname(result.paths.manifest)).catch(e => log.warn(`could not open it: ${e.message}`))
+    if (values.open && !result.dryRun) await openPath(result.paths?.video ?? result.guide?.pdf?.path ?? result.guide?.html ?? (result.paths ? dirname(result.paths.manifest) : '.')).catch(e => log.warn(`could not open it: ${e.message}`))
   },
   validate: async ({ values, positionals, config, vars }) => {
     if (!positionals[0]) throw new UserError('usage: tourwright validate <script>')
@@ -52,6 +57,11 @@ export const videosCommands = {
     const loaded = await loadFile(positionals[0], { vars, missing: unset })
     log.info(`${positionals[0]}: valid ${loaded.kind} script${loaded.run ? ' (JavaScript)' : ''}`)
     if (unset?.size) log.info(`variables without a value (pass them with --var to render): ${[...unset].join(', ')}`)
+    // The content steps belong to the documents: said once, not per step
+    const content = loaded.kind === 'browser' ? contentSteps(loaded.script.steps) : []
+    const exports = loaded.script.export ?? []
+    if (content.length && !exports.some(e => ['guide', 'pdf', 'docx'].includes(e)))
+      log.info(`${[...new Set(content)].join(', ')}: for the documents only (export: guide, pdf or docx, or tourwright guide); a video skips them`)
     const secrets = secretsIn(loaded.script)
     if (unset) {
       if (secrets.length) log.info(`secrets it uses: ${secrets.join(', ')}`)
@@ -79,17 +89,37 @@ export const videosCommands = {
     if (values.open) await openPath(result.paths.video).catch(e => log.warn(`could not open it: ${e.message}`))
   },
   guide: async ({ values, positionals, config, vars }) => {
-    if (!positionals[0]) throw new UserError('usage: tourwright guide <script> [--out dir] [--open]')
-    const result = await render(await loadFile(positionals[0], { vars }), { out: values.out, guide: true }, config)
-    log.info(`guide: ${result.guide.steps} steps → ${result.guide.html} (and .md, with its images)`)
-    if (values.open) openPath(result.guide.html)
+    if (!positionals[0]) throw new UserError('usage: tourwright guide <script> [--out dir] [--pdf] [--docx] [--compare] [--open]')
+    // A threshold that is not a number would report nothing as changed, and --fail-on-change would always pass
+    const threshold = value => {
+      if (value === undefined) return undefined
+      const t = Number(value)
+      if (!Number.isFinite(t) || t <= 0 || t > 1) throw new UserError(`--threshold ${value}: a number above 0 and up to 1 (0.97 by default)`)
+      return t
+    }
+    threshold(values.threshold)
+    const loaded = await loadFile(positionals[0], { vars })
+    // --compare: the guide already at the output is kept aside, to say which steps changed
+    const before = values.compare ? keepGuide(outputBase(values.out, loaded.name)) : null
+    if (values.compare && !before) log.info('compare: no earlier guide at this output yet; this one is the base for next time')
+    try {
+      const result = await render(loaded, { out: values.out, guide: true, pdf: values.pdf, docx: values.docx }, config)
+      const changes = before ? await compareGuides(before.json, result.guide.json, { threshold: threshold(values.threshold) }, config) : null
+      if (values.json) process.stdout.write(`${JSON.stringify({ ...result.guide, ...(changes ? { changes } : {}) }, null, 2)}\n`)
+      else reportGuide(result.guide, values)
+      if (changes) reportChanges(changes)
+      if (changes && values['fail-on-change'] && changes.changed.length + changes.added.length + changes.removed.length) process.exitCode = 1
+    } finally {
+      before?.discard()
+    }
   },
   narrate: async ({ values, positionals, config, vars }) => {
     // The plain narration rewritten by the AI the user brings; shown first, saved only with --write
     if (!positionals[0]) throw new UserError('usage: tourwright narrate <script> [--write]')
     const { proposeNarration, writeNarration } = await import('#ai/narrate.js')
     log.info('capturing each step and asking the AI…')
-    const proposals = await proposeNarration(await loadFile(positionals[0], { vars }), config)
+    if (values.style && !['promo', 'tutorial', 'calm'].includes(values.style)) throw new UserError('--style promo, tutorial or calm')
+    const proposals = await proposeNarration(await loadFile(positionals[0], { vars }), config, { style: values.style })
     for (const p of proposals) {
       // A line the AI wrote against the rules is shown too, with why the old one stays
       if (p.kept) process.stdout.write(`\n[${p.step}] ${p.before}\n   = unchanged: the AI's line was refused (${p.kept})\n`)
@@ -156,3 +186,29 @@ export const videosCommands = {
     process.stdout.write(`${JSON.stringify(jsonSchema(), null, 2)}\n`)
   },
 }
+
+// What `guide` (or a render with only documents) wrote
+const reportGuide = (guide, values) => {
+  log.info(`guide: ${guide.steps} steps → ${guide.html} (and .md, with its images)`)
+  if (guide.pdf) log.info(`pdf: ${guide.pdf.pages} pages → ${guide.pdf.path}`)
+  if (guide.docx) log.info(`word: ${guide.docx}`)
+  for (const f of guide.review ?? []) log.warn(`document: ${f.message}`)
+  if (values.open) openPath(guide.pdf?.path ?? guide.docx ?? guide.html)
+}
+
+const reportChanges = ({ changed, added, removed, same }) => {
+  if (!changed.length && !added.length && !removed.length) return void log.info(`compare: no step changed (${same} the same)`)
+  for (const c of changed) log.warn(`compare: ${c.n ? `step ${c.n}` : 'a picture'} changed on screen (${Math.round(c.similarity * 100)}% alike): ${c.text}`)
+  for (const a of added) log.warn(`compare: new step ${a.n ?? ''}: ${a.text}`)
+  for (const r of removed) log.warn(`compare: step gone: ${r.text}`)
+}
+
+/** The content steps (`md`, `note`, `table`, `shot`, `gallery`, `pageBreak`) a script holds, nested ones too */
+const contentSteps = steps =>
+  (steps ?? []).flatMap(step => {
+    if (!step || typeof step !== 'object') return []
+    const [action, arg] = Object.entries(step)[0] ?? []
+    if (['md', 'note', 'table', 'shot', 'gallery', 'pageBreak'].includes(action)) return [action]
+    const nested = [arg?.then, arg?.else, arg?.steps, arg?.catch, action === 'offCamera' || action === 'repeat' ? arg : null]
+    return nested.filter(Array.isArray).flatMap(contentSteps)
+  })

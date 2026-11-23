@@ -2,6 +2,7 @@
 //
 //   GET    /health                       liveness + queue counts (no auth)
 //   GET    /v1/voices                    voices and engines available
+//   GET    /v1/music                     background music tracks and moods the scripts can name
 //   GET    /v1/schema                    JSON Schema of scripts
 //   POST   /v1/validate                  { script, vars? } → { ok, errors? }
 //   POST   /v1/jobs                      { script, vars?, assets?, options?, webhook? } → 202 job
@@ -24,8 +25,14 @@ import { fromData, parseText } from '#script/load.js'
 import { jsonSchema } from '#script/schema.js'
 import { log, UserError } from '#core/util.js'
 import { listVoices } from '#voice/index.js'
+import { musicCatalog } from '#voice/music.js'
 
-const TYPES = { mp4: 'video/mp4', jpg: 'image/jpeg', srt: 'application/x-subrip; charset=utf-8', vtt: 'text/vtt; charset=utf-8', json: 'application/json' }
+const TYPES = {
+  mp4: 'video/mp4', mp3: 'audio/mpeg', jpg: 'image/jpeg', srt: 'application/x-subrip; charset=utf-8', vtt: 'text/vtt; charset=utf-8', json: 'application/json',
+  pdf: 'application/pdf', md: 'text/markdown; charset=utf-8', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', zip: 'application/zip',
+  // A guide opened from the API is downloaded, never run as a page on the API's origin
+  html: 'application/octet-stream',
+}
 const LOOPBACK = ['127.0.0.1', '::1', 'localhost']
 
 const send = (res, status, body, headers = {}) => {
@@ -131,6 +138,7 @@ export const createApp = async config => {
     }
 
     if (req.method === 'GET' && url.pathname === '/v1/voices') return send(res, 200, await listVoices(config))
+    if (req.method === 'GET' && url.pathname === '/v1/music') return send(res, 200, musicCatalog(config))
     if (req.method === 'GET' && url.pathname === '/v1/schema') return send(res, 200, jsonSchema())
     if (req.method === 'POST' && url.pathname === '/v1/validate') {
       const body = await readBody(req, config.api.maxBodyMb * 1048576)

@@ -423,10 +423,22 @@ theme: { accent: "#22C55E", titleAnimation: split, titleBackground: grid }
 
 Cards leave with a short blur. In slides the animation is drawn frame by frame, so it is smooth on any machine.
 
+### The site's own colors
+
+A walkthrough whose `theme` (and your settings) name no `accent`, `background` or `gradient` wears the site's
+colors: before filming, Tourwright opens its first page off camera and reads its background, its text color, its
+brand color (`theme-color`, the `--primary` / `--accent` of its design system, or else its most colorful button)
+and its font. Title cards, captions, the cursor and the studio window come out in them, and the log says what was
+used. A color that would not read on the background keeps the default. Name any of them in `theme` to choose your
+own; the `logo` and the title look are always yours.
+
+A page in another language than the narration (its `<html lang>`) is reported, with the address of its version in
+the right language when the site declares one (`hreflang`): viewers should not see English and hear Spanish.
+
 ### Studio frame
 
 `theme.frame: window` puts a walkthrough inside a browser window, with rounded corners, a soft shadow and the
-video's title in its bar, on a wallpaper of lights in the theme colors. It is drawn when the video is encoded:
+video's title in its bar, on a wallpaper of lights in the theme colors (the window itself in the theme's background). It is drawn when the video is encoded:
 the page is recorded as usual, so targets, zoom and captions do not change. Pair it with an `accent` from the
 app's own palette, `titleBackground: aurora` and `zoom` on the focus steps for a finished, studio look.
 
@@ -561,6 +573,94 @@ swells in the pauses.
 Sound effects (`sound`, clicks, typing) are mixed apart from the voice: they are not processed and do not
 lower the music.
 
+### A video with life: `style`
+
+A video that only reads what the page says does not make anyone want anything. `style` gives it a feel in one
+word, as defaults the script can still change:
+
+```yaml
+style: promo        # promo · calm · tutorial (default)
+```
+
+| `style` | What it turns on |
+|---|---|
+| `promo` | `music: upbeat` under the voice, `audio: { rate: +6%, dynamic: true, transitions: whoosh, clicks: true, pause: 0.12 }`, the studio window and aurora title cards |
+| `calm` | `music: calm`, a slower voice (`rate: -4%`), longer breaths between sentences |
+| `tutorial` | Nothing: the voice and the page, as before |
+
+**Background music.** `music` takes any of these; the first that matches plays:
+
+```yaml
+music: launch-theme                 # one of your tracks, by name (tourwright music)
+music: upbeat                       # a mood: one of your tracks of that mood
+music: theme.mp3                    # a file next to the script (an asset, through the API)
+music: https://example.com/a.mp3    # a URL, downloaded once (not for API jobs: send it as an asset)
+music: none                         # no music, even with style: promo
+music: { file: upbeat, volume: 0.3, start: 12, fadeIn: 1, fadeOut: 3, duck: true }
+```
+
+| Mood | For |
+|---|---|
+| `upbeat` | A launch, an ad: energy |
+| `corporate` | A demo, an explainer: positive, steady |
+| `calm` | Onboarding, a tutorial: easy |
+| `acoustic` | Warm, human: guitars, ukulele |
+| `tech` | Technology, innovation: synths, arpeggios |
+| `cinematic` | A big reveal: orchestra, drums |
+
+Your tracks live in the music folder (`TOURWRIGHT_MUSIC_DIR`), each with a name and a mood:
+
+```bash
+tourwright install --music                                  # nine public-domain tracks (CC0, ~48 MB), every mood
+tourwright music add theme.mp3 --name launch-theme --mood upbeat --artist "You" --license "bought"
+tourwright music add https://example.com/song.mp3 --mood calm
+tourwright music                                            # what you have
+tourwright music remove launch-theme
+```
+
+Several tracks of one mood: a video always gets the same one (chosen by its title), and another video may get
+another. With no track of a mood, a built-in loop made by ffmpeg plays (`upbeat`, `corporate` or `calm` sound:
+eight bars, no files, nothing to license); `tourwright install --music` replaces it with real music.
+
+Every track is measured once and brought to the same loudness before `volume`, so `volume: 0.3` sounds the same
+with a quiet track or a loud master. It is lowered while someone speaks (`duck: false` keeps it level), and
+`start` skips a long intro.
+
+**A voice with life** (`audio.dynamic`). A presenter does not say every line at one speed. Each line gets a
+shape from what it is, on top of `audio.rate`: a question rises (`+3%` faster, `+5%` higher), an exclamation speeds
+up (`+7%`, `+3%`), a short line of up to five words lands slower and lower (`-7%`, `-2%`), a long one keeps moving
+(`+4%`). The shape is added to the voice's own speed and pitch (a voice tuned to `-10%` stays slower than the
+rest) and works with every engine. A line's own `rate` or `pitch` always wins.
+
+**Transitions** (`audio.transitions`). A sound as each title card comes in: `true` is a whoosh, or name another
+built-in sound or a file. On slides it plays as each slide comes in, unless the slide has its own `sound`.
+
+#### Writing a promo people watch to the end
+
+The words matter more than any effect. What works:
+
+1. **Open with a hook, not a welcome.** A question or a pain the viewer recognizes in the first three seconds:
+   "¿Tu negocio sigue funcionando con hojas de cálculo?", not "Bienvenido a Acme".
+2. **Sell the change, then the feature.** What the viewer gains (time, money, calm, control), then what gives it.
+3. **One idea per line, with rhythm.** 4 to 16 words. Mix short lines that land ("Sin compromiso.") with longer
+   ones. A question or an exclamation now and then: with `dynamic`, they sound different.
+4. **Concrete beats vague.** "Propuesta en 48 horas" over "rápido y eficiente". Numbers that are on screen.
+5. **Tell one story.** Problem → how it is solved → proof → invitation. Each line continues the last one.
+6. **End with one thing to do.** "Escríbeles hoy: la propuesta llega en 48 horas."
+7. **Name the element early.** In a `focus`, the `{mark}` goes on the first words that name what is on screen:
+   "{Tus sistemas}, por fin hablando entre ellos", not "Tus sistemas, por fin {hablando entre ellos}". The focus
+   lands at the mark, and never after half the line: the picture arrives with the words, not after them. When the
+   camera has a long way to go, it moves first and the voice follows.
+
+| Reads the page | Sells |
+|---|---|
+| "Construyen el software que opera tu negocio, y se quedan para sostenerlo." | "¿Y si tu software no se cayera cada vez que creces?" |
+| "Conectan los sistemas que ya usas con integraciones y datos." | "Tus sistemas, por fin hablando entre ellos." |
+| "Le cuentas tu proyecto y recibes respuesta en menos de 48 horas." | "Cuéntales tu idea. En 48 horas tienes propuesta. Sin compromiso." |
+
+`tourwright narrate tour.yaml --style promo` has your AI rewrite the lines by these rules, from what each screen
+shows.
+
 ## JavaScript scripts
 
 ```js
@@ -619,13 +719,29 @@ tourwright render app.yaml                          # the narrated video (defaul
 tourwright render app.yaml --export audio           # only the sound: consultar.mp3 (narration, music, effects)
 tourwright render app.yaml --export silent          # the video without sound: consultar-silent.mp4
 tourwright render app.yaml --export video,audio,silent
+tourwright render app.yaml --export video,pdf       # the video, then its guide as a PDF
+tourwright render app.yaml --export pdf,docx        # only the documents: fast, no voice, no video
 ```
 
 ```yaml
 export: [video, audio]
 ```
 
-Subtitles, poster and manifest always come. `--quality` picks the size: `sd`, `hd` (default; yours with `tourwright config set quality`), `fullhd`,
+| `export` | What you get |
+|---|---|
+| `video` | The narrated video (`.mp4`) |
+| `audio` | Only the sound: narration, music, effects (`.mp3`) |
+| `silent` | The video without sound (`-silent.mp4`) |
+| `guide` | The step-by-step guide: `.guide.html` (one file) and `.guide.md` with its pictures (from the API, a `.guide.zip` with both) |
+| `pdf` | That guide as a PDF with the script's brand (`.guide.pdf`) |
+| `docx` | That guide as a Word file (`.guide.docx`) |
+
+Only what is asked for is made, one thing after another, never two browsers at once: the video first, then a quick
+second pass over the same script for the guide (its pictures are never taken while filming, so the video does not
+change), then the PDF or the Word file from those pictures. That second pass does the steps again: a form sent or
+an email triggered in the script happens twice in the app. Against a real account, make the documents alone
+(`export: [pdf]`) or point the script at a test account. With a video, subtitles, poster and manifest always
+come, and the manifest lists every file. `--quality` picks the size: `sd`, `hd` (default; yours with `tourwright config set quality`), `fullhd`,
 `vertical` (1080×1920, for phones and reels) or `square`.
 
 A vertical video is filmed the way a phone shows the app: the page is 540 CSS pixels wide at twice the density,
@@ -772,12 +888,84 @@ are kept.
 
 ```bash
 tourwright guide tour.yaml --open
+tourwright guide tour.yaml --pdf --docx       # also a PDF and a Word file to hand over
+tourwright guide tour.yaml --out docs/guide --compare   # and which steps changed since the last time
 ```
 
 Runs the script fast and, before each action, captures the page with the element marked. The narration becomes
 the text of each numbered step, chapters and title cards become sections, and what was typed is shown as an
-example (never a secret or a code). You get `tour.guide.html` — one file with its pictures inside, to send, put
-in a help center or print as PDF — and `tour.guide.md` with its pictures in `tour.guide/`.
+example (never a secret or a code). You get `tour.guide.html` — one file with its pictures inside, to send or put
+in a help center — and `tour.guide.md` with its pictures in `tour.guide/`, ready for Docusaurus, MkDocs or a wiki.
+
+`--pdf` adds `tour.guide.pdf`: a cover with the title and the contents, the script's `theme` (its `accent`, `font`
+and `logo`; the page stays white), the title and «page / pages» at the foot of every page, bookmarks from the
+sections and tags for screen readers. A section title never ends a page alone, a picture never runs past one (a
+phone screen gets narrower instead), and a closing title card with nothing after it is left out. The footer comes
+from the page's CSS on Chromium 131 and later; older ones print it from a template, on the cover too.
+
+`--docx` adds `tour.guide.docx`, the same guide as a Word file: the logo on the cover and in the header, the accent
+on the step numbers, headings and the header's line, the theme's font, the paper and the footer with «Page N of M».
+It opens in Word, LibreOffice and Google Docs. Word draws PNG and JPEG logos; with an SVG or WebP one it writes
+the title instead.
+
+Brand the documents with `theme.logo` (PNG, JPEG, WebP or SVG; its shape is kept): it goes on the cover and at the
+top of every page, over a line in the `accent`. A dark cover wants a light logo: `document.coverLogo`.
+
+#### More than steps: text, notes, tables and pictures
+
+These steps write only in the documents; a video skips them.
+
+| Action | Value | What it adds |
+|---|---|---|
+| `md` | text | Text in Markdown: paragraphs, `#` headings, lists, `**bold**`, `*italics*`, `` `code` ``, `[links](https://…)`. Raw HTML is shown as text |
+| `note` | text, or `{ md, tone }` | A note box; `tone`: `info` (default), `ok`, `warn` |
+| `table` | `{ columns, rows, caption? }` | A table |
+| `shot` | `true`, or `{ caption?, target?, fullPage?, name? }` | A picture of the page now, with nothing marked: the screen, the whole page or one element |
+| `gallery` | `{ columns?, shots: [{ goto?, caption?, target?, fullPage? }] }` | Pictures side by side; each one opens its page first. 3 per row, 4 on a phone script |
+| `pageBreak` | `true` | What follows starts on a new page of the PDF and the Word file |
+
+```yaml
+document:
+  paper: A4                 # A4 (default) or Letter
+  cover: dark               # light (default), dark or none
+  subtitle: For the support team
+  toc: true                 # the contents on the cover (default: with two sections or more)
+  marks: true               # the element of each step marked in its picture (default)
+  header: true              # every page but the cover: the theme logo, the title, a line in the accent (default)
+  footer: "Acme · acme.com · hola@acme.com"   # at the foot of every page, beside «Page N of M» (default: the title)
+  coverLogo: logo-white.png # another logo for the cover: a light one on a dark cover (default: the theme logo)
+steps:
+  - chapter: Invoices
+  - md: Each invoice belongs to **one customer**.
+  - note: { tone: warn, md: "Sent invoices cannot be deleted." }
+  - shot: { target: table, caption: The list of invoices }
+  - table: { columns: [Status, Who sees it], rows: [[Draft, Owner], [Sent, Everyone]] }
+```
+
+[examples/manual.yaml](../examples/manual.yaml) is a whole manual of the demo app with every block.
+
+#### Before printing: the review
+
+The PDF is checked before it is printed, like a video is: a page left mostly blank because a block did not fit,
+a picture taller than a page, an accent too pale on white, a PDF heavier than 20 MB. Each one is a warning with
+what to do; none stops the guide.
+
+#### Guides that follow the app: `--compare`
+
+The guide is made from the script, so when the app changes it is made again, not recorded again by hand.
+`--compare` keeps the guide already at `--out` aside, makes the new one and says which steps changed: the same
+step (matched by its text, in order) whose picture now looks different (ffmpeg's SSIM below `--threshold`, 0.97
+by default), and the steps added or gone. `--fail-on-change` exits with 1 when something changed, for CI:
+
+```yaml
+- uses: CXmiloxx/tourwright@v2
+  with:
+    command: guide
+    scripts: docs/tours/*.yaml
+    out: docs/guides
+    export: pdf
+# then commit docs/guides, or open a pull request with it (peter-evans/create-pull-request)
+```
 
 ### The review of every video
 

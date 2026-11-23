@@ -1,0 +1,68 @@
+# A manual of the demo app (examples/app) made from a script: steps with their pictures, plus text, notes, a
+# table, a picture of one element and a gallery. The login happens off camera. No video: only documents.
+#
+#   node examples/app/server.js &
+#   export TOURWRIGHT_SECRET_FACTURERO_USER=demo@facturero.test TOURWRIGHT_SECRET_FACTURERO_PASSWORD=demo123
+#   export TOURWRIGHT_SECRET_FACTURERO_TOTP=JBSWY3DPEHPK3PXP
+#   tourwright render examples/manual.yaml          # manual.guide.html, .md, .pdf and .docx
+#   tourwright guide examples/manual.yaml --compare  # later: which steps changed on screen
+title: Manual de Facturero
+language: es
+baseUrl: http://127.0.0.1:4800
+export: [guide, pdf, docx]
+mask:
+  - email
+  - phone
+  - id
+theme:
+  accent: "#3B82F6"
+document:
+  paper: A4
+  cover: dark
+  subtitle: Para el equipo de soporte
+setup:
+  - goto: /login
+  - type: { target: { placeholder: Tu usuario o tu correo }, text: "${secret:FACTURERO_USER}" }
+  - type: { target: { label: Contraseña }, text: "${secret:FACTURERO_PASSWORD}" }
+  - click: { role: button, name: Ingresar }
+  - type: { target: { label: Código de verificación }, text: "${totp:FACTURERO_TOTP}" }
+  - click: { role: button, name: Verificar }
+  - wait: { target: { role: heading, name: Clientes } }
+steps:
+  - chapter: Clientes
+  - goto: /clientes
+  - md: |
+      Cada cliente tiene sus datos de contacto y su **saldo**. Los correos, teléfonos y documentos que ves aquí
+      son *inventados*: el manual nunca muestra datos reales.
+  - shot: { target: table, caption: La lista de clientes }
+  - table:
+      columns: [Estado, Qué significa, Qué hacer]
+      rows:
+        - [Pendiente, La factura no se ha pagado, Enviar un recordatorio]
+        - [Pagada, El pago llegó, Nada]
+        - [Vencida, Pasó la fecha de pago, Llamar al cliente]
+
+  - chapter: Facturas
+  - click: { role: link, name: Facturas }
+  - wait: { target: { role: heading, name: Facturas } }
+  - upload: { target: { label: Archivo de la factura }, files: [app/factura.txt] }
+  - select: { target: { label: Cliente }, value: Luis Gómez }
+  - click: { role: button, name: Subir factura }
+  - wait: { text: guardada }
+  - note: { tone: ok, md: "La factura queda **guardada** y aparece en el saldo del cliente." }
+
+  - pageBreak: true
+  - chapter: Reportes
+  - click: { role: link, name: Reportes }
+  - wait: { target: { role: heading, name: Reportes } }
+  - click: { role: button, name: Generar reporte }
+  - wait: { text: Reporte listo, timeout: 20000 }
+  - note: { tone: warn, md: "El reporte tarda unos segundos: no cierres la página mientras se genera." }
+
+  - chapter: Las tres pantallas
+  - gallery:
+      columns: 3
+      shots:
+        - { goto: /clientes, caption: Clientes }
+        - { goto: /facturas, caption: Facturas }
+        - { goto: /reportes, caption: Reportes }

@@ -6,7 +6,14 @@
 //
 // A step is an object with exactly one action key: { click: "#buy" }, { say: "Hello" }…
 import { z } from 'zod'
+import { documentOptions, documentSteps } from './document.js'
 import { maskRule } from './mask-rule.js'
+
+// What a render can hand over: media (one recording) and documents (a quick pass). The one list: render/index.js,
+// the API's jobs and the MCP tool take it from here
+export const MEDIA = /** @type {const} */ (['video', 'audio', 'silent'])
+export const DOCUMENTS = /** @type {const} */ (['guide', 'pdf', 'docx'])
+export const EXPORTS = /** @type {const} */ ([...MEDIA, ...DOCUMENTS])
 
 // How to find an element. A string is a Playwright selector (CSS, `text=…`, `xpath=…`); the object forms
 // are the robust ones (by role and accessible name, label, placeholder, visible text or test id).
@@ -124,6 +131,7 @@ export const STEPS = {
   repeat: z.lazy(() => z.object({ times: z.number().int().min(1).max(500).optional(), each: z.array(z.unknown()).max(500).optional(), as: z.string().regex(/^\w+$/).optional(), steps: z.array(step) }).strict()
     .refine(r => r.times || r.each, 'repeat needs times or each'))
     .describe('Repeat steps `times` times, or once per item of `each` ({{index}}, {{item}} or the name in `as`)'),
+  ...documentSteps(target),
 }
 
 // Steps added by plugins: name → { run }. Their schemas join STEPS.
@@ -164,14 +172,22 @@ const common = {
     clicks: z.union([z.boolean(), z.string()]).optional().describe('A click sound on every click (true, or a sound file)'),
     typing: z.boolean().optional().describe('Keyboard sound while typing'),
     effects: z.number().min(0).max(2).optional().describe('Volume of sound effects (1 = as recorded)'),
+    transitions: z.union([z.boolean(), z.string()]).optional().describe('A sound when a title card comes in (true = whoosh, or a sound)'),
+    rate: prosody.rate.describe('Speed of the whole narration: +6% livelier, -5% calmer. A line\'s own rate wins'),
+    dynamic: z.boolean().optional()
+      .describe('Lines said with life: questions rise, exclamations speed up, short lines land slower, long ones keep moving'),
   }).strict().optional(),
+  style: z.enum(['promo', 'tutorial', 'calm']).optional()
+    .describe('The feel of the video, as defaults the script can still change: promo (upbeat music, livelier voice, a whoosh on title cards, clicks), calm (soft music, slower voice), tutorial (none of these; the default)'),
   music: z.union([z.string(), z.object({
     file: z.string(), volume: z.number().min(0).max(1).optional(), duck: z.boolean().optional(),
     fadeIn: z.number().min(0).max(30).optional(), fadeOut: z.number().min(0).max(30).optional(),
-  }).strict()]).optional().describe('Background music file (looped and lowered under the voice)'),
+    start: z.number().min(0).max(3600).optional().describe('Seconds of the track to skip (a long intro)'),
+  }).strict()]).optional()
+    .describe('Background music, looped and lowered under the voice: a file or URL, one of your tracks by name (tourwright music), a mood (upbeat, corporate, calm, acoustic, tech, cinematic: one of your tracks of that mood, else a built-in loop) or none'),
   vars: z.record(z.string().regex(/^\w+$/), z.unknown()).optional().describe('Variables: {{name}} in any text is replaced with its value'),
-  export: z.array(z.enum(['video', 'audio', 'silent'])).min(1).optional()
-    .describe('What to deliver (default [video]): video = the narrated .mp4, audio = only the sound (.mp3), silent = the video without sound. Subtitles, poster and manifest always come'),
+  export: z.array(z.enum(EXPORTS)).min(1).optional()
+    .describe('What to deliver (default [video]): video = the narrated .mp4, audio = only the sound (.mp3), silent = the video without sound, guide = a step-by-step guide (HTML and Markdown), pdf and docx = that guide as a PDF or a Word file. Only what is asked for is made, one after another'),
 }
 
 const browser = z.object({
@@ -194,6 +210,7 @@ const browser = z.object({
   dismiss: z.array(target).optional()
     .describe('Things the app puts in the way (its own product tour, a cookie banner, a chat bubble): clicked off camera whenever they show up, like { role: button, name: Skip }'),
   blocks: z.record(z.string().regex(/^[\w-]+$/), z.array(step)).optional().describe('Reusable groups of steps, inserted with `use`'),
+  document: documentOptions.optional(),
   steps: z.array(step).min(1),
 }).strict()
 

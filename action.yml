@@ -4,7 +4,11 @@
 #   - uses: CXmiloxx/tourwright@v2
 #     with:
 #       scripts: videos/*.yaml
-#       command: check          # or render (default)
+#       command: check          # or render (default), or guide
+#
+# command: guide rebuilds each script's step-by-step guide (HTML, Markdown; PDF and Word with `export`) in `out`
+# and compares it with the one already there: the job log lists the steps that changed on screen. Commit `out`
+# (or open a pull request with it) and the guide follows the app.
 #
 # Secrets for the scripts (${secret:NAME}) come from the environment: env: { TOURWRIGHT_SECRET_NAME: ... }
 name: Tourwright
@@ -18,8 +22,14 @@ inputs:
     description: Scripts to use (paths or globs, separated by spaces or new lines)
     required: true
   command:
-    description: "render: make the videos; check: dry-run each script and report every broken step"
+    description: "render: make the videos; check: dry-run each script and report every broken step; guide: rebuild the guides and say which steps changed"
     default: render
+  export:
+    description: "What to deliver, separated by commas: video, audio, silent, guide, pdf, docx (render); pdf, docx (guide). Empty uses each script's own"
+    default: ""
+  fail-on-change:
+    description: "guide: fail the job when a step of a guide changed on screen, was added or removed"
+    default: "false"
   out:
     description: Folder for the videos (render)
     default: videos
@@ -67,6 +77,8 @@ runs:
         OUT: ${{ inputs.out }}
         VOICE: ${{ inputs.voice }}
         QUALITY: ${{ inputs.quality }}
+        EXPORT: ${{ inputs.export }}
+        FAIL_ON_CHANGE: ${{ inputs.fail-on-change }}
       run: |
         shopt -s globstar nullglob
         files=()
@@ -77,13 +89,24 @@ runs:
           tourwright check "${files[@]}"
           exit
         fi
+        status=0
         for f in "${files[@]}"; do
+          if [ "$COMMAND" = "guide" ]; then
+            args=(guide "$f" --out "$OUT/$(basename "${f%.*}")/" --compare)
+            [[ ",$EXPORT," == *",pdf,"* ]] && args+=(--pdf)
+            [[ ",$EXPORT," == *",docx,"* ]] && args+=(--docx)
+            [ "$FAIL_ON_CHANGE" = "true" ] && args+=(--fail-on-change)
+            tourwright "${args[@]}" || status=1
+            continue
+          fi
           args=(render "$f" --out "$OUT/$(basename "${f%.*}")/")
           [ -n "$VOICE" ] && args+=(--voice "$VOICE")
           [ -n "$QUALITY" ] && args+=(--quality "$QUALITY")
+          [ -n "$EXPORT" ] && args+=(--export "$EXPORT")
           tourwright "${args[@]}"
         done
-    - if: inputs.command == 'render' && inputs.upload == 'true'
+        exit $status
+    - if: (inputs.command == 'render' || inputs.command == 'guide') && inputs.upload == 'true'
       uses: actions/upload-artifact@v7
       with:
         name: tourwright-videos

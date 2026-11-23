@@ -2,7 +2,7 @@
 // allow: they coordinate through the queue (a shared folder or Redis).
 import { createHmac } from 'node:crypto'
 import { lookup as dnsLookup } from 'node:dns'
-import { mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { request as httpRequest } from 'node:http'
 import { request as httpsRequest } from 'node:https'
 import { isIP } from 'node:net'
@@ -15,6 +15,7 @@ import { linkSigner } from './jobs/links.js'
 import { createBackend, publicJob } from './jobs/store.js'
 import { loadPlugins } from '#plugins/index.js'
 import { createGuard } from '#render/browser/network.js'
+import { zip } from '#render/guide/zip.js'
 import { killTree, log, spawnTree } from '#core/util.js'
 
 const RUN_JOB = fileURLToPath(new URL('./run-job.js', import.meta.url))
@@ -121,11 +122,18 @@ export const makeHandler = ({ backend, blobs, config, signLink, run = runChild }
     })
     if (r.result) {
       const outputs = []
-      for (const f of readdirSync(output).filter(f => !f.startsWith('failure-'))) {
+      // The guide's HTML and PDF hold their pictures; its Markdown links a folder of them, so the two go out
+      // together as <name>.guide.zip (a lone .md would point at pictures the client never gets)
+      packMarkdownGuides(output)
+      for (const f of readdirSync(output, { withFileTypes: true }).filter(e => e.isFile() && !e.name.startsWith('failure-')).map(e => e.name)) {
         await blobs.put(`jobs/${id}/out/${f}`, join(output, f))
         outputs.push(`jobs/${id}/out/${f}`)
       }
-      const { paths, ...result } = r.result
+      // Local paths stay on the worker; of a guide, what a client needs to know
+      const { paths, guide, ...result } = r.result
+      if (guide) result.guide = { steps: guide.steps, pages: guide.pdf?.pages ?? null, review: guide.review ?? [] }
+      // The Markdown went out zipped with its pictures
+      if (result.files?.guideMarkdown) result.files.guideMarkdown = result.files.guideMarkdown.replace(/\.md$/, '.zip')
       const done = await backend.store.update(id, { status: 'done', finishedAt: new Date().toISOString(), progress: { stage: 'done' }, result, outputs, error: undefined })
       log.info(`job ${id}: done in ${Math.round((Date.parse(done.finishedAt) - Date.parse(done.startedAt)) / 1000)} s`)
       await notify(done, config, signLink, blobs)
@@ -184,3 +192,18 @@ export const startWorker = async (config, { signal: external = undefined } = {})
   await backend.queue.close()
 }
 
+/**
+ * Each `<name>.guide.md` with its picture folder `<name>.guide/` becomes `<name>.guide.zip`, in place of the .md.
+ * @param {string} output  the job's output folder
+ */
+export const packMarkdownGuides = output => {
+  for (const f of readdirSync(output)) {
+    if (!f.endsWith('.guide.md')) continue
+    const base = f.slice(0, -'.md'.length)
+    const pictures = join(output, base)
+    const files = [{ name: f, data: readFileSync(join(output, f)) }]
+    if (existsSync(pictures)) for (const p of readdirSync(pictures).sort()) files.push({ name: `${base}/${p}`, data: readFileSync(join(pictures, p)) })
+    writeFileSync(join(output, `${base}.zip`), zip(files))
+    rmSync(join(output, f), { force: true })
+  }
+}
