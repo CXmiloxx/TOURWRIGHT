@@ -60,8 +60,11 @@ export const cameraHelpers = (s, v) => {
       // (synthesized on its own; cached like any sentence), a little early as the eye needs it.
       const { spoken, before } = markedLine(say)
       const narration = spoken ? await s.synth(plainText(spoken), prosody) : null
-      const lead = narration && /[\p{L}\p{N}]/u.test(before ?? '') ? await s.synth(plainText(before), prosody) : null
-      const at = lead ? Math.max(0, lead.duration - 0.25) : 0
+      // The part before the mark, said the way the whole line says it: its length is when the focus lands
+      const lead = narration && /[\p{L}\p{N}]/u.test(before ?? '') ? await s.synth(plainText(before), prosody, plainText(spoken)) : null
+      // The picture leads the sound, never the other way: the focus lands at the marked word, and at the latest
+      // before half the line is said (a mark at the end of a short line would land when the voice has stopped)
+      const at = lead ? Math.min(Math.max(0, lead.duration - 0.25), narration.duration * 0.45) : 0
       // Held close from the focus before: a zoomed focus glides there, any other goes back to the whole page first
       if (s.state.cameraHeld && zoomed) {
         await camera(locator, zoom)
@@ -69,7 +72,15 @@ export const cameraHelpers = (s, v) => {
       } else await v.releaseCamera()
       // The voice starts and the cursor glides there meanwhile: no silence while it travels. A focus that clicks
       // waits until the element can be clicked before it starts talking about it
-      const target = await s.center(locator, Boolean(click) && !safe)
+      let target = await s.center(locator, Boolean(click) && !safe)
+      // The voice would name the element before the camera got there: the camera goes first, then the voice
+      const early = zoomed && !s.state.cameraHeld && at < 1.2
+      if (early) {
+        await camera(locator, zoom)
+        await wait(dryRun ? 0 : 750)
+        const box = await locator.boundingBox()
+        if (box) target = { ...target, x: box.x + box.width / 2, y: box.y + box.height / 2, width: box.width, height: box.height }
+      }
       const shown = caption ?? (spoken || null)
       if (shown) {
         const html = stripMarks(shown)
@@ -81,15 +92,23 @@ export const cameraHelpers = (s, v) => {
       } else clock.markStart()
       if (narration) clock.play(narration, v.step)
       const started = clock.now()
-      await moveTo(target.x, target.y)
-      const left = at - (clock.now() - started)
-      if (left > 0) await wait(left * 1000)
-      if (zoomed && !s.state.cameraHeld) {
-        // The focus lands once the camera has done most of its move: a layer chasing a fast element lags
-        await camera(locator, zoom)
-        await wait(450)
+      // The cursor travels while the line goes on: the focus lands at its time, not after a long glide
+      // (a page closed meanwhile, by a time limit, fails the step below: the move's own error is not left unhandled)
+      let moveError = null
+      const travel = moveTo(target.x, target.y).catch(e => (moveError = e))
+      try {
+        const left = at - (clock.now() - started)
+        if (left > 0) await wait(left * 1000)
+        if (zoomed && !s.state.cameraHeld && !early) {
+          // The focus lands once the camera has done most of its move: a layer chasing a fast element lags
+          await camera(locator, zoom)
+          await wait(450)
+        }
+        await focusOn(locator, { html: text, step, pulse, position, zoom: zoomed ? zoom : 1 })
+      } finally {
+        await travel
       }
-      await focusOn(locator, { html: text, step, pulse, position, zoom: zoomed ? zoom : 1 })
+      if (moveError) throw moveError
       if (zoomed) {
         // The element moved under the camera: the cursor follows it
         await wait(250)
