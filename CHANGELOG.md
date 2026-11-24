@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [2.7.1]
+
+Up-to-date dependencies: videos are filmed with Playwright 1.65 and its newer Chromium.
+
+### Changed
+
+- `playwright` 1.65.1 is now the minimum, so an install from npm gets the newer Chromium too.
+- Development and optional dependencies brought up to date: `@anthropic-ai/sdk` 1.12, `bullmq` 6.7.8 and
+  `@biomejs/biome` 2.6.8.
+
 ## [2.7.0]
 
 The same script now hands over documents: a step-by-step guide as HTML, Markdown, a PDF in the script's brand and
@@ -534,6 +544,7 @@ First release.
 - Quality checks: lint (Biome), types (JSDoc checked by `tsc`), tests and a real render on the three
   systems in CI.
 
+[2.7.1]: https://github.com/CXmiloxx/tourwright/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/CXmiloxx/tourwright/compare/v2.6.2...v2.7.0
 [2.6.2]: https://github.com/CXmiloxx/tourwright/compare/v2.6.1...v2.6.2
 [2.6.1]: https://github.com/CXmiloxx/tourwright/compare/v2.6.0...v2.6.1
